@@ -62,7 +62,11 @@ export function PhotoPermissionSettings() {
           {permissionOptions.map((option) => {
             const Icon = option.icon
             return (
-              <div key={option.value} className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+              <div
+                key={option.value}
+                className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                onClick={() => handlePermissionChange(option.value)}
+              >
                 <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
                 <div className="flex-1">
                   <Label htmlFor={option.value} className="flex items-center gap-2 font-medium cursor-pointer">
