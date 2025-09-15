@@ -42,9 +42,9 @@ export function MemberDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-5">
           {/* Profile and Photo Permissions */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -76,8 +76,8 @@ export function MemberDashboard() {
             <PhotoPermissionSettings />
           </div>
 
-          {/* Activities List */}
-          <div className="lg:col-span-1">
+          {/* Activities List - Now takes up 2/5 of the width */}
+          <div className="lg:col-span-2">
             <ActivitiesList />
           </div>
         </div>

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Calendar, MapPin, Users, Euro, ActivityIcon } from 'lucide-react'
+import { Calendar, MapPin, Users, Euro, ActivityIcon } from "lucide-react"
 import { useActivities } from "../hooks/use-activities"
 import { ActivityDialog } from "./activity-dialog"
 import { getActivityName, getActivityDescription, getActivityStartDate } from "../utils/activity-helpers"
@@ -52,7 +52,7 @@ export function ActivitiesList() {
           <CardDescription>Loading activities...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="p-4 border rounded-lg">
               <Skeleton className="h-4 w-3/4 mb-2" />
               <Skeleton className="h-3 w-1/2 mb-2" />
@@ -89,14 +89,16 @@ export function ActivitiesList() {
             <ActivityIcon className="h-5 w-5" />
             Upcoming Activities
           </CardTitle>
-          <CardDescription>Discover and join activities organized by SIB Utrecht</CardDescription>
+          <CardDescription>
+            Discover and join activities organized by SIB Utrecht ({safeActivities.length} activities)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {safeActivities.length === 0 ? (
             <p className="text-gray-500 text-center py-8">No activities available at the moment.</p>
           ) : (
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {safeActivities.slice(0, 10).map((activity) => {
+            <div className="space-y-4">
+              {safeActivities.map((activity) => {
                 const activityName = getActivityName(activity)
                 const activityDescription = getActivityDescription(activity)
                 const startDate = getActivityStartDate(activity)
@@ -108,16 +110,16 @@ export function ActivitiesList() {
                     onClick={() => handleActivityClick(activity)}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium text-sm line-clamp-1">{activityName}</h4>
-                      <Badge variant={activity.is_signup_open ? "default" : "secondary"} className="ml-2 shrink-0">
+                      <h4 className="font-medium text-sm line-clamp-1 flex-1 mr-2">{activityName}</h4>
+                      <Badge variant={activity.is_signup_open ? "default" : "secondary"} className="shrink-0">
                         {activity.is_signup_open ? "Open" : "Closed"}
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-2">
+                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-3">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {formatDate(startDate)}
+                        <span className="truncate">{formatDate(startDate)}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
@@ -125,22 +127,29 @@ export function ActivitiesList() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
-                        {activity.current_participants || 0}
-                        {activity.max_participants && `/${activity.max_participants}`}
+                        <span>
+                          {activity.current_participants || 0}
+                          {activity.max_participants && `/${activity.max_participants}`}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Euro className="h-3 w-3" />
-                        {formatPrice(activity.price || 0)}
+                        <span>{formatPrice(activity.price || 0)}</span>
                       </div>
                     </div>
 
-                    <p className="text-xs text-gray-500 line-clamp-2">{activityDescription}</p>
+                    <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{activityDescription}</p>
 
-                    <div className="flex justify-between items-center mt-2">
+                    <div className="flex justify-between items-center">
                       <Badge variant="outline" className="text-xs">
                         {activity.category || "General"}
                       </Badge>
-                      {activity.is_full && <Badge className="bg-red-100 text-red-800 text-xs">Full</Badge>}
+                      <div className="flex gap-1">
+                        {activity.is_full && <Badge className="bg-red-100 text-red-800 text-xs">Full</Badge>}
+                        {(activity.price || 0) === 0 && (
+                          <Badge className="bg-blue-100 text-blue-800 text-xs">Free</Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
