@@ -16,6 +16,10 @@ Your project is live at:
 
 **[https://vercel.com/vkuhlmanns-projects/v0-sib-portal](https://vercel.com/vkuhlmanns-projects/v0-sib-portal)**
 
+### GitHub Pages
+
+Live at https://sib-utrecht.github.io/sib-portal.
+
 ## Build your app
 
 Continue building your app on:
