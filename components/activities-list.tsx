@@ -147,7 +147,7 @@ export function ActivitiesList() {
                       <div className="flex gap-1">
                         {activity.is_full && <Badge className="bg-red-100 text-red-800 text-xs">Full</Badge>}
                         {(activity.price || 0) === 0 && (
-                          <Badge className="bg-blue-100 text-blue-800 text-xs">Free</Badge>
+                          <Badge className="bg-accent text-primary text-xs">Free</Badge>
                         )}
                       </div>
                     </div>

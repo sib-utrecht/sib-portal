@@ -78,7 +78,7 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-blue-600" />
+                <Calendar className="h-4 w-4 text-primary" />
                 <div>
                   <p className="text-sm font-medium">Start Date</p>
                   <p className="text-sm text-gray-600">{formatDate(startDate)}</p>
@@ -152,7 +152,7 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
               <Badge className="bg-gray-100 text-gray-800">Signup Closed</Badge>
             )}
             {activity.is_full && <Badge className="bg-red-100 text-red-800">Full</Badge>}
-            {(activity.price || 0) === 0 && <Badge className="bg-blue-100 text-blue-800">Free Event</Badge>}
+            {(activity.price || 0) === 0 && <Badge className="bg-accent text-primary">Free Event</Badge>}
           </div>
 
           {/* Signup Button */}

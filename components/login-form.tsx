@@ -32,11 +32,33 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Member Login</CardTitle>
-          <CardDescription>Sign in to manage your photo permissions</CardDescription>
+    <div
+      className="min-h-screen relative flex items-center justify-center overflow-hidden"
+      // Local brand theming for this page only
+      style={{
+        // Using inline CSS custom properties so existing Tailwind variables (bg-primary, ring, etc.) pick up our brand color
+        ["--primary" as any]: "#21526f",
+        ["--primary-foreground" as any]: "#ffffff",
+        ["--ring" as any]: "#21526f",
+      }}
+    >
+      {/* Background: brand-forward gradient with a soft light spot */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_10%_-10%,#6fb0cd33,transparent_60%),radial-gradient(800px_400px_at_90%_110%,#21526f22,transparent_60%),linear-gradient(135deg,#eaf5fb_0%,#d7eef8_25%,#c9e7f3_40%,#bfe0ee_55%,#a9d3e6_70%,#8fc2da_85%,#78b3cf_100%)] dark:bg-[radial-gradient(1200px_600px_at_10%_-10%,#6fb0cd22,transparent_60%),radial-gradient(800px_400px_at_90%_110%,#21526f33,transparent_60%),linear-gradient(135deg,#0b1216_0%,#102029_30%,#153544_70%,#1a4a61_100%)]" />
+
+      <Card className="w-full max-w-md backdrop-blur-[2px] bg-card/90 border-[#21526f]/20 shadow-lg shadow-[#21526f]/10">
+        <CardHeader className="text-center">
+          {/* Optional logo area; replace src with your association logo when available */}
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[#21526f] text-white shadow-md shadow-[#21526f]/30">
+            <span className="text-base font-bold">SIB</span>
+          </div>
+          <CardTitle className="text-2xl font-semibold tracking-tight">
+            <span className="bg-gradient-to-r from-[#21526f] via-[#2a6a88] to-[#58a6c7] bg-clip-text text-transparent">
+              Member Login
+            </span>
+          </CardTitle>
+          <CardDescription className="text-sm">
+            Sign in to manage your photo permissions
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -67,7 +89,11 @@ export function LoginForm() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
+              disabled={isLoading}
+            >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>

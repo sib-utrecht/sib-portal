@@ -72,8 +72,8 @@ export function AdminDashboard() {
   const hasActiveFilters = selectedPermissions.size > 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
+      <header className="bg-white shadow-sm border-b border-t-4 border-[#21526f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -107,11 +107,11 @@ export function AdminDashboard() {
             <Card className="relative">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-blue-600" />
+                  <Users className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium text-gray-600">Total Members</span>
                 </div>
                 <p className="text-2xl font-bold">{mockUsers.length}</p>
-                {!hasActiveFilters && <p className="text-xs text-blue-600 mt-1">Showing all members</p>}
+                {!hasActiveFilters && <p className="text-xs text-primary mt-1">Showing all members</p>}
               </CardContent>
             </Card>
 
@@ -181,9 +181,9 @@ export function AdminDashboard() {
 
           {/* Filter Status and Reset Button */}
           {hasActiveFilters && (
-            <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-accent border border-accent/60 rounded-lg">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-medium text-blue-900">Active filters:</span>
+                <span className="text-sm font-medium">Active filters:</span>
                 {Array.from(selectedPermissions).map((permission) => {
                   const permissionInfo = getPermissionBadge(permission)
                   const Icon = permissionInfo.icon
@@ -246,7 +246,7 @@ export function AdminDashboard() {
                       const isHighlighted = selectedPermissions.has(member.photoPermission)
 
                       return (
-                        <TableRow key={member.id} className={isHighlighted ? "bg-blue-50" : ""}>
+                        <TableRow key={member.id} className={isHighlighted ? "bg-accent" : ""}>
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
