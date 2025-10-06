@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Camera, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "../contexts/auth-context"
@@ -54,6 +55,15 @@ export function PhotoPermissionSettings() {
 
   const currentOption = permissionOptions.find((option) => option.value === user.photoPermission)
 
+  type PrefKey = "noAlcohol" | "noAudio" | "notProminently" | "noSocialMedia" | "noTiktok"
+  const chipOptions: Array<{ key: PrefKey; label: string }> = [
+    { key: "noAlcohol", label: "No alcohol" },
+    { key: "noAudio", label: "No audio" },
+    { key: "notProminently", label: "Not prominently" },
+    { key: "noSocialMedia", label: "No social media" },
+    { key: "noTiktok", label: "No TikTok" },
+  ]
+
   return (
     <div className="space-y-8">
         <div className="flex items-center gap-2">
@@ -85,47 +95,20 @@ export function PhotoPermissionSettings() {
 
         <div className="space-y-3">
           <h4 className="text-base font-semibold">Additional preferences</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={prefs.noAlcohol}
-                onChange={(e) => setPrefs((p) => ({ ...p, noAlcohol: e.target.checked }))}
-              />
-              <span>No alcohol</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={prefs.notProminently}
-                onChange={(e) => setPrefs((p) => ({ ...p, notProminently: e.target.checked }))}
-              />
-              <span>Not prominently</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={prefs.noAudio}
-                onChange={(e) => setPrefs((p) => ({ ...p, noAudio: e.target.checked }))}
-              />
-              <span>No audio</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={prefs.noSocialMedia}
-                onChange={(e) => setPrefs((p) => ({ ...p, noSocialMedia: e.target.checked }))}
-              />
-              <span>No social media</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={prefs.noTiktok}
-                onChange={(e) => setPrefs((p) => ({ ...p, noTiktok: e.target.checked }))}
-              />
-              <span>No TikTok</span>
-            </label>
+          <div className="flex flex-wrap gap-2">
+            {chipOptions.map(({ key, label }) => (
+              <Button
+                key={key}
+                type="button"
+                aria-pressed={prefs[key]}
+                onClick={() => setPrefs((p) => ({ ...p, [key]: !p[key] }))}
+                variant={prefs[key] ? "default" : "outline"}
+                className="h-8 rounded-full px-3 text-sm"
+                title={label}
+              >
+                {label}
+              </Button>
+            ))}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="photo-prefs-other">Other</Label>
@@ -137,8 +120,6 @@ export function PhotoPermissionSettings() {
             />
           </div>
         </div>
-       {/* </CardContent>
-     </Card> */}
     </div>
   )
 }
