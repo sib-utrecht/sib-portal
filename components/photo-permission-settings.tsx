@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Camera, Eye, EyeOff } from "lucide-react"
+import { Camera, Eye, EyeOff, X } from "lucide-react"
 import { useAuth } from "../contexts/auth-context"
 import type { PhotoPermission } from "../types/user"
 import { useState } from "react"
@@ -63,6 +62,9 @@ export function PhotoPermissionSettings() {
     { key: "noSocialMedia", label: "No social media" },
     { key: "noTiktok", label: "No TikTok" },
   ]
+  const enabledChips = chipOptions.filter(({ key }) => prefs[key])
+  const disabledChips = chipOptions.filter(({ key }) => !prefs[key])
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   return (
     <div className="space-y-8">
@@ -96,28 +98,68 @@ export function PhotoPermissionSettings() {
         <div className="space-y-3">
           <h4 className="text-base font-semibold">Additional preferences</h4>
           <div className="flex flex-wrap gap-2">
-            {chipOptions.map(({ key, label }) => (
-              <Button
-                key={key}
-                type="button"
-                aria-pressed={prefs[key]}
-                onClick={() => setPrefs((p) => ({ ...p, [key]: !p[key] }))}
-                variant={prefs[key] ? "default" : "outline"}
-                className="h-8 rounded-full px-3 text-sm"
-                title={label}
-              >
-                {label}
-              </Button>
-            ))}
+            {enabledChips.length === 0 ? (
+              <span className="text-sm text-muted-foreground">No additional preferences selected</span>
+            ) : (
+              enabledChips.map(({ key, label }) => (
+                <div
+                  key={key}
+                  className="inline-flex items-center gap-1.5 h-8 rounded-full px-3 text-sm select-none bg-primary text-primary-foreground shadow-xs"
+                  aria-label={`${label} (enabled)`}
+                >
+                  <span>{label}</span>
+                  <button
+                    type="button"
+                    onClick={() => setPrefs((p) => ({ ...p, [key]: false }))}
+                    title={`Remove ${label}`}
+                    aria-label={`Remove ${label}`}
+                    className="ml-0.5 inline-grid place-items-center cursor-pointer rounded-full p-0.5 hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <X className="h-3.5 w-3.5 opacity-80" aria-hidden="true" />
+                  </button>
+                </div>
+              ))
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="photo-prefs-other">Other</Label>
-            <Input
-              id="photo-prefs-other"
-              placeholder="Add any additional note"
-              value={prefs.other}
-              onChange={(e) => setPrefs((p) => ({ ...p, other: e.target.value }))}
-            />
+            <div className="relative">
+              <Input
+                id="photo-prefs-other"
+                placeholder="Type a note or pick more preferences"
+                value={prefs.other}
+                onFocus={() => setPickerOpen(true)}
+                onClick={() => setPickerOpen(true)}
+                onBlur={() => setTimeout(() => setPickerOpen(false), 120)}
+                onChange={(e) => setPrefs((p) => ({ ...p, other: e.target.value }))}
+                aria-expanded={pickerOpen}
+                aria-controls="photo-prefs-suggestions"
+                role="combobox"
+              />
+              {pickerOpen && disabledChips.length > 0 && (
+                <div
+                  id="photo-prefs-suggestions"
+                  role="listbox"
+                  className="absolute z-10 mt-1 w-full rounded-md border bg-background shadow-md"
+                >
+                  {disabledChips.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      role="option"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setPrefs((p) => ({ ...p, [key]: true }))
+                        setPickerOpen(false)
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-accent"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
     </div>
