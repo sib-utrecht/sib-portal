@@ -139,7 +139,7 @@ export default function SettingsPage() {
                       <option value="Other" />
                     </datalist>
                     <p className="text-xs text-muted-foreground">
-                      *Why do you need to know?* To get funding from educational institutions, we must know how many of
+                      <strong>Why do you need to know?</strong> To get funding from educational institutions, we must know how many of
                       their students we have
                     </p>
                   </CardContent>
