@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, User } from "lucide-react"
+import { Camera, LogOut, User } from "lucide-react"
 import { useAuth } from "../contexts/auth-context"
 import { PhotoPermissionSettings } from "./photo-permission-settings"
 import { ActivitiesList } from "./activities-list"
@@ -77,7 +77,18 @@ export function MemberDashboard() {
               </CardContent>
             </Card>
 
-            <PhotoPermissionSettings />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Camera className="h-5 w-5" />
+                  Photo Permissions
+                </CardTitle>
+                <CardDescription>Control how your photos can be used by the organization</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                <PhotoPermissionSettings />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Activities List - Now takes up 2/5 of the width */}

@@ -4,9 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { Camera, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "../contexts/auth-context"
 import type { PhotoPermission } from "../types/user"
+import { useState } from "react"
 
 const permissionOptions = [
   {
@@ -35,6 +37,15 @@ const permissionOptions = [
 export function PhotoPermissionSettings() {
   const { user, updatePhotoPermission } = useAuth()
 
+  const [prefs, setPrefs] = useState({
+    noAlcohol: false,
+    noAudio: false,
+    notProminently: false,
+    noSocialMedia: false,
+    noTiktok: false,
+    other: "",
+  })
+
   if (!user) return null
 
   const handlePermissionChange = (value: string) => {
@@ -44,21 +55,13 @@ export function PhotoPermissionSettings() {
   const currentOption = permissionOptions.find((option) => option.value === user.photoPermission)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Camera className="h-5 w-5" />
-          Photo Permissions
-        </CardTitle>
-        <CardDescription>Control how your photos can be used by the organization</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="space-y-8">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">Current setting:</span>
           {currentOption && <Badge className={currentOption.color}>{currentOption.label}</Badge>}
         </div>
 
-        <RadioGroup value={user.photoPermission} onValueChange={handlePermissionChange} className="space-y-4">
+        <RadioGroup value={user.photoPermission} onValueChange={handlePermissionChange} className="space-y-0">
           {permissionOptions.map((option) => {
             const Icon = option.icon
             return (
@@ -79,7 +82,63 @@ export function PhotoPermissionSettings() {
             )
           })}
         </RadioGroup>
-      </CardContent>
-    </Card>
+
+        <div className="space-y-3">
+          <h4 className="text-base font-semibold">Additional preferences</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={prefs.noAlcohol}
+                onChange={(e) => setPrefs((p) => ({ ...p, noAlcohol: e.target.checked }))}
+              />
+              <span>No alcohol</span>
+            </label>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={prefs.notProminently}
+                onChange={(e) => setPrefs((p) => ({ ...p, notProminently: e.target.checked }))}
+              />
+              <span>Not prominently</span>
+            </label>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={prefs.noAudio}
+                onChange={(e) => setPrefs((p) => ({ ...p, noAudio: e.target.checked }))}
+              />
+              <span>No audio</span>
+            </label>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={prefs.noSocialMedia}
+                onChange={(e) => setPrefs((p) => ({ ...p, noSocialMedia: e.target.checked }))}
+              />
+              <span>No social media</span>
+            </label>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={prefs.noTiktok}
+                onChange={(e) => setPrefs((p) => ({ ...p, noTiktok: e.target.checked }))}
+              />
+              <span>No TikTok</span>
+            </label>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="photo-prefs-other">Other</Label>
+            <Input
+              id="photo-prefs-other"
+              placeholder="Add any additional note"
+              value={prefs.other}
+              onChange={(e) => setPrefs((p) => ({ ...p, other: e.target.value }))}
+            />
+          </div>
+        </div>
+       {/* </CardContent>
+     </Card> */}
+    </div>
   )
 }
