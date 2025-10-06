@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PhotoPermissionSettings } from "@/components/photo-permission-settings"
 import { RequireAuth } from "@/components/require-auth"
 import { useAuth } from "@/contexts/auth-context"
@@ -132,18 +131,14 @@ export default function SettingsPage() {
                     <CardTitle>I study at</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Select value={study} onValueChange={setStudy}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your institution" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Utrecht University">Utrecht University</SelectItem>
-                        <SelectItem value="Hogeschool Utrecht">Hogeschool Utrecht</SelectItem>
-                        <SelectItem value="MBO Utrecht">MBO Utrecht</SelectItem>
-                        <SelectItem value="HKU">HKU</SelectItem>
-                        <SelectItem value="Nothing">Nothing</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input list="study-suggestions" value={study} onChange={(e) => setStudy(e.target.value)} />
+                    <datalist id="study-suggestions">
+                      <option value="Utrecht University" />
+                      <option value="Hogeschool Utrecht" />
+                      <option value="MBO Utrecht" />
+                      <option value="HKU" />
+                      <option value="Nothing" />
+                    </datalist>
                     <p className="text-xs text-muted-foreground">
                       <strong>Why do you need to know?</strong> To get funding from educational institutions, we must know how many of
                       their students we have.
