@@ -248,18 +248,18 @@ export default function SettingsPage() {
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value.toUpperCase())}
                       onBlur={autoFillFromPostal}
-                      placeholder="3500AA"
+                      placeholder=""
                     />
                   </div>
                   <div>
                     <Label>Number</Label>
-                    <Input value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} onBlur={autoFillFromPostal} placeholder="5" />
+                    <Input value={houseNumber} onChange={(e) => setHouseNumber(e.target.value)} onBlur={autoFillFromPostal} placeholder="" />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2">
                     <Label>Street</Label>
-                    <Input value={street} onChange={(e) => setStreet(e.target.value)} onBlur={autoFillFromStreet} list="street-suggestions" placeholder="Sesamstraat" />
+                    <Input value={street} onChange={(e) => setStreet(e.target.value)} onBlur={autoFillFromStreet} list="street-suggestions" placeholder="" />
                     <datalist id="street-suggestions">
                       <option value="Sesamstraat" />
                       <option value="Oudegracht" />
@@ -268,7 +268,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <Label>Place</Label>
-                    <Input value={place} onChange={(e) => setPlace(e.target.value)} onBlur={autoFillFromStreet} placeholder="Utrecht" />
+                    <Input value={place} onChange={(e) => setPlace(e.target.value)} onBlur={autoFillFromStreet} placeholder="" />
                   </div>
                 </div>
                 <div>
