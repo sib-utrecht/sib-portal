@@ -2,20 +2,25 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "../contexts/auth-context"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export function LoginForm() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectUri = useMemo(() => searchParams.get("redirect_uri") || "/", [searchParams])
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,10 +31,19 @@ export function LoginForm() {
 
     if (!success) {
       setError("Invalid email or password")
+    } else {
+      router.replace(redirectUri)
     }
 
     setIsLoading(false)
   }
+
+  // If already signed in, bounce to redirectUri
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace(redirectUri)
+    }
+  }, [isAuthenticated, redirectUri, router])
 
   return (
     <div

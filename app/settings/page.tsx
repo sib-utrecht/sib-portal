@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { PhotoPermissionSettings } from "@/components/photo-permission-settings"
+import { RequireAuth } from "@/components/require-auth"
 import { useAuth } from "@/contexts/auth-context"
 import { Mail, PencilLine, Phone, ShieldQuestion, UserRoundCog } from "lucide-react"
 
@@ -44,6 +45,7 @@ export default function SettingsPage() {
   }
 
   return (
+    <RequireAuth>
     <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -306,5 +308,6 @@ export default function SettingsPage() {
         </div>
       </main>
     </div>
+    </RequireAuth>
   )
 }
