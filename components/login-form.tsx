@@ -61,9 +61,12 @@ export function LoginForm() {
 
       <Card className="w-full max-w-md backdrop-blur-[2px] bg-card/90 border-[#21526f]/20 shadow-lg shadow-[#21526f]/10">
         <CardHeader className="text-center">
-          {/* Optional logo area; replace src with your association logo when available */}
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[#21526f] text-white shadow-md shadow-[#21526f]/30">
-            <span className="text-base font-bold">SIB</span>
+          <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center">
+            <img
+              src="https://sib-utrecht.nl/wp-content/uploads/2025/04/Logo-44e-v3_512x512-150x150.png"
+              alt="SIB Utrecht Logo"
+              className="h-full w-full object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-semibold tracking-tight">
             <span className="bg-gradient-to-r from-[#21526f] via-[#2a6a88] to-[#58a6c7] bg-clip-text text-transparent">
