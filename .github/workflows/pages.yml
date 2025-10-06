@@ -74,12 +74,19 @@ jobs:
           ref: gh-pages
           path: publish
 
-      - name: Stage site into publish directory (clean target subdir)
+      - name: Stage site into publish directory (preserve versions on main)
         run: |
           mkdir -p publish
-          rm -rf "publish/${{ steps.vars.outputs.subdir }}"
-          mkdir -p "publish/${{ steps.vars.outputs.subdir }}"
-          rsync -a ./out/ "publish/${{ steps.vars.outputs.subdir }}/"
+          if [ "${{ steps.vars.outputs.subdir }}" = "." ]; then
+            echo "Main branch: cleaning publish root except 'versions/'"
+            find publish -mindepth 1 -maxdepth 1 ! -name versions -exec rm -rf {} +
+            rsync -a ./out/ publish/
+          else
+            echo "Branch deploy: cleaning target subdir '${{ steps.vars.outputs.subdir }}'"
+            rm -rf "publish/${{ steps.vars.outputs.subdir }}"
+            mkdir -p "publish/${{ steps.vars.outputs.subdir }}"
+            rsync -a ./out/ "publish/${{ steps.vars.outputs.subdir }}/"
+          fi
 
       - name: Deploy to gh-pages (keeps other versions)
         uses: peaceiris/actions-gh-pages@v4
