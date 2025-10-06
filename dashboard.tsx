@@ -1,6 +1,6 @@
 "use client"
 
-import { AuthProvider, useAuth } from "./contexts/auth-context"
+import { useAuth } from "./contexts/auth-context"
 import { LoginForm } from "./components/login-form"
 import { MemberDashboard } from "./components/member-dashboard"
 import { AdminDashboard } from "./components/admin-dashboard"
@@ -20,9 +20,5 @@ function AppContent() {
 }
 
 export default function Dashboard() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  )
+  return <AppContent />
 }

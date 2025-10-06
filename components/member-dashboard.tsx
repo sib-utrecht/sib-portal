@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, User } from "lucide-react"
@@ -32,6 +33,9 @@ export function MemberDashboard() {
                 </Avatar>
                 <span className="text-sm font-medium">{user.name}</span>
               </div>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/settings">Preferences</Link>
+              </Button>
               <Button variant="outline" size="sm" onClick={logout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
