@@ -1,30 +1,30 @@
-name: Deploy to GitHub Pages
+name: Deploy multi-branch to GitHub Pages
 
 on:
   push:
     branches:
-      - main
+      - '**' # deploy every branch
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write # needed to push to gh-pages
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  # Set a default; for org/user pages set to '' (root), for project pages set to '/<repo>'
+  # default, overridden per-branch in the "Compute basePath" step
   NEXT_PUBLIC_BASE_PATH: "/${{ github.event.repository.name }}"
 
 jobs:
-  build:
-    name: Build
+  build-and-deploy:
+    name: Build and deploy (gh-pages)
     runs-on: ubuntu-latest
+    # Do not run on gh-pages itself to avoid loops
+    if: github.ref != 'refs/heads/gh-pages'
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Setup PNPM
@@ -41,26 +41,59 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Compute basePath and target subdir
+        id: vars
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          BRANCH="${GITHUB_REF_NAME}"
+          SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g' | sed -E 's/^-+|-+$//g')
+          if [ "$BRANCH" = "main" ]; then
+            BASE="/$REPO"
+            SUBDIR="."
+          else
+            BASE="/$REPO/versions/$SLUG"
+            SUBDIR="versions/$SLUG"
+          fi
+          echo "base_path=$BASE" >> $GITHUB_OUTPUT
+          echo "subdir=$SUBDIR" >> $GITHUB_OUTPUT
+          echo "Branch=$BRANCH slug=$SLUG base=$BASE subdir=$SUBDIR"
+
       # For GitHub Pages we export a static site to ./out
       - name: Build (Next.js static export)
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.vars.outputs.base_path }}
         run: |
-          echo "Using basePath=$NEXT_PUBLIC_BASE_PATH"
+          echo "Using basePath=${NEXT_PUBLIC_BASE_PATH}"
           pnpm build
           # Next 15+ export happens automatically when output:'export' is set
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Checkout existing gh-pages into publish (if exists)
+        uses: actions/checkout@v4
+        continue-on-error: true
         with:
-          path: ./out
+          ref: gh-pages
+          path: publish
 
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Stage site into publish directory (preserve versions on main)
+        run: |
+          mkdir -p publish
+          if [ "${{ steps.vars.outputs.subdir }}" = "." ]; then
+            echo "Main branch: cleaning publish root except 'versions/'"
+            find publish -mindepth 1 -maxdepth 1 ! -name versions -exec rm -rf {} +
+            rsync -a ./out/ publish/
+          else
+            echo "Branch deploy: cleaning target subdir '${{ steps.vars.outputs.subdir }}'"
+            rm -rf "publish/${{ steps.vars.outputs.subdir }}"
+            mkdir -p "publish/${{ steps.vars.outputs.subdir }}"
+            rsync -a ./out/ "publish/${{ steps.vars.outputs.subdir }}/"
+          fi
+
+      - name: Deploy to gh-pages (keeps other versions)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./publish
+          keep_files: false
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
