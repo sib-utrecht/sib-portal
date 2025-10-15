@@ -15,7 +15,7 @@ concurrency:
 
 env:
   # default, overridden per-branch in the "Compute basePath" step
-  NEXT_PUBLIC_BASE_PATH: "/${{ github.event.repository.name }}"
+  NEXT_PUBLIC_BASE_PATH: "/"
 
 jobs:
   build-and-deploy:
@@ -48,10 +48,10 @@ jobs:
           BRANCH="${GITHUB_REF_NAME}"
           SLUG=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g' | sed -E 's/^-+|-+$//g')
           if [ "$BRANCH" = "main" ]; then
-            BASE="/$REPO"
+            BASE="/"
             SUBDIR="."
           else
-            BASE="/$REPO/versions/$SLUG"
+            BASE="/versions/$SLUG"
             SUBDIR="versions/$SLUG"
           fi
           echo "base_path=$BASE" >> $GITHUB_OUTPUT
@@ -94,6 +94,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./publish
+          cname: portal.sib-utrecht.nl
           keep_files: false
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
