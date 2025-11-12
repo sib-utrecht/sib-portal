@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "../contexts/auth-context"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Mail } from "lucide-react"
+import Link from "next/link"
 
 export function LoginForm() {
   const router = useRouter()
@@ -20,6 +22,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const { login, isAuthenticated } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,6 +47,27 @@ export function LoginForm() {
       router.replace(redirectUri)
     }
   }, [isAuthenticated, redirectUri, router])
+
+  // Initialize remember-me preference from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("rememberMe")
+      if (saved !== null) {
+        setRememberMe(saved === "true")
+      }
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [])
+
+  // Persist remember-me preference
+  useEffect(() => {
+    try {
+      localStorage.setItem("rememberMe", String(rememberMe))
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [rememberMe])
 
   return (
     <div
@@ -70,11 +94,11 @@ export function LoginForm() {
           </div>
           <CardTitle className="text-2xl font-semibold tracking-tight">
             <span className="bg-gradient-to-r from-[#21526f] via-[#2a6a88] to-[#58a6c7] bg-clip-text text-transparent">
-              Member Login
+              SIB-Utrecht
             </span>
           </CardTitle>
           <CardDescription className="text-sm">
-            Sign in to manage your photo permissions
+            Sign in with a password, or with a login code sent to your email.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -101,6 +125,21 @@ export function LoginForm() {
                 required
               />
             </div>
+            <div className="flex items-center justify-between text-sm">
+              <label htmlFor="remember" className="flex items-center select-none">
+                <input
+                  id="remember"
+                  type="checkbox"
+                  className="mr-2 h-4 w-4 rounded border-gray-300 text-[#21526f] focus:ring-[#21526f] accent-[#21526f]"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                Keep me logged in
+              </label>
+              <Link href="/login/reset" className="text-[#21526f] hover:underline font-medium">
+                Reset password
+              </Link>
+            </div>
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -120,6 +159,22 @@ export function LoginForm() {
             </p>
             <p>Member: john@example.com / password</p>
             <p>Admin: jane@example.com / password</p>
+          </div>
+        </CardContent>
+        <CardContent>
+          {/* Additional actions */}
+          <div className="mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                // TODO: Implement email magic-code flow
+              }}
+            >
+              <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
+              <span>Get login code by email</span>
+            </Button>
           </div>
         </CardContent>
       </Card>
