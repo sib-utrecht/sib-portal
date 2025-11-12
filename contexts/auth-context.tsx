@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { AuthState } from "../types/user"
 import { mockUsers } from "../data/mock-users"
 
@@ -12,20 +12,47 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const AUTH_STORAGE_KEY = "sib_auth_state"
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
   })
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY)
+    if (storedAuth) {
+      try {
+        const parsedAuth = JSON.parse(storedAuth)
+        setAuthState(parsedAuth)
+      } catch (error) {
+        console.error("Failed to parse stored auth state:", error)
+        localStorage.removeItem(AUTH_STORAGE_KEY)
+      }
+    }
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (isHydrated) {
+      if (authState.isAuthenticated) {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authState))
+      } else {
+        localStorage.removeItem(AUTH_STORAGE_KEY)
+      }
+    }
+  }, [authState, isHydrated])
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in real app, this would call an API
     const user = mockUsers.find((u) => u.email === email)
     if (user && password === "password") {
-      setAuthState({
+      const newAuthState = {
         user,
         isAuthenticated: true,
-      })
+      }
+      setAuthState(newAuthState)
       return true
     }
     return false
@@ -41,12 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updatePhotoPermission = (permission: "internal+external" | "internal" | "nowhere") => {
     if (authState.user) {
       const updatedUser = { ...authState.user, photoPermission: permission }
-      setAuthState({
+      const newAuthState = {
         ...authState,
         user: updatedUser,
-      })
+      }
+      setAuthState(newAuthState)
 
-      // Update mock data
       const userIndex = mockUsers.findIndex((u) => u.id === authState.user!.id)
       if (userIndex !== -1) {
         mockUsers[userIndex] = updatedUser
