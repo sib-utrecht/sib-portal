@@ -129,19 +129,20 @@ export default function SettingsPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>I study at</CardTitle>
-                    <CardDescription>
-                      We ask this to report anonymized counts to education institutions for funding.
-                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <Input list="study-suggestions" value={study} onChange={(e) => setStudy(e.target.value)} />
                     <datalist id="study-suggestions">
                       <option value="Utrecht University" />
-                      <option value="HU University of Applied Sciences Utrecht" />
-                      <option value="Avans University of Applied Sciences" />
-                      <option value="Other" />
+                      <option value="Hogeschool Utrecht" />
+                      <option value="MBO Utrecht" />
+                      <option value="HKU" />
+                      <option value="Nothing" />
                     </datalist>
-                    <p className="text-xs text-muted-foreground">This text box also offers suggestions.</p>
+                    <p className="text-xs text-muted-foreground">
+                      <strong>Why do you need to know?</strong> To get funding from educational institutions, we must know how many of
+                      their students we have.
+                    </p>
                   </CardContent>
                 </Card>
               </div>
