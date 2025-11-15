@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import './globals.css'
 import { Providers } from './providers'
+import { ConvexClientProvider } from './ConvexClientProvider'
 
 export const metadata: Metadata = {
   title: 'SIB portal',
@@ -26,7 +27,11 @@ html {
         `}</style>
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+	<ConvexClientProvider>
+	    {children}
+	</ConvexClientProvider>
+	</Providers>
       </body>
     </html>
   )
