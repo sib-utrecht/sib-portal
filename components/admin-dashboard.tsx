@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { LogOut, Users, Camera, Eye, EyeOff, X, Filter } from "lucide-react"
+import { LogOut, Users, Camera, Eye, EyeOff, X, Filter, Search } from "lucide-react"
+import Link from "next/link"
 import { useAuth } from "../contexts/auth-context"
 import { mockUsers } from "../data/mock-users"
 import type { PhotoPermission } from "../types/user"
@@ -91,6 +92,12 @@ export function AdminDashboard() {
                 <span className="text-sm font-medium">{user.name}</span>
                 <Badge variant="secondary">Admin</Badge>
               </div>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/photo-permissions">
+                  <Search className="h-4 w-4 mr-2" />
+                  Photo Search
+                </Link>
+              </Button>
               <Button variant="outline" size="sm" onClick={logout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
