@@ -199,7 +199,7 @@ export default function PhotoPermissionsPage() {
                     : "bg-[#8dd4b8] hover:bg-[#7ac4a8] text-gray-900 border-2 border-transparent"
                 }`}
               >
-                All permissions
+                Internally & Externally
               </Button>
 
               <Button
