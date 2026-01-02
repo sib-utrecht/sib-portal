@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as committees from "../committees.js";
+import type * as generateToken from "../generateToken.js";
 import type * as users from "../users.js";
 
 import type {
@@ -17,6 +19,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  committees: typeof committees;
+  generateToken: typeof generateToken;
   users: typeof users;
 }>;
 

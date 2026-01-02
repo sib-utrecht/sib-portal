@@ -10,4 +10,9 @@ export default defineSchema({
         photoPermission: v.union(v.literal("internal+external"), v.literal("internal"), v.literal("nowhere")),
         avatar: v.string(),
     }),
+    committees: defineTable({
+        name: v.string(),
+        secret: v.string(),
+        members: v.array(v.id("users"))
+    }),
 });
