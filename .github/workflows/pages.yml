@@ -22,7 +22,7 @@ jobs:
     name: Build and deploy (gh-pages)
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_CONVEX_URL: ${{ vars.NEXT_PUBLIC_CONVEX_URL }}
+      NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL: ${{ vars.NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL }}
     # Do not run on gh-pages itself to avoid loops
     if: github.ref != 'refs/heads/gh-pages'
     steps:
