@@ -13,69 +13,69 @@ import { useMutation } from "convex/react"
 import { api } from "../convex/_generated/api";
 
 const permissionOptions = [
-    {
-        value: "internal+external" as PhotoPermission,
-        label: "Internal + External",
-        description: "Photos can be used for both internal communications and external marketing",
-        icon: Camera,
-        color: "bg-green-100 text-green-800",
-    },
-    {
-        value: "internal" as PhotoPermission,
-        label: "Internal Only",
-        description: "Photos can only be used for internal communications",
-        icon: Eye,
-        color: "bg-yellow-100 text-yellow-800",
-    },
-    {
-        value: "nowhere" as PhotoPermission,
-        label: "No Usage",
-        description: "Photos should not be used anywhere",
-        icon: EyeOff,
-        color: "bg-red-100 text-red-800",
-    },
+  {
+    value: "internal+external" as PhotoPermission,
+    label: "Internal + External",
+    description: "Photos can be used for both internal communications and external marketing",
+    icon: Camera,
+    color: "bg-green-100 text-green-800",
+  },
+  {
+    value: "internal" as PhotoPermission,
+    label: "Internal Only",
+    description: "Photos can only be used for internal communications",
+    icon: Eye,
+    color: "bg-yellow-100 text-yellow-800",
+  },
+  {
+    value: "nowhere" as PhotoPermission,
+    label: "No Usage",
+    description: "Photos should not be used anywhere",
+    icon: EyeOff,
+    color: "bg-red-100 text-red-800",
+  },
 ]
 
 export function PhotoPermissionSettings() {
-    const { user, updatePhotoPermission } = useAuth()
-    const updatePhotoPermissionDB = useMutation(api.users.updateUserPhotoPermission);
+  const { user, updatePhotoPermission } = useAuth()
+  const updatePhotoPermissionDB = useMutation(api.users.updateUserPhotoPermission);
 
-    const [prefs, setPrefs] = useState({
-        noAlcohol: false,
-        noAudio: false,
-        notProminently: false,
-        noSocialMedia: false,
-        noTiktok: false,
-        other: "",
-    })
+  const [prefs, setPrefs] = useState({
+    noAlcohol: false,
+    noAudio: false,
+    notProminently: false,
+    noSocialMedia: false,
+    noTiktok: false,
+    other: "",
+  })
 
-    if (!user) return null
+  if (!user) return null
 
-    const handlePermissionChange = (value: string) => {
-        updatePhotoPermissionDB({ id: user._id, photoPermission: value as PhotoPermission });
-        updatePhotoPermission(value as PhotoPermission);
-    }
+  const handlePermissionChange = (value: string) => {
+    updatePhotoPermissionDB({ id: user._id, photoPermission: value as PhotoPermission });
+    updatePhotoPermission(value as PhotoPermission);
+  }
 
-    const currentOption = permissionOptions.find((option) => option.value === user.photoPermission)
+  const currentOption = permissionOptions.find((option) => option.value === user.photoPermission)
 
     type PrefKey = "noAlcohol" | "noAudio" | "notProminently" | "noSocialMedia" | "noTiktok"
     const chipOptions: Array<{ key: PrefKey; label: string }> = [
-        { key: "noAlcohol", label: "No alcohol" },
-        { key: "noAudio", label: "No audio" },
-        { key: "notProminently", label: "Not prominently" },
-        { key: "noSocialMedia", label: "No social media" },
-        { key: "noTiktok", label: "No TikTok" },
+      { key: "noAlcohol", label: "No alcohol" },
+      { key: "noAudio", label: "No audio" },
+      { key: "notProminently", label: "Not prominently" },
+      { key: "noSocialMedia", label: "No social media" },
+      { key: "noTiktok", label: "No TikTok" },
     ]
     const enabledChips = chipOptions.filter(({ key }) => prefs[key])
     const disabledChips = chipOptions.filter(({ key }) => !prefs[key])
     const [pickerOpen, setPickerOpen] = useState(false)
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Current setting:</span>
-                {currentOption && <Badge className={currentOption.color}>{currentOption.label}</Badge>}
-            </div>
+      <div className="space-y-8">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">Current setting:</span>
+          {currentOption && <Badge className={currentOption.color}>{currentOption.label}</Badge>}
+        </div>
 
         <RadioGroup value={user.photoPermission} onValueChange={handlePermissionChange} className="space-y-0">
           {permissionOptions.map((option) => {
@@ -166,6 +166,6 @@ export function PhotoPermissionSettings() {
             </div>
           </div>
         </div>
-    </div>
-  )
+      </div>
+    )
 }

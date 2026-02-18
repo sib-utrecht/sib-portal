@@ -28,10 +28,10 @@ html {
       </head>
       <body>
         <Providers>
-	<ConvexClientProvider>
+          <ConvexClientProvider>
 	    {children}
-	</ConvexClientProvider>
-	</Providers>
+          </ConvexClientProvider>
+        </Providers>
       </body>
     </html>
   )
