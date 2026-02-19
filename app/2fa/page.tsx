@@ -7,31 +7,33 @@ import { api } from "@/convex/_generated/api";
 import { useAction, useQuery } from "convex/react";
 import { Car, Link } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useAuth } from "../../contexts/auth-context"
+import { useRouter } from "next/navigation";
 
 export default function twoFA() {
     return (
-        // <RequireAuth>
-        <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-            <header className="bg-white shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
-                        <h1 className="text-2xl font-bold text-gray-900">Two-Factor Authentication Codes</h1>
-                        <div className="flex items-center gap-2">
-                            <Button asChild variant="outline" size="lg">
-                                <a href="/">Back to dashboard</a>
-                            </Button>
+        <RequireAuth>
+            <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
+                <header className="bg-white shadow-sm border-b">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center py-4">
+                            <h1 className="text-2xl font-bold text-gray-900">Two-Factor Authentication Codes</h1>
+                            <div className="flex items-center gap-2">
+                                <Button asChild variant="outline" size="lg">
+                                    <a href="/">Back to dashboard</a>
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </header>
+                </header>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="max-w-xl mx-auto">
-                    <Content />
-                </div>
-            </main>
-        </div>
-        // </RequireAuth>
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="max-w-xl mx-auto">
+                        <Content />
+                    </div>
+                </main>
+            </div>
+        </RequireAuth>
     )
 }
 
@@ -56,6 +58,9 @@ function Content() {
     const [loginHelpOpen, setLoginHelpOpen] = useState(false);
     const generateTokens = useAction(api.generateToken.generateTokens);
     const committees = useQuery(api.committees.getCommittees);
+
+    const router = useRouter();
+    const { isAuthenticated } = useAuth();
 
     useEffect(() => {
         if (!committees || updated) return;
@@ -160,7 +165,7 @@ function Content() {
                 </div>
             ) : committees.length === 0 ? (
                 <div className="py-12">
-                    <p className="text-center text-gray-500">No committees available.</p>
+                    <p className="text-center text-gray-500">No committees available. Go join one!</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -171,30 +176,30 @@ function Content() {
                             className="relative w-full text-left transition-all hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-3xl"
                         >
                             {copiedToast?.index === index && (
-                                    <div
-                                        key={copiedToast.nonce}
-                                        className="absolute bg-white border-2 border-gray-900 rounded-md px-3 py-1 text-sm text-gray-900 pointer-events-none"
-                                        style={{
-                                            left: copiedToast.x,
-                                            top: copiedToast.y,
-                                            transform: "translate(12px, -50%)",
-                                            animation: `copiedFade ${TOAST_MS}ms ease-out forwards`,
-                                        }}
-                                    >
-                                        {copiedToast.text}
-                                    </div>
-                                )}
+                                <div
+                                    key={copiedToast.nonce}
+                                    className="absolute bg-white border-2 border-gray-900 rounded-md px-3 py-1 text-sm text-gray-900 pointer-events-none"
+                                    style={{
+                                        left: copiedToast.x,
+                                        top: copiedToast.y,
+                                        transform: "translate(12px, -50%)",
+                                        animation: `copiedFade ${TOAST_MS}ms ease-out forwards`,
+                                    }}
+                                >
+                                    {copiedToast.text}
+                                </div>
+                            )}
                             <div className="border-2 border-gray-900 rounded-3xl px-6 py-6 bg-white hover:bg-gray-50 transition-colors flex items-center justify-between gap-4">
                                 {/* Committee Name */}
                                 <div className="text-xl font-normal text-gray-900 min-w-[100px]">
                                     {committee.name}
                                 </div>
-                                
+
                                 {/* Code */}
                                 <div className="font-mono text-4xl font-semibold text-gray-900 tracking-wider flex-1 text-center">
                                     {codes[index]}
                                 </div>
-                                
+
                                 {/* Timer with animated circle */}
                                 <div className="relative flex items-center justify-center w-12 h-12">
                                     <svg className="absolute inset-0 w-12 h-12 -rotate-90">
@@ -224,11 +229,11 @@ function Content() {
                     ))}
                 </div>
             )}
-            
+
             {/* Footer Text */}
             <div className="space-y-1 text-sm text-gray-600 pt-4">
                 <p>
-                   Missing a committee? <a className="underline" href="mailto:secretaris@sib-utrecht.nl">
+                    Missing a committee? <a className="underline" href="mailto:secretaris@sib-utrecht.nl">
                         Contact the secretary
                     </a>
                 </p>
