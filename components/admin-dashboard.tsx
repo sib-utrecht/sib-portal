@@ -1,15 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { LogOut, Users, Camera, Eye, EyeOff, X, Filter } from "lucide-react"
-import { useAuth } from "../contexts/auth-context"
-import { mockUsers } from "../data/mock-users"
-import type { PhotoPermission } from "../types/user"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { LogOut, Users, Camera, Eye, EyeOff, X, Filter } from "lucide-react";
+import { useAuth } from "../contexts/auth-context";
+import { mockUsers } from "../data/mock-users";
+import type { PhotoPermission } from "../types/user";
 
 const getPermissionBadge = (permission: PhotoPermission) => {
   switch (permission) {
@@ -18,67 +25,69 @@ const getPermissionBadge = (permission: PhotoPermission) => {
         label: "Internal + External",
         className: "bg-green-100 text-green-800",
         icon: Camera,
-      }
+      };
     case "internal":
       return {
         label: "Internal Only",
         className: "bg-yellow-100 text-yellow-800",
         icon: Eye,
-      }
+      };
     case "nowhere":
       return {
         label: "No Usage",
         className: "bg-red-100 text-red-800",
         icon: EyeOff,
-      }
+      };
   }
-}
+};
 
 export function AdminDashboard() {
-  const { logout, isAdmin } = useAuth()
-  const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set())
+  const { logout, isAdmin } = useAuth();
+  const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
   // if (!user || user.role !== "admin") return null
   if (!isAdmin) {
-    return <div className="min-h-screen flex items-center justify-center">Access Denied</div>
+    return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
   }
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-            You are an admin
+      You are an admin
       <Button onClick={logout}> Logout </Button>
     </div>
-  )
-  const members = mockUsers.filter((u) => u.role === "member")
+  );
+  const members = mockUsers.filter((u) => u.role === "member");
   const permissionStats = {
     "internal+external": mockUsers.filter((u) => u.photoPermission === "internal+external").length,
     internal: mockUsers.filter((u) => u.photoPermission === "internal").length,
     nowhere: mockUsers.filter((u) => u.photoPermission === "nowhere").length,
-  }
+  };
 
   // Filter members based on selected permissions
   const filteredMembers =
-        selectedPermissions.size === 0 ? mockUsers : mockUsers.filter((u) => selectedPermissions.has(u.photoPermission))
+    selectedPermissions.size === 0
+      ? mockUsers
+      : mockUsers.filter((u) => selectedPermissions.has(u.photoPermission));
 
   const togglePermissionFilter = (permission: PhotoPermission) => {
-    const newSelectedPermissions = new Set(selectedPermissions)
+    const newSelectedPermissions = new Set(selectedPermissions);
     if (newSelectedPermissions.has(permission)) {
-      newSelectedPermissions.delete(permission)
+      newSelectedPermissions.delete(permission);
     } else {
-      newSelectedPermissions.add(permission)
+      newSelectedPermissions.add(permission);
     }
-    setSelectedPermissions(newSelectedPermissions)
-  }
+    setSelectedPermissions(newSelectedPermissions);
+  };
 
   const clearAllFilters = () => {
-    setSelectedPermissions(new Set())
-  }
+    setSelectedPermissions(new Set());
+  };
 
   const isPermissionSelected = (permission: PhotoPermission) => {
-    return selectedPermissions.has(permission)
-  }
+    return selectedPermissions.has(permission);
+  };
 
-  const hasActiveFilters = selectedPermissions.size > 0
+  const hasActiveFilters = selectedPermissions.size > 0;
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
@@ -102,7 +111,7 @@ export function AdminDashboard() {
               </div>
               <Button variant="outline" size="sm" onClick={logout}>
                 <LogOut className="h-4 w-4 mr-2" />
-                                Logout
+                Logout
               </Button>
             </div>
           </div>
@@ -120,12 +129,15 @@ export function AdminDashboard() {
                   <span className="text-sm font-medium text-gray-600">Total Members</span>
                 </div>
                 <p className="text-2xl font-bold">{mockUsers.length}</p>
-                {!hasActiveFilters && <p className="text-xs text-primary mt-1">Showing all members</p>}
+                {!hasActiveFilters && (
+                  <p className="text-xs text-primary mt-1">Showing all members</p>
+                )}
               </CardContent>
             </Card>
 
             <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${isPermissionSelected("internal+external") ? "ring-2 ring-green-500 bg-green-50" : ""
+              className={`cursor-pointer transition-all hover:shadow-md relative ${
+                isPermissionSelected("internal+external") ? "ring-2 ring-green-500 bg-green-50" : ""
               }`}
               onClick={() => togglePermissionFilter("internal+external")}
             >
@@ -145,7 +157,8 @@ export function AdminDashboard() {
             </Card>
 
             <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${isPermissionSelected("internal") ? "ring-2 ring-yellow-500 bg-yellow-50" : ""
+              className={`cursor-pointer transition-all hover:shadow-md relative ${
+                isPermissionSelected("internal") ? "ring-2 ring-yellow-500 bg-yellow-50" : ""
               }`}
               onClick={() => togglePermissionFilter("internal")}
             >
@@ -165,7 +178,8 @@ export function AdminDashboard() {
             </Card>
 
             <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${isPermissionSelected("nowhere") ? "ring-2 ring-red-500 bg-red-50" : ""
+              className={`cursor-pointer transition-all hover:shadow-md relative ${
+                isPermissionSelected("nowhere") ? "ring-2 ring-red-500 bg-red-50" : ""
               }`}
               onClick={() => togglePermissionFilter("nowhere")}
             >
@@ -191,14 +205,14 @@ export function AdminDashboard() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-medium">Active filters:</span>
                 {Array.from(selectedPermissions).map((permission) => {
-                  const permissionInfo = getPermissionBadge(permission)
-                  const Icon = permissionInfo.icon
+                  const permissionInfo = getPermissionBadge(permission);
+                  const Icon = permissionInfo.icon;
                   return (
                     <Badge key={permission} className={permissionInfo.className}>
                       <Icon className="h-3 w-3 mr-1" />
                       {permissionInfo.label}
                     </Badge>
-                  )
+                  );
                 })}
                 <Badge variant="outline" className="ml-2">
                   {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""} shown
@@ -206,7 +220,7 @@ export function AdminDashboard() {
               </div>
               <Button variant="outline" size="sm" onClick={clearAllFilters}>
                 <X className="h-4 w-4 mr-2" />
-                                Clear All Filters
+                Clear All Filters
               </Button>
             </div>
           )}
@@ -215,10 +229,10 @@ export function AdminDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>
-                                Member Photo Permissions
+                Member Photo Permissions
                 {hasActiveFilters && (
                   <span className="text-base font-normal text-gray-600 ml-2">
-                                        ({filteredMembers.length} of {mockUsers.length} members)
+                    ({filteredMembers.length} of {mockUsers.length} members)
                   </span>
                 )}
               </CardTitle>
@@ -242,21 +256,24 @@ export function AdminDashboard() {
                   {filteredMembers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center py-8 text-gray-500">
-                                                No members found with the selected permission settings.
+                        No members found with the selected permission settings.
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredMembers.map((member) => {
-                      const permissionInfo = getPermissionBadge(member.photoPermission)
-                      const Icon = permissionInfo.icon
-                      const isHighlighted = selectedPermissions.has(member.photoPermission)
+                      const permissionInfo = getPermissionBadge(member.photoPermission);
+                      const Icon = permissionInfo.icon;
+                      const isHighlighted = selectedPermissions.has(member.photoPermission);
 
                       return (
                         <TableRow key={member.id} className={isHighlighted ? "bg-accent" : ""}>
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.name} />
+                                <AvatarImage
+                                  src={member.avatar || "/placeholder.svg"}
+                                  alt={member.name}
+                                />
                                 <AvatarFallback>
                                   {member.name
                                     .split(" ")
@@ -269,7 +286,9 @@ export function AdminDashboard() {
                           </TableCell>
                           <TableCell className="text-gray-600">{member.email}</TableCell>
                           <TableCell>
-                            <Badge variant={member.role === "admin" ? "default" : "secondary"}>{member.role}</Badge>
+                            <Badge variant={member.role === "admin" ? "default" : "secondary"}>
+                              {member.role}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge className={permissionInfo.className}>
@@ -278,7 +297,7 @@ export function AdminDashboard() {
                             </Badge>
                           </TableCell>
                         </TableRow>
-                      )
+                      );
                     })
                   )}
                 </TableBody>
@@ -288,5 +307,5 @@ export function AdminDashboard() {
         </div>
       </main>
     </div>
-  )
+  );
 }

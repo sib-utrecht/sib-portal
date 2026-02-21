@@ -1,33 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { PhotoPermissionSettings } from "@/components/photo-permission-settings"
-import { RequireAuth } from "@/components/require-auth"
-import { useAuth } from "@/contexts/auth-context"
-import { Mail, PencilLine, Phone, ShieldQuestion, UserRoundCog } from "lucide-react"
-import { ChangeAddressDialog } from "@/components/quick-actions/change-address-dialog"
-import { ChangeEmailDialog } from "@/components/quick-actions/change-email-dialog"
-import { ChangePhoneDialog } from "@/components/quick-actions/change-phone-dialog"
-import { ChangeBankDetailsDialog } from "@/components/quick-actions/change-bank-details-dialog"
-import { UpdateEcpDialog } from "@/components/quick-actions/update-ecp-dialog"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { PhotoPermissionSettings } from "@/components/photo-permission-settings";
+import { RequireAuth } from "@/components/require-auth";
+import { useAuth } from "@/contexts/auth-context";
+import { Mail, PencilLine, Phone, ShieldQuestion, UserRoundCog } from "lucide-react";
+import { ChangeAddressDialog } from "@/components/quick-actions/change-address-dialog";
+import { ChangeEmailDialog } from "@/components/quick-actions/change-email-dialog";
+import { ChangePhoneDialog } from "@/components/quick-actions/change-phone-dialog";
+import { ChangeBankDetailsDialog } from "@/components/quick-actions/change-bank-details-dialog";
+import { UpdateEcpDialog } from "@/components/quick-actions/update-ecp-dialog";
 
 export default function SettingsPage() {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   // Local demo state only (no persistence yet)
-  const [newsletter, setNewsletter] = useState(true)
-  const [postalCards, setPostalCards] = useState(false)
-  const [language, setLanguage] = useState<"Dutch" | "English">("Dutch")
-  const [ecp, setEcp] = useState("Dagobert Duck")
-  const [pronouns, setPronouns] = useState("she/they")
-  const [study, setStudy] = useState("Utrecht University")
+  const [newsletter, setNewsletter] = useState(true);
+  const [postalCards, setPostalCards] = useState(false);
+  const [language, setLanguage] = useState<"Dutch" | "English">("Dutch");
+  const [ecp, setEcp] = useState("Dagobert Duck");
+  const [pronouns, setPronouns] = useState("she/they");
+  const [study, setStudy] = useState("Utrecht University");
 
   // Quick action dialogs now manage their own local state
 
@@ -86,7 +100,10 @@ export default function SettingsPage() {
                     </label>
                     <div className="space-y-2">
                       <Label>Language of preference</Label>
-                      <Select value={language} onValueChange={(v) => setLanguage(v as "Dutch" | "English")}>
+                      <Select
+                        value={language}
+                        onValueChange={(v) => setLanguage(v as "Dutch" | "English")}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select language" />
                         </SelectTrigger>
@@ -130,7 +147,11 @@ export default function SettingsPage() {
                       <CardTitle>I study at</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <Input list="study-suggestions" value={study} onChange={(e) => setStudy(e.target.value)} />
+                      <Input
+                        list="study-suggestions"
+                        value={study}
+                        onChange={(e) => setStudy(e.target.value)}
+                      />
                       <datalist id="study-suggestions">
                         <option value="Utrecht University" />
                         <option value="Hogeschool Utrecht" />
@@ -139,8 +160,8 @@ export default function SettingsPage() {
                         <option value="Nothing" />
                       </datalist>
                       <p className="text-xs text-muted-foreground">
-                        <strong>Why do you need to know?</strong> To get funding from educational institutions, we must know how many of
-                      their students we have.
+                        <strong>Why do you need to know?</strong> To get funding from educational
+                        institutions, we must know how many of their students we have.
                       </p>
                     </CardContent>
                   </Card>
@@ -159,7 +180,9 @@ export default function SettingsPage() {
                     </div>
                     <div className="space-y-1">
                       <p className="font-medium">Current period</p>
-                      <p className="text-sm text-muted-foreground">September 2025 – January 2026 • €10-deal</p>
+                      <p className="text-sm text-muted-foreground">
+                        September 2025 – January 2026 • €10-deal
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -176,7 +199,8 @@ export default function SettingsPage() {
                           <DialogHeader>
                             <DialogTitle>Cancel membership</DialogTitle>
                             <DialogDescription>
-                            This will notify the secretary. They may reach out to confirm your request.
+                              This will notify the secretary. They may reach out to confirm your
+                              request.
                             </DialogDescription>
                           </DialogHeader>
                           <DialogFooter>
@@ -192,23 +216,31 @@ export default function SettingsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><UserRoundCog className="h-4 w-4"/>Quick actions</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserRoundCog className="h-4 w-4" />
+                    Quick actions
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {[
                     { label: "Change address", icon: PencilLine, content: ChangeAddressDialog },
                     { label: "Change phone number", icon: Phone, content: ChangePhoneDialog },
                     { label: "Change e-mail address", icon: Mail, content: ChangeEmailDialog },
-                    { label: "Change bank details", icon: PencilLine, content: ChangeBankDetailsDialog },
+                    {
+                      label: "Change bank details",
+                      icon: PencilLine,
+                      content: ChangeBankDetailsDialog,
+                    },
                     { label: "Update ECP", icon: ShieldQuestion, content: UpdateEcpDialog },
                   ].map((action) => (
                     <Dialog key={action.label}>
                       <DialogTrigger asChild>
-                        <Button variant="link" className="justify-start px-0"><action.icon className="h-4 w-4"/>{action.label}</Button>
+                        <Button variant="link" className="justify-start px-0">
+                          <action.icon className="h-4 w-4" />
+                          {action.label}
+                        </Button>
                       </DialogTrigger>
-                      <DialogContent>
-                        {<action.content />}
-                      </DialogContent>
+                      <DialogContent>{<action.content />}</DialogContent>
                     </Dialog>
                   ))}
                 </CardContent>
@@ -220,5 +252,5 @@ export default function SettingsPage() {
         </main>
       </div>
     </RequireAuth>
-  )
+  );
 }

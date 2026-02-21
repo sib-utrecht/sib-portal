@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import type { ReactNode } from "react"
-import { AuthProvider } from "@/contexts/auth-context"
+import type { ReactNode } from "react";
+import { AuthProvider } from "@/contexts/auth-context";
 
 export function Providers({ children }: { children: ReactNode }) {
-  return <AuthProvider>{children}</AuthProvider>
+  return <AuthProvider>{children}</AuthProvider>;
 }

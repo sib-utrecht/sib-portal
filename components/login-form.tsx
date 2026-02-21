@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "../contexts/auth-context"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "../contexts/auth-context";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAction, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { Mail } from "lucide-react"
-import Link from "next/link"
+import { Mail } from "lucide-react";
+import Link from "next/link";
 
 // export function LoginForm() {
 //     const router = useRouter()
@@ -277,7 +277,7 @@ export function LoginForm() {
     try {
       await login(username, password);
       // navigate(from, { replace: true });
-      router.replace('/');
+      router.replace("/");
     } catch (err) {
       console.error("Login failed:", err);
     }
@@ -298,7 +298,7 @@ export function LoginForm() {
     try {
       await loginWithCode(email, code);
       // navigate(from, { replace: true });
-      router.replace('/');
+      router.replace("/");
     } catch (err) {
       console.error("Code login failed:", err);
     }
@@ -354,7 +354,7 @@ export function LoginForm() {
                   disabled={isLoading}
                 >
                   <Mail className="h-4 w-4 mr-2" />
-                                    Login with Email Code
+                  Login with Email Code
                 </Button>
               </form>
             )}
@@ -388,7 +388,7 @@ export function LoginForm() {
                   onClick={() => setMode("password")}
                   disabled={isLoading}
                 >
-                                    Back to Password Login
+                  Back to Password Login
                 </Button>
               </form>
             )}
@@ -396,7 +396,7 @@ export function LoginForm() {
             {mode === "code-sent" && (
               <form onSubmit={handleCodeLogin} className="space-y-4">
                 <div className="bg-primary/10 text-primary text-sm p-3 rounded-md mb-4">
-                                    A verification code has been sent to {email}
+                  A verification code has been sent to {email}
                 </div>
                 <div>
                   <Label htmlFor="code">Verification Code</Label>
@@ -426,7 +426,7 @@ export function LoginForm() {
                   onClick={() => setMode("code")}
                   disabled={isLoading}
                 >
-                                    Resend Code
+                  Resend Code
                 </Button>
               </form>
             )}
@@ -436,4 +436,3 @@ export function LoginForm() {
     </div>
   );
 }
-

@@ -23,6 +23,11 @@ function ConvexAuthWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
-  return <ConvexProvider client={convex}><AuthProvider><ConvexAuthWrapper> {children}</ConvexAuthWrapper></AuthProvider></ConvexProvider>;
+  return (
+    <ConvexProvider client={convex}>
+      <AuthProvider>
+        <ConvexAuthWrapper> {children}</ConvexAuthWrapper>
+      </AuthProvider>
+    </ConvexProvider>
+  );
 }
-

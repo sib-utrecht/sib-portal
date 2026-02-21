@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, LogOut, User } from "lucide-react"
-import { useAuth } from "../contexts/auth-context"
-import { PhotoPermissionSettings } from "./photo-permission-settings"
-import { ActivitiesList } from "./activities-list"
-import { useRouter, useSearchParams } from "next/navigation"
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera, LogOut, User } from "lucide-react";
+import { useAuth } from "../contexts/auth-context";
+import { PhotoPermissionSettings } from "./photo-permission-settings";
+import { ActivitiesList } from "./activities-list";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function MemberDashboard() {
-  const { logout, isAuthenticated } = useAuth()
+  const { logout, isAuthenticated } = useAuth();
   const router = useRouter();
   if (!isAuthenticated) {
-    router.replace('/login');
+    router.replace("/login");
   }
   //
   // if (!user) return null
@@ -26,8 +26,7 @@ export function MemberDashboard() {
 
   return (
     <div>
-            You are logged in
-
+      You are logged in
       <Button onClick={handleLogout}> Logout </Button>
     </div>
   );
