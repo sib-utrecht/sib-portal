@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# next build output
+.next/
+out/
+
+# other build artifacts
+build/
+dist/
+coverage/
+
+# convex generated code
+convex/_generated/
+
+# lockfiles & misc
+pnpm-lock.yaml
+
+# data files
+*.jsonl
