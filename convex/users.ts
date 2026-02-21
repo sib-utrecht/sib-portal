@@ -1,4 +1,3 @@
-import { PhotoPermissionSettings } from "@/components/photo-permission-settings";
 import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
 import { User } from "../types/user";
