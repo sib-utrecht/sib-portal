@@ -12,9 +12,12 @@ Any changes you make to your deployed app will be automatically pushed to this r
 
 ## Deployment
 
-Your project is live at:
+Project is deployed at:
 
-**[https://vercel.com/vkuhlmanns-projects/v0-sib-portal](https://vercel.com/vkuhlmanns-projects/v0-sib-portal)**
+[portal.sib-utrecht.nl](portal.sib-utrecht.nl)
+
+for the old portal, go to:
+[app.sib-utrecht.nl](app.sib-utrecht.nl)
 
 ### GitHub Pages
 
