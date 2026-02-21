@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { LogOut, Users, Camera, Eye, EyeOff, X, Filter } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
+import { useRouter } from "next/navigation";
 import { mockUsers } from "../data/mock-users";
 import type { PhotoPermission } from "../types/user";
 
@@ -42,20 +43,35 @@ const getPermissionBadge = (permission: PhotoPermission) => {
 };
 
 export function AdminDashboard() {
-  const { logout, isAdmin } = useAuth();
+  const { logout, isAdmin, token } = useAuth();
+  const router = useRouter();
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
+
+  // Decode user info from the Cognito JWT token
+  const user = (() => {
+    if (!token) return { name: "Admin", email: "", avatar: undefined as string | undefined };
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return {
+        name: String(payload.name || payload.email || payload["cognito:username"] || "Admin"),
+        email: String(payload.email || ""),
+        avatar: undefined as string | undefined,
+      };
+    } catch {
+      return { name: "Admin", email: "", avatar: undefined as string | undefined };
+    }
+  })();
+
+  const handleLogout = () => {
+    logout();
+    router.replace("/");
+  };
 
   // if (!user || user.role !== "admin") return null
   if (!isAdmin) {
     return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
   }
 
-  return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-      You are an admin
-      <Button onClick={logout}> Logout </Button>
-    </div>
-  );
   const members = mockUsers.filter((u) => u.role === "member");
   const permissionStats = {
     "internal+external": mockUsers.filter((u) => u.photoPermission === "internal+external").length,
@@ -109,7 +125,7 @@ export function AdminDashboard() {
                 <span className="text-sm font-medium">{user.name}</span>
                 <Badge variant="secondary">Admin</Badge>
               </div>
-              <Button variant="outline" size="sm" onClick={logout}>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
@@ -266,7 +282,7 @@ export function AdminDashboard() {
                       const isHighlighted = selectedPermissions.has(member.photoPermission);
 
                       return (
-                        <TableRow key={member.id} className={isHighlighted ? "bg-accent" : ""}>
+                        <TableRow key={member._id} className={isHighlighted ? "bg-accent" : ""}>
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
