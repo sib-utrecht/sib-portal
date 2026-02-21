@@ -1,7 +1,19 @@
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import typescriptParser from "@typescript-eslint/parser";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 const eslintConfig = [
+  {
+    ignores: [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/out/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/coverage/**",
+      "convex/_generated/**",
+    ],
+  },
   {
     files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
@@ -10,17 +22,8 @@ const eslintConfig = [
     plugins: {
       "@typescript-eslint": typescriptEslint,
     },
-    rules: {
-      "indent": "off",
-      "@typescript-eslint/indent": "off",
-    },
   },
-  {
-    files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
-    rules: {
-      "indent": ["error", 2, { "SwitchCase": 1 }],
-    },
-  },
+  eslintConfigPrettier,
 ];
 
 export default eslintConfig;
