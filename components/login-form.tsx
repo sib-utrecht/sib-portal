@@ -1,73 +1,73 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "../contexts/auth-context"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Mail } from "lucide-react"
-import Link from "next/link"
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "../contexts/auth-context";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Mail } from "lucide-react";
+import Link from "next/link";
 
 export function LoginForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectUri = useMemo(() => searchParams.get("redirect_uri") || "/", [searchParams])
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUri = useMemo(() => searchParams.get("redirect_uri") || "/", [searchParams]);
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const { login, isAuthenticated } = useAuth()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const { login, isAuthenticated } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-    const success = await login(email, password)
+    const success = await login(email, password);
 
     if (!success) {
-      setError("Invalid email or password")
+      setError("Invalid email or password");
     } else {
-      router.replace(redirectUri)
+      router.replace(redirectUri);
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   // If already signed in, bounce to redirectUri
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace(redirectUri)
+      router.replace(redirectUri);
     }
-  }, [isAuthenticated, redirectUri, router])
+  }, [isAuthenticated, redirectUri, router]);
 
   // Initialize remember-me preference from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("rememberMe")
+      const saved = localStorage.getItem("rememberMe");
       if (saved !== null) {
-        setRememberMe(saved === "true")
+        setRememberMe(saved === "true");
       }
     } catch (e) {
       // ignore storage errors
     }
-  }, [])
+  }, []);
 
   // Persist remember-me preference
   useEffect(() => {
     try {
-      localStorage.setItem("rememberMe", String(rememberMe))
+      localStorage.setItem("rememberMe", String(rememberMe));
     } catch (e) {
       // ignore storage errors
     }
-  }, [rememberMe])
+  }, [rememberMe]);
 
   return (
     <div
@@ -179,5 +179,5 @@ export function LoginForm() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { MessagePreview } from "@/components/quick-actions/message-preview"
-import { useAuth } from "@/contexts/auth-context"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MessagePreview } from "@/components/quick-actions/message-preview";
+import { useAuth } from "@/contexts/auth-context";
 
 export function ChangeBankDetailsDialog() {
-  const { user } = useAuth()
-  const [iban, setIban] = useState("")
-  const [bic, setBic] = useState("")
-  const [note, setNote] = useState("")
-  const showBic = iban.trim().length >= 2 && !iban.toUpperCase().startsWith("NL")
+  const { user } = useAuth();
+  const [iban, setIban] = useState("");
+  const [bic, setBic] = useState("");
+  const [note, setNote] = useState("");
+  const showBic = iban.trim().length >= 2 && !iban.toUpperCase().startsWith("NL");
 
   return (
     <>
@@ -32,7 +32,9 @@ export function ChangeBankDetailsDialog() {
         <p>I would like to update my bank details.</p>
         <div className="grid gap-3">
           <div>
-            <Label htmlFor="iban" className="text-xs font-medium">IBAN</Label>
+            <Label htmlFor="iban" className="text-xs font-medium">
+              IBAN
+            </Label>
             <Input
               id="iban"
               value={iban}
@@ -42,7 +44,9 @@ export function ChangeBankDetailsDialog() {
           </div>
           {showBic && (
             <div>
-              <Label htmlFor="bic" className="text-xs font-medium">BIC</Label>
+              <Label htmlFor="bic" className="text-xs font-medium">
+                BIC
+              </Label>
               <Input
                 id="bic"
                 value={bic}
@@ -62,5 +66,5 @@ export function ChangeBankDetailsDialog() {
         <Button disabled={!iban}>Send request</Button>
       </DialogFooter>
     </>
-  )
+  );
 }

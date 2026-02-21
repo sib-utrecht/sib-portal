@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { MessagePreview } from "@/components/quick-actions/message-preview"
-import { useAuth } from "@/contexts/auth-context"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MessagePreview } from "@/components/quick-actions/message-preview";
+import { useAuth } from "@/contexts/auth-context";
 
 export function UpdateEcpDialog() {
-  const { user } = useAuth()
-  const [name, setName] = useState("")
-  const [phone, setPhone] = useState("")
+  const { user } = useAuth();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   return (
     <>
       <DialogHeader>
@@ -29,7 +29,9 @@ export function UpdateEcpDialog() {
         <p>I would like to update my emergency contact person details.</p>
         <div className="grid gap-3">
           <div>
-            <Label htmlFor="ecpName" className="text-xs font-medium">Name</Label>
+            <Label htmlFor="ecpName" className="text-xs font-medium">
+              Name
+            </Label>
             <Input
               id="ecpName"
               value={name}
@@ -38,7 +40,9 @@ export function UpdateEcpDialog() {
             />
           </div>
           <div>
-            <Label htmlFor="ecpPhone" className="text-xs font-medium">Phone number</Label>
+            <Label htmlFor="ecpPhone" className="text-xs font-medium">
+              Phone number
+            </Label>
             <Input
               id="ecpPhone"
               value={phone}
@@ -58,5 +62,5 @@ export function UpdateEcpDialog() {
         <Button disabled={!name || !phone}>Send request</Button>
       </DialogFooter>
     </>
-  )
+  );
 }
