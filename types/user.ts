@@ -1,9 +1,10 @@
 export type PhotoPermission = "internal+external" | "internal" | "nowhere";
 
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
+  password: string;
   role: "member" | "admin";
   photoPermission: PhotoPermission;
   avatar?: string;

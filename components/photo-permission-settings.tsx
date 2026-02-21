@@ -9,6 +9,8 @@ import { Camera, Eye, EyeOff, X } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
 import type { PhotoPermission } from "../types/user";
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
 
 const permissionOptions = [
   {
@@ -36,6 +38,7 @@ const permissionOptions = [
 
 export function PhotoPermissionSettings() {
   const { user, updatePhotoPermission } = useAuth();
+  const updatePhotoPermissionDB = useMutation(api.users.updateUserPhotoPermission);
 
   const [prefs, setPrefs] = useState({
     noAlcohol: false,
@@ -49,6 +52,7 @@ export function PhotoPermissionSettings() {
   if (!user) return null;
 
   const handlePermissionChange = (value: string) => {
+    updatePhotoPermissionDB({ id: user._id, photoPermission: value as PhotoPermission });
     updatePhotoPermission(value as PhotoPermission);
   };
 

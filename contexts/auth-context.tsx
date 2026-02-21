@@ -1,13 +1,21 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import type { AuthState } from "../types/user";
-import { mockUsers } from "../data/mock-users";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+  SetStateAction,
+} from "react";
+import type { AuthState, PhotoPermission, User } from "../types/user";
+import { api } from "../convex/_generated/api";
+import { useQuery, useMutation } from "convex/react";
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (users: User[], email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  updatePhotoPermission: (permission: "internal+external" | "internal" | "nowhere") => void;
+  updatePhotoPermission: (permission: PhotoPermission) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,17 +53,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [authState, isHydrated]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    const user = mockUsers.find((u) => u.email === email);
-    if (user && password === "password") {
-      const newAuthState = {
-        user,
-        isAuthenticated: true,
-      };
-      setAuthState(newAuthState);
-      return true;
+  const login = async (users: User[], email: string, password: string): Promise<boolean> => {
+    const foundUser = users.find((u) => u.email === email && u.password === password);
+    if (foundUser === undefined) {
+      return false;
     }
-    return false;
+    const newAuthState = {
+      user: foundUser,
+      isAuthenticated: true,
+    };
+    setAuthState(newAuthState);
+    return true;
   };
 
   const logout = () => {
@@ -65,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const updatePhotoPermission = (permission: "internal+external" | "internal" | "nowhere") => {
+  const updatePhotoPermission = (permission: PhotoPermission) => {
     if (authState.user) {
       const updatedUser = { ...authState.user, photoPermission: permission };
       const newAuthState = {
@@ -73,11 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: updatedUser,
       };
       setAuthState(newAuthState);
-
-      const userIndex = mockUsers.findIndex((u) => u.id === authState.user!.id);
-      if (userIndex !== -1) {
-        mockUsers[userIndex] = updatedUser;
-      }
     }
   };
 
