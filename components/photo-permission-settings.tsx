@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Camera, Eye, EyeOff, X } from "lucide-react"
-import { useAuth } from "../contexts/auth-context"
-import type { PhotoPermission } from "../types/user"
-import { useState } from "react"
-import { useMutation } from "convex/react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Camera, Eye, EyeOff, X } from "lucide-react";
+import { useAuth } from "../contexts/auth-context";
+import type { PhotoPermission } from "../types/user";
+import { useState } from "react";
+import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 
 const permissionOptions = [
@@ -34,10 +34,10 @@ const permissionOptions = [
     icon: EyeOff,
     color: "bg-red-100 text-red-800",
   },
-]
+];
 
 export function PhotoPermissionSettings() {
-  const { user, updatePhotoPermission } = useAuth()
+  const { user, updatePhotoPermission } = useAuth();
   const updatePhotoPermissionDB = useMutation(api.users.updateUserPhotoPermission);
 
   const [prefs, setPrefs] = useState({
@@ -47,28 +47,28 @@ export function PhotoPermissionSettings() {
     noSocialMedia: false,
     noTiktok: false,
     other: "",
-  })
+  });
 
-  if (!user) return null
+  if (!user) return null;
 
   const handlePermissionChange = (value: string) => {
     updatePhotoPermissionDB({ id: user._id, photoPermission: value as PhotoPermission });
     updatePhotoPermission(value as PhotoPermission);
-  }
+  };
 
   const currentOption = permissionOptions.find((option) => option.value === user.photoPermission);
 
-  type PrefKey = "noAlcohol" | "noAudio" | "notProminently" | "noSocialMedia" | "noTiktok"
+  type PrefKey = "noAlcohol" | "noAudio" | "notProminently" | "noSocialMedia" | "noTiktok";
   const chipOptions: Array<{ key: PrefKey; label: string }> = [
     { key: "noAlcohol", label: "No alcohol" },
     { key: "noAudio", label: "No audio" },
     { key: "notProminently", label: "Not prominently" },
     { key: "noSocialMedia", label: "No social media" },
     { key: "noTiktok", label: "No TikTok" },
-  ]
-  const enabledChips = chipOptions.filter(({ key }) => prefs[key])
-  const disabledChips = chipOptions.filter(({ key }) => !prefs[key])
-  const [pickerOpen, setPickerOpen] = useState(false)
+  ];
+  const enabledChips = chipOptions.filter(({ key }) => prefs[key]);
+  const disabledChips = chipOptions.filter(({ key }) => !prefs[key]);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <div className="space-y-8">
@@ -77,9 +77,13 @@ export function PhotoPermissionSettings() {
         {currentOption && <Badge className={currentOption.color}>{currentOption.label}</Badge>}
       </div>
 
-      <RadioGroup value={user.photoPermission} onValueChange={handlePermissionChange} className="space-y-0">
+      <RadioGroup
+        value={user.photoPermission}
+        onValueChange={handlePermissionChange}
+        className="space-y-0"
+      >
         {permissionOptions.map((option) => {
-          const Icon = option.icon
+          const Icon = option.icon;
           return (
             <div
               key={option.value}
@@ -88,14 +92,17 @@ export function PhotoPermissionSettings() {
             >
               <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
               <div className="flex-1">
-                <Label htmlFor={option.value} className="flex items-center gap-2 font-medium cursor-pointer">
+                <Label
+                  htmlFor={option.value}
+                  className="flex items-center gap-2 font-medium cursor-pointer"
+                >
                   <Icon className="h-4 w-4" />
                   {option.label}
                 </Label>
                 <p className="text-sm text-gray-600 mt-1">{option.description}</p>
               </div>
             </div>
-          )
+          );
         })}
       </RadioGroup>
 
@@ -103,7 +110,9 @@ export function PhotoPermissionSettings() {
         <h4 className="text-base font-semibold">Additional preferences</h4>
         <div className="flex flex-wrap gap-2">
           {enabledChips.length === 0 ? (
-            <span className="text-sm text-muted-foreground">No additional preferences selected</span>
+            <span className="text-sm text-muted-foreground">
+              No additional preferences selected
+            </span>
           ) : (
             enabledChips.map(({ key, label }) => (
               <div
@@ -153,8 +162,8 @@ export function PhotoPermissionSettings() {
                     role="option"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => {
-                      setPrefs((p) => ({ ...p, [key]: true }))
-                      setPickerOpen(false)
+                      setPrefs((p) => ({ ...p, [key]: true }));
+                      setPickerOpen(false);
                     }}
                     className="w-full text-left px-3 py-2 hover:bg-accent"
                   >
@@ -167,5 +176,5 @@ export function PhotoPermissionSettings() {
         </div>
       </div>
     </div>
-  )
+  );
 }

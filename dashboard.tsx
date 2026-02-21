@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import { useAuth } from "./contexts/auth-context"
-import { LoginForm } from "./components/login-form"
-import { MemberDashboard } from "./components/member-dashboard"
-import { AdminDashboard } from "./components/admin-dashboard"
+import { useAuth } from "./contexts/auth-context";
+import { LoginForm } from "./components/login-form";
+import { MemberDashboard } from "./components/member-dashboard";
+import { AdminDashboard } from "./components/admin-dashboard";
 
 function AppContent() {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
-    return <LoginForm />
+    return <LoginForm />;
   }
 
   if (user?.role === "admin") {
-    return <AdminDashboard />
+    return <AdminDashboard />;
   }
 
-  return <MemberDashboard />
+  return <MemberDashboard />;
 }
 
 export default function Dashboard() {
-  return <AppContent />
+  return <AppContent />;
 }

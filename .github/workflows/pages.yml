@@ -3,7 +3,7 @@ name: Deploy multi-branch to GitHub Pages
 on:
   push:
     branches:
-      - '**' # deploy every branch
+      - "**" # deploy every branch
   workflow_dispatch:
 
 permissions:

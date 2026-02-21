@@ -1,29 +1,41 @@
-"use client"
+"use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Users, Euro, Clock } from 'lucide-react'
-import { getActivityName, getActivityDescription, getActivityStartDate, getActivityEndDate, getActivityImage } from "../utils/activity-helpers"
-import type { Activity } from "../types/activity"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, MapPin, Users, Euro, Clock } from "lucide-react";
+import {
+  getActivityName,
+  getActivityDescription,
+  getActivityStartDate,
+  getActivityEndDate,
+  getActivityImage,
+} from "../utils/activity-helpers";
+import type { Activity } from "../types/activity";
 
 interface ActivityDialogProps {
-  activity: Activity | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  activity: Activity | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogProps) {
-  if (!activity) return null
+  if (!activity) return null;
 
-  const activityName = getActivityName(activity)
-  const activityDescription = getActivityDescription(activity)
-  const startDate = getActivityStartDate(activity)
-  const endDate = getActivityEndDate(activity)
-  const imageUrl = getActivityImage(activity)
+  const activityName = getActivityName(activity);
+  const activityDescription = getActivityDescription(activity);
+  const startDate = getActivityStartDate(activity);
+  const endDate = getActivityEndDate(activity);
+  const imageUrl = getActivityImage(activity);
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "TBD"
+    if (!dateString) return "TBD";
     try {
       return new Date(dateString).toLocaleDateString("en-US", {
         weekday: "long",
@@ -32,22 +44,22 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-      })
+      });
     } catch {
-      return "Invalid date"
+      return "Invalid date";
     }
-  }
+  };
 
   const formatPrice = (price: number) => {
-    return price === 0 ? "Free" : `€${price.toFixed(2)}`
-  }
+    return price === 0 ? "Free" : `€${price.toFixed(2)}`;
+  };
 
   const handleSignup = () => {
     // In a real app, this would handle the signup process
-    alert(`Signing up for: ${activityName}`)
-  }
+    alert(`Signing up for: ${activityName}`);
+  };
 
-  const isSignupAvailable = activity.is_signup_open && !activity.is_full
+  const isSignupAvailable = activity.is_signup_open && !activity.is_full;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -68,7 +80,7 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
                 alt={activityName}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.currentTarget.src = "/placeholder.svg?height=200&width=400&text=Activity+Image"
+                  e.currentTarget.src = "/placeholder.svg?height=200&width=400&text=Activity+Image";
                 }}
               />
             </div>
@@ -152,13 +164,19 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
               <Badge className="bg-gray-100 text-gray-800">Signup Closed</Badge>
             )}
             {activity.is_full && <Badge className="bg-red-100 text-red-800">Full</Badge>}
-            {(activity.price || 0) === 0 && <Badge className="bg-accent text-primary">Free Event</Badge>}
+            {(activity.price || 0) === 0 && (
+              <Badge className="bg-accent text-primary">Free Event</Badge>
+            )}
           </div>
 
           {/* Signup Button */}
           <div className="flex gap-3 pt-4 border-t">
             <Button onClick={handleSignup} disabled={!isSignupAvailable} className="flex-1">
-              {activity.is_full ? "Event Full" : !activity.is_signup_open ? "Signup Closed" : "Sign Up"}
+              {activity.is_full
+                ? "Event Full"
+                : !activity.is_signup_open
+                  ? "Signup Closed"
+                  : "Sign Up"}
             </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close
@@ -167,5 +185,5 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

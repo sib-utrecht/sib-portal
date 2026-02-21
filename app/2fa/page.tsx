@@ -1,8 +1,15 @@
-"use client"
+"use client";
 import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { api } from "@/convex/_generated/api";
 import { useAction, useQuery } from "convex/react";
 import { Car, Link } from "lucide-react";
@@ -10,7 +17,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 export default function twoFA() {
   return (
-  // <RequireAuth>
+    // <RequireAuth>
     <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,8 +38,8 @@ export default function twoFA() {
         </div>
       </main>
     </div>
-  // </RequireAuth>
-  )
+    // </RequireAuth>
+  );
 }
 
 function Content() {
@@ -44,12 +51,12 @@ function Content() {
   const [resetKey, setResetKey] = useState(0);
   const [isResettingCircle, setIsResettingCircle] = useState(false);
   const [copiedToast, setCopiedToast] = useState<{
-        index: number;
-        x: number;
-        y: number;
-        nonce: number;
-        text: string;
-    } | null>(null);
+    index: number;
+    x: number;
+    y: number;
+    nonce: number;
+    text: string;
+  } | null>(null);
   const toastTimeoutRef = useRef<number | null>(null);
   const resetTimeoutRef = useRef<number | null>(null);
   const prevEndTimeRef = useRef<number | null>(null);
@@ -189,12 +196,12 @@ function Content() {
                 <div className="text-xl font-normal text-gray-900 min-w-[100px]">
                   {committee.name}
                 </div>
-                                
+
                 {/* Code */}
                 <div className="font-mono text-4xl font-semibold text-gray-900 tracking-wider flex-1 text-center">
                   {codes[index]}
                 </div>
-                                
+
                 {/* Timer with animated circle */}
                 <div className="relative flex items-center justify-center w-12 h-12">
                   <svg className="absolute inset-0 w-12 h-12 -rotate-90">
@@ -217,19 +224,22 @@ function Content() {
                       }}
                     />
                   </svg>
-                  <span className="text-lg font-semibold text-gray-900 relative z-10">{secondsLeft}</span>
+                  <span className="text-lg font-semibold text-gray-900 relative z-10">
+                    {secondsLeft}
+                  </span>
                 </div>
               </div>
             </button>
           ))}
         </div>
       )}
-            
+
       {/* Footer Text */}
       <div className="space-y-1 text-sm text-gray-600 pt-4">
         <p>
-                   Missing a committee? <a className="underline" href="mailto:secretaris@sib-utrecht.nl">
-                        Contact the secretary
+          Missing a committee?{" "}
+          <a className="underline" href="mailto:secretaris@sib-utrecht.nl">
+            Contact the secretary
           </a>
         </p>
         <p>Interested in joining a new committee? Contact the board</p>
@@ -238,24 +248,33 @@ function Content() {
           className="underline cursor-pointer"
           onClick={() => setLoginHelpOpen(true)}
         >
-                    How do I login?
+          How do I login?
         </button>
       </div>
 
       <Dialog open={loginHelpOpen} onOpenChange={setLoginHelpOpen}>
         <DialogContent className="w-[min(560px,calc(100vw-2rem))] border-2 border-gray-900 rounded-3xl bg-white text-gray-900 shadow-none [&>button.absolute]:hidden">
           <DialogHeader>
-            <DialogTitle className="text-base font-semibold text-gray-900">How do I login?</DialogTitle>
+            <DialogTitle className="text-base font-semibold text-gray-900">
+              How do I login?
+            </DialogTitle>
           </DialogHeader>
           <div className="text-sm leading-relaxed">
             <p>
-                            Thank you for becoming a committee member! To sign in, you should have gotten an email address and password from someone. If you haven't, ask in the groupchat or directly to the chair of your committee. If you are then prompted to verify signing in using someone's phone, click "other ways" and go to 2FA code. There you can enter the code from this page.
+              Thank you for becoming a committee member! To sign in, you should have gotten an email
+              address and password from someone. If you haven't, ask in the groupchat or directly to
+              the chair of your committee. If you are then prompted to verify signing in using
+              someone's phone, click "other ways" and go to 2FA code. There you can enter the code
+              from this page.
             </p>
           </div>
           <DialogFooter className="sm:justify-end">
             <DialogClose asChild>
-              <Button variant="secondary" className="cursor-pointer border-2 border-gray-900 bg-destructive/20 text-gray-900 hover:bg-destructive/25">
-                                close
+              <Button
+                variant="secondary"
+                className="cursor-pointer border-2 border-gray-900 bg-destructive/20 text-gray-900 hover:bg-destructive/25"
+              >
+                close
               </Button>
             </DialogClose>
           </DialogFooter>
@@ -263,25 +282,24 @@ function Content() {
       </Dialog>
 
       <style jsx global>{`
-                @keyframes copiedFade {
-                    0% {
-                        opacity: 1;
-                    }
-                    100% {
-                        opacity: 0;
-                    }
-                }
+        @keyframes copiedFade {
+          0% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+          }
+        }
 
-                @keyframes circleResetFill {
-                    from {
-                        stroke-dashoffset: var(--circumference);
-                    }
-                    to {
-                        stroke-dashoffset: 0;
-                    }
-                }
-            `}</style>
+        @keyframes circleResetFill {
+          from {
+            stroke-dashoffset: var(--circumference);
+          }
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
-

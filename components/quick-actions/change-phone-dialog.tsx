@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { MessagePreview } from "@/components/quick-actions/message-preview"
-import { useAuth } from "@/contexts/auth-context"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MessagePreview } from "@/components/quick-actions/message-preview";
+import { useAuth } from "@/contexts/auth-context";
 
 export function ChangePhoneDialog() {
-  const { user } = useAuth()
-  const [phone, setPhone] = useState("")
-  const [note, setNote] = useState("")
+  const { user } = useAuth();
+  const [phone, setPhone] = useState("");
+  const [note, setNote] = useState("");
   return (
     <>
       <DialogHeader>
@@ -29,7 +29,9 @@ export function ChangePhoneDialog() {
         <p>I would like to update my phone number.</p>
         <div className="grid gap-3">
           <div>
-            <Label htmlFor="newPhone" className="text-xs font-medium">Phone number</Label>
+            <Label htmlFor="newPhone" className="text-xs font-medium">
+              Phone number
+            </Label>
             <Input
               id="newPhone"
               value={phone}
@@ -49,5 +51,5 @@ export function ChangePhoneDialog() {
         <Button disabled={!phone}>Send request</Button>
       </DialogFooter>
     </>
-  )
+  );
 }

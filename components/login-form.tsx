@@ -1,52 +1,52 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "../contexts/auth-context"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "../contexts/auth-context";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAction, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { Mail } from "lucide-react"
-import Link from "next/link"
+import { Mail } from "lucide-react";
+import Link from "next/link";
 
 export function LoginForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectUri = useMemo(() => searchParams.get("redirect_uri") || "/", [searchParams])
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUri = useMemo(() => searchParams.get("redirect_uri") || "/", [searchParams]);
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const { login, isAuthenticated } = useAuth()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const { login, isAuthenticated } = useAuth();
   const users = useQuery(api.users.getUsers);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
     if (!users) {
-      setError("User data is not available. Please try again later.")
-      setIsLoading(false)
-      return
+      setError("User data is not available. Please try again later.");
+      setIsLoading(false);
+      return;
     }
 
     const success = await login(users, email, password);
     if (!success) {
-      setError("Invalid email or password")
+      setError("Invalid email or password");
     } else {
-      router.replace(redirectUri)
+      router.replace(redirectUri);
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   // // If already signed in, bounce to redirectUri
   // useEffect(() => {
@@ -57,23 +57,23 @@ export function LoginForm() {
   // Initialize remember-me preference from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("rememberMe")
+      const saved = localStorage.getItem("rememberMe");
       if (saved !== null) {
-        setRememberMe(saved === "true")
+        setRememberMe(saved === "true");
       }
     } catch (e) {
       // ignore storage errors
     }
-  }, [])
+  }, []);
 
   // Persist remember-me preference
   useEffect(() => {
     try {
-      localStorage.setItem("rememberMe", String(rememberMe))
+      localStorage.setItem("rememberMe", String(rememberMe));
     } catch (e) {
       // ignore storage errors
     }
-  }, [rememberMe])
+  }, [rememberMe]);
 
   return (
     <div
@@ -100,11 +100,11 @@ export function LoginForm() {
           </div>
           <CardTitle className="text-2xl font-semibold tracking-tight">
             <span className="bg-gradient-to-r from-[#21526f] via-[#2a6a88] to-[#58a6c7] bg-clip-text text-transparent">
-							Member Login
+              Member Login
             </span>
           </CardTitle>
           <CardDescription className="text-sm">
-						Sign in to manage your photo permissions
+            Sign in to manage your photo permissions
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -148,12 +148,16 @@ export function LoginForm() {
             <p>
               <strong>Demo credentials:</strong>
             </p>
-            {users?.map(({ email, password, name }) => <p key={email}>{name}: {email} / {password}</p>)}
+            {users?.map(({ email, password, name }) => (
+              <p key={email}>
+                {name}: {email} / {password}
+              </p>
+            ))}
           </div>
         </CardContent>
       </Card>
-    </div >
-  )
+    </div>
+  );
 
   // return (
   //   <div

@@ -1,39 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { MessagePreview } from "@/components/quick-actions/message-preview"
-import { useAuth } from "@/contexts/auth-context"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MessagePreview } from "@/components/quick-actions/message-preview";
+import { useAuth } from "@/contexts/auth-context";
 
 export function ChangeAddressDialog() {
-  const { user } = useAuth()
-  const [postalCode, setPostalCode] = useState("")
-  const [houseNumber, setHouseNumber] = useState("")
-  const [street, setStreet] = useState("")
-  const [place, setPlace] = useState("")
+  const { user } = useAuth();
+  const [postalCode, setPostalCode] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
+  const [street, setStreet] = useState("");
+  const [place, setPlace] = useState("");
 
   const autoFillFromPostal = () => {
     if (postalCode && houseNumber && !street && !place) {
-      setStreet("Sesamstraat")
-      setPlace("Utrecht")
+      setStreet("Sesamstraat");
+      setPlace("Utrecht");
     }
-  }
+  };
 
   const autoFillFromStreet = () => {
     if (street && place && !postalCode) {
-      setPostalCode("3500AA")
+      setPostalCode("3500AA");
     }
-  }
+  };
 
   return (
     <>
       <DialogHeader>
         <DialogTitle>Change address</DialogTitle>
         <DialogDescription>
-                    This will send a message to the secretary who will process your request.
+          This will send a message to the secretary who will process your request.
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-6">
@@ -46,7 +46,9 @@ export function ChangeAddressDialog() {
           <p>I would like to update my address to:</p>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <Label htmlFor="postalCode" className="text-xs font-medium">Postal code</Label>
+              <Label htmlFor="postalCode" className="text-xs font-medium">
+                Postal code
+              </Label>
               <Input
                 id="postalCode"
                 value={postalCode}
@@ -56,7 +58,9 @@ export function ChangeAddressDialog() {
               />
             </div>
             <div>
-              <Label htmlFor="houseNumber" className="text-xs font-medium">Number</Label>
+              <Label htmlFor="houseNumber" className="text-xs font-medium">
+                Number
+              </Label>
               <Input
                 id="houseNumber"
                 value={houseNumber}
@@ -68,7 +72,9 @@ export function ChangeAddressDialog() {
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              <Label htmlFor="street" className="text-xs font-medium">Street</Label>
+              <Label htmlFor="street" className="text-xs font-medium">
+                Street
+              </Label>
               <Input
                 id="street"
                 value={street}
@@ -78,7 +84,9 @@ export function ChangeAddressDialog() {
               />
             </div>
             <div>
-              <Label htmlFor="place" className="text-xs font-medium">Place</Label>
+              <Label htmlFor="place" className="text-xs font-medium">
+                Place
+              </Label>
               <Input
                 id="place"
                 value={place}
@@ -99,5 +107,5 @@ export function ChangeAddressDialog() {
         <Button>Submit</Button>
       </DialogFooter>
     </>
-  )
+  );
 }

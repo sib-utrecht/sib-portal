@@ -1,4 +1,4 @@
-import type { User } from "../types/user"
+import type { User } from "../types/user";
 
 export const mockUsers: User[] = [
   {
@@ -33,4 +33,4 @@ export const mockUsers: User[] = [
     photoPermission: "internal+external",
     avatar: "/abstract-geometric-shapes.png",
   },
-]
+];
