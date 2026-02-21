@@ -100,11 +100,11 @@ export function LoginForm() {
           </div>
           <CardTitle className="text-2xl font-semibold tracking-tight">
             <span className="bg-gradient-to-r from-[#21526f] via-[#2a6a88] to-[#58a6c7] bg-clip-text text-transparent">
-              Member Login
+              SIB-Utrecht
             </span>
           </CardTitle>
           <CardDescription className="text-sm">
-            Sign in to manage your photo permissions
+            Sign in with a password, or with a login code sent to your email.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -131,6 +131,21 @@ export function LoginForm() {
                 required
               />
             </div>
+            <div className="flex items-center justify-between text-sm">
+              <label htmlFor="remember" className="flex items-center select-none">
+                <input
+                  id="remember"
+                  type="checkbox"
+                  className="mr-2 h-4 w-4 rounded border-gray-300 text-[#21526f] focus:ring-[#21526f] accent-[#21526f]"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                Keep me logged in
+              </label>
+              <Link href="/login/reset" className="text-[#21526f] hover:underline font-medium">
+                Reset password
+              </Link>
+            </div>
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -153,6 +168,22 @@ export function LoginForm() {
                 {name}: {email} / {password}
               </p>
             ))}
+          </div>
+        </CardContent>
+        <CardContent>
+          {/* Additional actions */}
+          <div className="mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                // TODO: Implement email magic-code flow
+              }}
+            >
+              <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
+              <span>Get login code by email</span>
+            </Button>
           </div>
         </CardContent>
       </Card>
