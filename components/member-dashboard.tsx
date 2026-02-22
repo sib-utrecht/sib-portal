@@ -5,39 +5,22 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, LogOut, User } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useAuth } from "../contexts/auth-context";
 import { PhotoPermissionSettings } from "./photo-permission-settings";
 import { ActivitiesList } from "./activities-list";
 import { useRouter } from "next/navigation";
 
 export function MemberDashboard() {
-  const { logout, isAuthenticated, token, isAdmin } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
   const router = useRouter();
   if (!isAuthenticated) {
     router.replace("/login");
   }
 
-  // Decode user info from the Cognito JWT token
-  const user = (() => {
-    if (!token)
-      return { name: "User", email: "", role: isAdmin ? "admin" : "member", avatar: undefined };
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return {
-        name: `${payload.given_name ?? "User"} ${payload.family_name || ""}`,
-        email: payload.email || "",
-        role: (isAdmin ? "admin" : "member") as "admin" | "member",
-        avatar: undefined as string | undefined,
-      };
-    } catch {
-      return {
-        name: "User",
-        email: "",
-        role: (isAdmin ? "admin" : "member") as "admin" | "member",
-        avatar: undefined as string | undefined,
-      };
-    }
-  })();
+  const profileData = useQuery(api.users.getProfile);
+  const user = profileData ?? { name: "User", email: "", role: "member" as const, avatar: null };
 
   const handleLogout = () => {
     logout();

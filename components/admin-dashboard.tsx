@@ -14,6 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { LogOut, Users, Camera, Eye, EyeOff, X, Filter } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useAuth } from "../contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { mockUsers } from "../data/mock-users";
@@ -43,24 +45,12 @@ const getPermissionBadge = (permission: PhotoPermission) => {
 };
 
 export function AdminDashboard() {
-  const { logout, isAdmin, token } = useAuth();
+  const { logout, isAdmin } = useAuth();
   const router = useRouter();
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
-  // Decode user info from the Cognito JWT token
-  const user = (() => {
-    if (!token) return { name: "Admin", email: "", avatar: undefined as string | undefined };
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return {
-        name: String(payload.name || payload.email || payload["cognito:username"] || "Admin"),
-        email: String(payload.email || ""),
-        avatar: undefined as string | undefined,
-      };
-    } catch {
-      return { name: "Admin", email: "", avatar: undefined as string | undefined };
-    }
-  })();
+  const profileData = useQuery(api.users.getProfile);
+  const user = profileData ?? { name: "Admin", email: "", avatar: null };
 
   const handleLogout = () => {
     logout();

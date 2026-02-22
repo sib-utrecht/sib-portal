@@ -1,6 +1,7 @@
 import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
 import { User } from "../types/user";
+import { requireLogin } from "./auth";
 
 export const getUsers = query({
   args: {},
@@ -16,6 +17,28 @@ export const getUserByEmail = query({
       .query("users")
       .filter((q) => q.eq(q.field("email"), email))
       .first();
+  },
+});
+
+export const getProfile = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await requireLogin(ctx);
+
+    const dbUser = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), identity.email ?? ""))
+      .first();
+
+    return {
+      name:
+        [identity.givenName, identity.familyName].filter(Boolean).join(" ") ||
+        identity.name ||
+        "User",
+      email: identity.email ?? "",
+      role: dbUser?.role ?? "member",
+      avatar: dbUser?.avatar ?? null,
+    };
   },
 });
 
