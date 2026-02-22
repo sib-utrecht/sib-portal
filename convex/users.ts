@@ -1,11 +1,14 @@
 import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
 import { User } from "../types/user";
-import { requireLogin } from "./auth";
+import { requireLogin, isAdmin } from "./auth";
 
 export const getUsers = query({
   args: {},
   handler: async (ctx): Promise<User[]> => {
+    if (!(await isAdmin(ctx))) {
+      throw new Error("Forbidden: Admin privileges required");
+    }
     return await ctx.db.query("users").collect();
   },
 });
@@ -13,6 +16,9 @@ export const getUsers = query({
 export const getUserByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
+    if (!(await isAdmin(ctx))) {
+      throw new Error("Forbidden: Admin privileges required");
+    }
     return await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("email"), email))
@@ -52,6 +58,8 @@ export const updateUserPhotoPermission = mutation({
     ),
   },
   handler: async (ctx, { id, photoPermission }) => {
+    const identity = await requireLogin(ctx);
+
     const user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("_id"), id))
@@ -59,36 +67,13 @@ export const updateUserPhotoPermission = mutation({
     if (!user) {
       throw new Error("User not found");
     }
-    await ctx.db.patch(user._id, { photoPermission });
-    // return await ctx.db.get("users", id);
-  },
-});
 
-export const login = query({
-  args: { email: v.string(), password: v.string() },
-  handler: async (ctx, { email, password }) => {
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), email))
-      .first();
-    if (!user || user.password !== password) {
-      return null;
+    if (user.email !== identity.email) {
+      if (!(await isAdmin(ctx))) {
+        throw new Error("Forbidden: Admin privileges required");
+      }
     }
-    return user;
+
+    await ctx.db.patch(user._id, { photoPermission });
   },
 });
-// export const login = action({
-//     args: { email: v.string(), password: v.string() },
-//     handler: async (ctx, { email, password }) => {
-//         const user = await ctx.runQuery(api.users.getUserByEmail, { email });
-//         if (!user || user.password !== password) return null;
-//         // return user;
-//         // return ctx.auth.login(async () => {
-//         //     const user = await ctx.db.query("users").filter((q) => q.eq(q.field("email"), email)).first();
-//         //     if (!user || user.password !== password) {
-//         //         return null;
-//         //     }
-//         //     return user;
-//         // });
-//     }
-// });
