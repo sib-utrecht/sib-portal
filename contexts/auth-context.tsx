@@ -118,11 +118,13 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   token: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, keepLoggedIn?: boolean) => Promise<void>;
   requestPasswordlessCode: (email: string) => Promise<void>;
-  loginWithCode: (email: string, code: string) => Promise<void>;
+  loginWithCode: (email: string, code: string, keepLoggedIn?: boolean) => Promise<void>;
   logout: () => void;
   error: string | null;
+  resetPassword: (email: string) => Promise<void>;
+  confirmResetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -162,6 +164,11 @@ const TOKEN_STORAGE_KEY = "cognito_jwt_token";
 const REFRESH_TOKEN_STORAGE_KEY = "cognito_refresh_token";
 const USERNAME_STORAGE_KEY = "cognito_username";
 const TOKEN_EXPIRY_STORAGE_KEY = "cognito_token_expiry";
+const KEEP_LOGGED_IN_KEY = "cognito_keep_logged_in";
+
+// Returns the storage used for persisting tokens based on user preference
+const getTokenStorage = (): Storage =>
+  localStorage.getItem(KEEP_LOGGED_IN_KEY) === "false" ? sessionStorage : localStorage;
 
 // Refresh token 5 minutes before expiry
 const REFRESH_BUFFER_MS = 5 * 60 * 1000;
@@ -175,25 +182,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [sessionData, setSessionData] = useState<string | null>(null); // Store session for OTP flow
 
   // Helper to save token to localStorage
-  const saveToken = (jwtToken: string, refreshToken?: string, username?: string) => {
+  const saveToken = (jwtToken: string, refreshToken?: string, username?: string, keepLoggedIn = true) => {
     setToken(jwtToken);
     setIsAuthenticated(true);
     setIsAdmin(isAdminUser(jwtToken));
-    localStorage.setItem(TOKEN_STORAGE_KEY, jwtToken);
+
+    localStorage.setItem(KEEP_LOGGED_IN_KEY, keepLoggedIn.toString());
+    const storage = keepLoggedIn ? localStorage : sessionStorage;
+
+    storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
 
     if (refreshToken) {
-      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+      storage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
     }
 
     if (username) {
-      localStorage.setItem(USERNAME_STORAGE_KEY, username);
+      storage.setItem(USERNAME_STORAGE_KEY, username);
     }
 
     // Calculate and store token expiry
     try {
       const payload = JSON.parse(atob(jwtToken.split(".")[1]));
       const expiryTime = payload.exp * 1000; // Convert to milliseconds
-      localStorage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
+      storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
     } catch (error) {
       console.error("Failed to parse token expiry:", error);
     }
@@ -203,15 +214,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearToken = () => {
     setToken(null);
     setIsAuthenticated(false);
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-    localStorage.removeItem(USERNAME_STORAGE_KEY);
-    localStorage.removeItem(TOKEN_EXPIRY_STORAGE_KEY);
+    [localStorage, sessionStorage].forEach((storage) => {
+      storage.removeItem(TOKEN_STORAGE_KEY);
+      storage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+      storage.removeItem(USERNAME_STORAGE_KEY);
+      storage.removeItem(TOKEN_EXPIRY_STORAGE_KEY);
+    });
+    localStorage.removeItem(KEEP_LOGGED_IN_KEY);
   };
 
   // Helper to check if token needs refresh
   const needsRefresh = (): boolean => {
-    const expiryStr = localStorage.getItem(TOKEN_EXPIRY_STORAGE_KEY);
+    const expiryStr = getTokenStorage().getItem(TOKEN_EXPIRY_STORAGE_KEY);
     if (!expiryStr) return false;
 
     const expiryTime = parseInt(expiryStr, 10);
@@ -223,8 +237,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Helper to refresh token using refresh token
   const refreshAccessToken = async (): Promise<boolean> => {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-    const username = localStorage.getItem(USERNAME_STORAGE_KEY);
+    const refreshToken = getTokenStorage().getItem(REFRESH_TOKEN_STORAGE_KEY);
+    const username = getTokenStorage().getItem(USERNAME_STORAGE_KEY);
 
     if (!refreshToken || !username) {
       return false;
@@ -299,7 +313,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       // First, try to restore from localStorage
-      const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+      const storedToken = getTokenStorage().getItem(TOKEN_STORAGE_KEY);
       console.log("Restoring token");
       if (storedToken) {
         // Check if token needs refresh
@@ -370,7 +384,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  const login = async (username: string, password: string): Promise<void> => {
+  const login = async (username: string, password: string, keepLoggedIn = false): Promise<void> => {
     setError(null);
     setIsLoading(true);
 
@@ -403,7 +417,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           //     return;
           // }
 
-          saveToken(jwtToken, refreshToken, username);
+          saveToken(jwtToken, refreshToken, username, keepLoggedIn);
           setIsLoading(false);
           resolve();
         },
@@ -454,7 +468,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithCode = async (email: string, code: string): Promise<void> => {
+  const loginWithCode = async (email: string, code: string, keepLoggedIn = false): Promise<void> => {
     setError(null);
     setIsLoading(true);
 
@@ -489,7 +503,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         //     throw new Error("Access denied: Admin privileges required");
         // }
 
-        saveToken(jwtToken, refreshToken, email);
+        saveToken(jwtToken, refreshToken, email, keepLoggedIn);
         setSessionData(null);
         setIsLoading(false);
       } else {
@@ -500,6 +514,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
       throw err;
     }
+  };
+
+  const resetPassword = async (email: string): Promise<void> => {
+    setError(null);
+    setIsLoading(true);
+
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: userPool,
+    });
+
+    return new Promise((resolve, reject) => {
+      cognitoUser.forgotPassword({
+        onSuccess: () => {
+          setIsLoading(false);
+          resolve();
+        },
+        onFailure: (err: Error) => {
+          setError(err.message);
+          setIsLoading(false);
+          reject(err);
+        },
+      });
+    });
+  };
+
+  const confirmResetPassword = async (
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<void> => {
+    setError(null);
+    setIsLoading(true);
+
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: userPool,
+    });
+
+    return new Promise((resolve, reject) => {
+      cognitoUser.confirmPassword(code, newPassword, {
+        onSuccess: () => {
+          setIsLoading(false);
+          resolve();
+        },
+        onFailure: (err: Error) => {
+          setError(err.message);
+          setIsLoading(false);
+          reject(err);
+        },
+      });
+    });
   };
 
   return (
@@ -514,6 +580,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithCode,
         logout,
         error,
+        resetPassword,
+        confirmResetPassword,
       }}
     >
       {children}
