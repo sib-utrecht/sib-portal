@@ -146,6 +146,9 @@ const REGION = process.env.VITE_AWS_REGION || "eu-central-1";
 // as our custom token keys rather than always defaulting to localStorage.
 const makeUserPool = (storage: Storage) => new CognitoUserPool({ ...poolData, Storage: storage });
 
+// Convenience wrapper: pool backed by the user's current keep-logged-in preference.
+const getUserPool = () => makeUserPool(getTokenStorage());
+
 // Create AWS SDK client for USER_AUTH flow
 const cognitoClient = new CognitoIdentityProviderClient({
   region: REGION,
@@ -257,7 +260,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       // For password-based auth, use Cognito SDK
-      const cognitoUser = makeUserPool(getTokenStorage()).getCurrentUser();
+      const cognitoUser = getUserPool().getCurrentUser();
       if (cognitoUser) {
         return new Promise((resolve) => {
           cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
@@ -352,7 +355,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Fallback to checking Cognito session
-      const cognitoUser = makeUserPool(getTokenStorage()).getCurrentUser();
+      const cognitoUser = getUserPool().getCurrentUser();
       if (cognitoUser) {
         cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
           if (err || !session) {
@@ -446,7 +449,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    const cognitoUser = makeUserPool(getTokenStorage()).getCurrentUser();
+    const cognitoUser = getUserPool().getCurrentUser();
     if (cognitoUser) {
       cognitoUser.signOut();
     }
@@ -537,7 +540,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const cognitoUser = new CognitoUser({
       Username: email,
-      Pool: makeUserPool(getTokenStorage()),
+      Pool: getUserPool(),
     });
 
     return new Promise((resolve, reject) => {
@@ -571,7 +574,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const cognitoUser = new CognitoUser({
       Username: email,
-      Pool: makeUserPool(getTokenStorage()),
+      Pool: getUserPool(),
     });
 
     return new Promise((resolve, reject) => {
