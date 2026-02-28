@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "../contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Mail } from "lucide-react";
 
 type LoginMode = "password" | "code" | "code-sent" | "reset-password" | "reset-password-confirm";
@@ -26,6 +26,14 @@ export function LoginForm() {
   const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUri = (() => {
+    const param = searchParams.get("redirect_uri");
+    if (param && param.startsWith("/") && !param.startsWith("//") && !/[\r\n]/.test(param)) {
+      return param;
+    }
+    return "/";
+  })();
   const {
     login,
     requestPasswordlessCode,
@@ -40,7 +48,7 @@ export function LoginForm() {
     e.preventDefault();
     try {
       await login(email, password, keepLoggedIn);
-      router.replace("/");
+      router.replace(redirectUri);
     } catch (err) {
       console.error("Login failed:", err);
     }
@@ -60,7 +68,7 @@ export function LoginForm() {
     e.preventDefault();
     try {
       await loginWithCode(email, code, keepLoggedIn);
-      router.replace("/");
+      router.replace(redirectUri);
     } catch (err) {
       console.error("Code login failed:", err);
     }
