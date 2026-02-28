@@ -139,7 +139,7 @@ const poolData = {
   ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "",
 };
 // const REGION = import.meta.env.VITE_AWS_REGION || "eu-central-1";
-const REGION = process.env.VITE_AWS_REGION || "eu-central-1";
+const REGION = process.env.NEXT_PUBLIC_AWS_REGION || "eu-central-1";
 
 // Returns a new CognitoUserPool instance configured to use the given storage, so the
 // SDK's own CognitoIdentityServiceProvider.* keys are written to the same location
