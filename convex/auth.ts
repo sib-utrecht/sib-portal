@@ -2,8 +2,9 @@ import { UserIdentity } from "convex/server";
 import type { QueryCtx, MutationCtx, ActionCtx } from "./_generated/server";
 
 /**
- * Check if the current user is authenticated and is a member of the "admins" group.
- * Throws an error if the user is not authenticated or not an admin.
+ * Check if the current user is authenticated.
+ * Throws an error if the user is not authenticated.
+ * Returns the user's identity if authenticated.
  */
 export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Promise<UserIdentity> {
   const identity = await ctx.auth.getUserIdentity();
