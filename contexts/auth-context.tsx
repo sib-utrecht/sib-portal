@@ -141,7 +141,10 @@ const poolData = {
 // const REGION = import.meta.env.VITE_AWS_REGION || "eu-central-1";
 const REGION = process.env.VITE_AWS_REGION || "eu-central-1";
 
-const userPool = new CognitoUserPool(poolData);
+// Returns a new CognitoUserPool instance configured to use the given storage, so the
+// SDK's own CognitoIdentityServiceProvider.* keys are written to the same location
+// as our custom token keys rather than always defaulting to localStorage.
+const makeUserPool = (storage: Storage) => new CognitoUserPool({ ...poolData, Storage: storage });
 
 // Create AWS SDK client for USER_AUTH flow
 const cognitoClient = new CognitoIdentityProviderClient({
@@ -254,7 +257,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       // For password-based auth, use Cognito SDK
-      const cognitoUser = userPool.getCurrentUser();
+      const cognitoUser = makeUserPool(getTokenStorage()).getCurrentUser();
       if (cognitoUser) {
         return new Promise((resolve) => {
           cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
@@ -349,7 +352,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Fallback to checking Cognito session
-      const cognitoUser = userPool.getCurrentUser();
+      const cognitoUser = makeUserPool(getTokenStorage()).getCurrentUser();
       if (cognitoUser) {
         cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
           if (err || !session) {
@@ -397,6 +400,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     setIsLoading(true);
 
+    // Compute storage directly from the parameter so we don't mutate KEEP_LOGGED_IN_KEY
+    // before the auth completes. saveToken() sets the preference on successful auth.
+    const loginStorage: Storage = keepLoggedIn ? localStorage : sessionStorage;
+
     const authenticationData = {
       Username: username,
       Password: password,
@@ -404,12 +411,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const authenticationDetails = new AuthenticationDetails(authenticationData);
 
-    const userData = {
+    const cognitoUser = new CognitoUser({
       Username: username,
-      Pool: userPool,
-    };
-
-    const cognitoUser = new CognitoUser(userData);
+      Pool: makeUserPool(loginStorage),
+      Storage: loginStorage,
+    });
 
     return new Promise((resolve, reject) => {
       cognitoUser.authenticateUser(authenticationDetails, {
@@ -440,7 +446,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    const cognitoUser = userPool.getCurrentUser();
+    const cognitoUser = makeUserPool(getTokenStorage()).getCurrentUser();
     if (cognitoUser) {
       cognitoUser.signOut();
     }
@@ -531,7 +537,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const cognitoUser = new CognitoUser({
       Username: email,
-      Pool: userPool,
+      Pool: makeUserPool(getTokenStorage()),
     });
 
     return new Promise((resolve, reject) => {
@@ -565,7 +571,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const cognitoUser = new CognitoUser({
       Username: email,
-      Pool: userPool,
+      Pool: makeUserPool(getTokenStorage()),
     });
 
     return new Promise((resolve, reject) => {
