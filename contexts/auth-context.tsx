@@ -365,13 +365,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (session.isValid()) {
             const jwtToken = session.getIdToken().getJwtToken();
             const refreshToken = session.getRefreshToken().getToken();
-            if (isAdminUser(jwtToken)) {
-              saveToken(jwtToken, refreshToken, cognitoUser.getUsername());
-            } else {
-              // User is not an admin, sign them out
-              cognitoUser.signOut();
-              setError("Access denied: Admin privileges required");
-            }
+            saveToken(jwtToken, refreshToken, cognitoUser.getUsername());
+            setIsAdmin(isAdminUser(jwtToken));
           }
           setIsLoading(false);
         });
