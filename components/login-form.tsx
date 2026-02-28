@@ -8,24 +8,38 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "../contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { Mail } from "lucide-react";
 
-type LoginMode = "password" | "code" | "code-sent";
+type LoginMode = "password" | "code" | "code-sent" | "reset-password" | "reset-password-confirm";
 
 export function LoginForm() {
   const [mode, setMode] = useState<LoginMode>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
   const router = useRouter();
-  const { login, requestPasswordlessCode, loginWithCode, error, isLoading } = useAuth();
+  const {
+    login,
+    requestPasswordlessCode,
+    loginWithCode,
+    resetPassword,
+    confirmResetPassword,
+    error,
+    isLoading,
+  } = useAuth();
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await login(email, password, keepLoggedIn);
       router.replace("/");
     } catch (err) {
       console.error("Login failed:", err);
@@ -45,10 +59,39 @@ export function LoginForm() {
   const handleCodeLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await loginWithCode(email, code);
+      await loginWithCode(email, code, keepLoggedIn);
       router.replace("/");
     } catch (err) {
       console.error("Code login failed:", err);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await resetPassword(email);
+      setMode("reset-password-confirm");
+    } catch (err) {
+      console.error("Failed to send reset code:", err);
+    }
+  };
+
+  const handleConfirmResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMismatch(false);
+    if (newPassword !== confirmNewPassword) {
+      setPasswordMismatch(true);
+      return;
+    }
+    try {
+      await confirmResetPassword(email, code, newPassword);
+      setResetSuccess(true);
+      setMode("password");
+      setCode("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    } catch (err) {
+      console.error("Failed to confirm password reset:", err);
     }
   };
 
@@ -98,7 +141,20 @@ export function LoginForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <button
+                    type="button"
+                    className="text-xs text-[#21526f] hover:underline disabled:opacity-50"
+                    onClick={() => {
+                      setResetSuccess(false);
+                      setMode("reset-password");
+                    }}
+                    disabled={isLoading}
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <Input
                   id="password"
                   type="password"
@@ -109,6 +165,24 @@ export function LoginForm() {
                   disabled={isLoading}
                 />
               </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="keep-logged-in"
+                  checked={keepLoggedIn}
+                  onCheckedChange={(checked) => setKeepLoggedIn(checked === true)}
+                  disabled={isLoading}
+                />
+                <Label htmlFor="keep-logged-in" className="text-sm font-normal cursor-pointer">
+                  Keep me logged in
+                </Label>
+              </div>
+              {resetSuccess && (
+                <Alert>
+                  <AlertDescription>
+                    Password reset successfully. You can now sign in with your new password.
+                  </AlertDescription>
+                </Alert>
+              )}
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
@@ -190,6 +264,20 @@ export function LoginForm() {
                   autoFocus
                 />
               </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="keep-logged-in-code"
+                  checked={keepLoggedIn}
+                  onCheckedChange={(checked) => setKeepLoggedIn(checked === true)}
+                  disabled={isLoading}
+                />
+                <Label
+                  htmlFor="keep-logged-in-code"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Keep me logged in
+                </Label>
+              </div>
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
@@ -213,8 +301,122 @@ export function LoginForm() {
               </Button>
             </form>
           )}
+
+          {mode === "reset-password" && (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Enter your email address and we will send you a code to reset your password.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  disabled={isLoading}
+                  autoFocus
+                />
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
+                disabled={isLoading}
+              >
+                {isLoading ? "Sending..." : "Send Reset Code"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => setMode("password")}
+                disabled={isLoading}
+              >
+                Back to Sign In
+              </Button>
+            </form>
+          )}
+
+          {mode === "reset-password-confirm" && (
+            <form onSubmit={handleConfirmResetPassword} className="space-y-4">
+              <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
+                A reset code has been sent to {email}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reset-code">Reset Code</Label>
+                <Input
+                  id="reset-code"
+                  type="text"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="Enter the code from your email"
+                  required
+                  disabled={isLoading}
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter your new password"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                <Input
+                  id="confirm-new-password"
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="Confirm your new password"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              {passwordMismatch && (
+                <Alert variant="destructive">
+                  <AlertDescription>Passwords do not match.</AlertDescription>
+                </Alert>
+              )}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
+                disabled={isLoading}
+              >
+                {isLoading ? "Resetting..." : "Reset Password"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => setMode("reset-password")}
+                disabled={isLoading}
+              >
+                Back
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
+

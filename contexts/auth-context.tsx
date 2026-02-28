@@ -118,11 +118,13 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   token: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, keepLoggedIn?: boolean) => Promise<void>;
   requestPasswordlessCode: (email: string) => Promise<void>;
-  loginWithCode: (email: string, code: string) => Promise<void>;
+  loginWithCode: (email: string, code: string, keepLoggedIn?: boolean) => Promise<void>;
   logout: () => void;
   error: string | null;
+  resetPassword: (email: string) => Promise<void>;
+  confirmResetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -139,7 +141,13 @@ const poolData = {
 // const REGION = import.meta.env.VITE_AWS_REGION || "eu-central-1";
 const REGION = process.env.VITE_AWS_REGION || "eu-central-1";
 
-const userPool = new CognitoUserPool(poolData);
+// Returns a new CognitoUserPool instance configured to use the given storage, so the
+// SDK's own CognitoIdentityServiceProvider.* keys are written to the same location
+// as our custom token keys rather than always defaulting to localStorage.
+const makeUserPool = (storage: Storage) => new CognitoUserPool({ ...poolData, Storage: storage });
+
+// Convenience wrapper: pool backed by the user's current keep-logged-in preference.
+const getUserPool = () => makeUserPool(getTokenStorage());
 
 // Create AWS SDK client for USER_AUTH flow
 const cognitoClient = new CognitoIdentityProviderClient({
@@ -162,6 +170,12 @@ const TOKEN_STORAGE_KEY = "cognito_jwt_token";
 const REFRESH_TOKEN_STORAGE_KEY = "cognito_refresh_token";
 const USERNAME_STORAGE_KEY = "cognito_username";
 const TOKEN_EXPIRY_STORAGE_KEY = "cognito_token_expiry";
+const KEEP_LOGGED_IN_KEY = "cognito_keep_logged_in";
+
+// Returns the storage used for persisting tokens based on user preference.
+// Defaults to sessionStorage when the preference key is absent.
+const getTokenStorage = (): Storage =>
+  localStorage.getItem(KEEP_LOGGED_IN_KEY) === "true" ? localStorage : sessionStorage;
 
 // Refresh token 5 minutes before expiry
 const REFRESH_BUFFER_MS = 5 * 60 * 1000;
@@ -174,26 +188,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [sessionData, setSessionData] = useState<string | null>(null); // Store session for OTP flow
 
-  // Helper to save token to localStorage
-  const saveToken = (jwtToken: string, refreshToken?: string, username?: string) => {
+  // Helper to save token to appropriate storage based on keep-logged-in preference.
+  // When keepLoggedIn is not supplied, the existing stored preference is used so
+  // that refresh/restore paths do not accidentally change the user's selection.
+  const saveToken = (
+    jwtToken: string,
+    refreshToken?: string,
+    username?: string,
+    keepLoggedIn = localStorage.getItem(KEEP_LOGGED_IN_KEY) === "true",
+  ) => {
     setToken(jwtToken);
     setIsAuthenticated(true);
     setIsAdmin(isAdminUser(jwtToken));
-    localStorage.setItem(TOKEN_STORAGE_KEY, jwtToken);
+
+    localStorage.setItem(KEEP_LOGGED_IN_KEY, keepLoggedIn.toString());
+    const storage = keepLoggedIn ? localStorage : sessionStorage;
+
+    storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
 
     if (refreshToken) {
-      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+      storage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
     }
 
     if (username) {
-      localStorage.setItem(USERNAME_STORAGE_KEY, username);
+      storage.setItem(USERNAME_STORAGE_KEY, username);
     }
 
     // Calculate and store token expiry
     try {
       const payload = JSON.parse(atob(jwtToken.split(".")[1]));
       const expiryTime = payload.exp * 1000; // Convert to milliseconds
-      localStorage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
+      storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
     } catch (error) {
       console.error("Failed to parse token expiry:", error);
     }
@@ -203,15 +228,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearToken = () => {
     setToken(null);
     setIsAuthenticated(false);
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-    localStorage.removeItem(USERNAME_STORAGE_KEY);
-    localStorage.removeItem(TOKEN_EXPIRY_STORAGE_KEY);
+    [localStorage, sessionStorage].forEach((storage) => {
+      storage.removeItem(TOKEN_STORAGE_KEY);
+      storage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+      storage.removeItem(USERNAME_STORAGE_KEY);
+      storage.removeItem(TOKEN_EXPIRY_STORAGE_KEY);
+    });
+    localStorage.removeItem(KEEP_LOGGED_IN_KEY);
   };
 
   // Helper to check if token needs refresh
   const needsRefresh = (): boolean => {
-    const expiryStr = localStorage.getItem(TOKEN_EXPIRY_STORAGE_KEY);
+    const expiryStr = getTokenStorage().getItem(TOKEN_EXPIRY_STORAGE_KEY);
     if (!expiryStr) return false;
 
     const expiryTime = parseInt(expiryStr, 10);
@@ -223,8 +251,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Helper to refresh token using refresh token
   const refreshAccessToken = async (): Promise<boolean> => {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-    const username = localStorage.getItem(USERNAME_STORAGE_KEY);
+    const refreshToken = getTokenStorage().getItem(REFRESH_TOKEN_STORAGE_KEY);
+    const username = getTokenStorage().getItem(USERNAME_STORAGE_KEY);
 
     if (!refreshToken || !username) {
       return false;
@@ -232,7 +260,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       // For password-based auth, use Cognito SDK
-      const cognitoUser = userPool.getCurrentUser();
+      const cognitoUser = getUserPool().getCurrentUser();
       if (cognitoUser) {
         return new Promise((resolve) => {
           cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
@@ -244,14 +272,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             const jwtToken = session.getIdToken().getJwtToken();
             if (isAdminUser(jwtToken)) {
+              const storage = getTokenStorage();
               setToken(jwtToken);
-              localStorage.setItem(TOKEN_STORAGE_KEY, jwtToken);
+              storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
 
               // Update expiry
               try {
                 const payload = JSON.parse(atob(jwtToken.split(".")[1]));
                 const expiryTime = payload.exp * 1000;
-                localStorage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
+                storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
               } catch (error) {
                 console.error("Failed to parse token expiry:", error);
               }
@@ -299,7 +328,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       // First, try to restore from localStorage
-      const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+      const storedToken = getTokenStorage().getItem(TOKEN_STORAGE_KEY);
       console.log("Restoring token");
       if (storedToken) {
         // Check if token needs refresh
@@ -326,7 +355,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Fallback to checking Cognito session
-      const cognitoUser = userPool.getCurrentUser();
+      const cognitoUser = getUserPool().getCurrentUser();
       if (cognitoUser) {
         cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
           if (err || !session) {
@@ -370,9 +399,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  const login = async (username: string, password: string): Promise<void> => {
+  const login = async (username: string, password: string, keepLoggedIn = false): Promise<void> => {
     setError(null);
     setIsLoading(true);
+
+    // Compute storage directly from the parameter so we don't mutate KEEP_LOGGED_IN_KEY
+    // before the auth completes. saveToken() sets the preference on successful auth.
+    const loginStorage: Storage = keepLoggedIn ? localStorage : sessionStorage;
 
     const authenticationData = {
       Username: username,
@@ -381,12 +414,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const authenticationDetails = new AuthenticationDetails(authenticationData);
 
-    const userData = {
+    const cognitoUser = new CognitoUser({
       Username: username,
-      Pool: userPool,
-    };
-
-    const cognitoUser = new CognitoUser(userData);
+      Pool: makeUserPool(loginStorage),
+      Storage: loginStorage,
+    });
 
     return new Promise((resolve, reject) => {
       cognitoUser.authenticateUser(authenticationDetails, {
@@ -403,7 +435,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           //     return;
           // }
 
-          saveToken(jwtToken, refreshToken, username);
+          saveToken(jwtToken, refreshToken, username, keepLoggedIn);
           setIsLoading(false);
           resolve();
         },
@@ -417,7 +449,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    const cognitoUser = userPool.getCurrentUser();
+    const cognitoUser = getUserPool().getCurrentUser();
     if (cognitoUser) {
       cognitoUser.signOut();
     }
@@ -454,7 +486,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithCode = async (email: string, code: string): Promise<void> => {
+  const loginWithCode = async (email: string, code: string, keepLoggedIn = false): Promise<void> => {
     setError(null);
     setIsLoading(true);
 
@@ -489,7 +521,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         //     throw new Error("Access denied: Admin privileges required");
         // }
 
-        saveToken(jwtToken, refreshToken, email);
+        saveToken(jwtToken, refreshToken, email, keepLoggedIn);
         setSessionData(null);
         setIsLoading(false);
       } else {
@@ -500,6 +532,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
       throw err;
     }
+  };
+
+  const resetPassword = async (email: string): Promise<void> => {
+    setError(null);
+    setIsLoading(true);
+
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: getUserPool(),
+    });
+
+    return new Promise((resolve, reject) => {
+      cognitoUser.forgotPassword({
+        // Called when Cognito has sent the verification code to the user.
+        // Resolve here so the UI can transition to the code-entry step.
+        inputVerificationCode: () => {
+          setIsLoading(false);
+          resolve();
+        },
+        // onSuccess fires after the full confirmPassword flow; not used here.
+        onSuccess: () => {
+          setIsLoading(false);
+        },
+        onFailure: (err: Error) => {
+          setError(err.message);
+          setIsLoading(false);
+          reject(err);
+        },
+      });
+    });
+  };
+
+  const confirmResetPassword = async (
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<void> => {
+    setError(null);
+    setIsLoading(true);
+
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: getUserPool(),
+    });
+
+    return new Promise((resolve, reject) => {
+      cognitoUser.confirmPassword(code, newPassword, {
+        onSuccess: () => {
+          setIsLoading(false);
+          resolve();
+        },
+        onFailure: (err: Error) => {
+          setError(err.message);
+          setIsLoading(false);
+          reject(err);
+        },
+      });
+    });
   };
 
   return (
@@ -514,6 +604,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithCode,
         logout,
         error,
+        resetPassword,
+        confirmResetPassword,
       }}
     >
       {children}
