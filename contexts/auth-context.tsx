@@ -1,104 +1,5 @@
-// "use client"
-//
-// import { createContext, useContext, useState, useEffect, type ReactNode, SetStateAction } from "react"
-// import type { AuthState, PhotoPermission, User } from "../types/user"
-// import { api } from "../convex/_generated/api";
-// import { useQuery, useMutation } from "convex/react";
-//
-// interface AuthContextType extends AuthState {
-// 	login: (users: User[], email: string, password: string) => Promise<boolean>
-// 	logout: () => void
-// 	updatePhotoPermission: (permission: PhotoPermission) => void
-// }
-//
-// const AuthContext = createContext<AuthContextType | undefined>(undefined)
-//
-// const AUTH_STORAGE_KEY = "sib_auth_state"
-//
-// export function AuthProvider({ children }: { children: ReactNode }) {
-// 	const [authState, setAuthState] = useState<AuthState>({
-// 		user: null,
-// 		isAuthenticated: false,
-// 	})
-// 	const [isHydrated, setIsHydrated] = useState(false)
-//
-// 	useEffect(() => {
-// 		const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY)
-// 		if (storedAuth) {
-// 			try {
-// 				const parsedAuth = JSON.parse(storedAuth)
-// 				setAuthState(parsedAuth)
-// 			} catch (error) {
-// 				console.error("Failed to parse stored auth state:", error)
-// 				localStorage.removeItem(AUTH_STORAGE_KEY)
-// 			}
-// 		}
-// 		setIsHydrated(true)
-// 	}, [])
-//
-// 	useEffect(() => {
-// 		if (isHydrated) {
-// 			if (authState.isAuthenticated) {
-// 				localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authState))
-// 			} else {
-// 				localStorage.removeItem(AUTH_STORAGE_KEY)
-// 			}
-// 		}
-// 	}, [authState, isHydrated])
-//
-// 	const login = async (users: User[], email: string, password: string): Promise<boolean> => {
-// 		const foundUser = users.find((u) => u.email === email && u.password === password);
-// 		if (foundUser === undefined) {
-// 			return false
-// 		}
-// 		const newAuthState = {
-// 			user: foundUser,
-// 			isAuthenticated: true,
-// 		}
-// 		setAuthState(newAuthState)
-// 		return true
-// 	}
-//
-// 	const logout = () => {
-// 		setAuthState({
-// 			user: null,
-// 			isAuthenticated: false,
-// 		})
-// 	}
-//
-// 	const updatePhotoPermission = (permission: PhotoPermission) => {
-// 		if (authState.user) {
-// 			const updatedUser = { ...authState.user, photoPermission: permission }
-// 			const newAuthState = {
-// 				...authState,
-// 				user: updatedUser,
-// 			}
-// 			setAuthState(newAuthState);
-// 		}
-// 	}
-//
-// 	return (
-// 		<AuthContext.Provider
-// 			value={{
-// 				...authState,
-// 				login,
-// 				logout,
-// 				updatePhotoPermission,
-// 			}}
-// 		>
-// 			{children}
-// 		</AuthContext.Provider>
-// 	)
-// }
-//
-// export function useAuth() {
-// 	const context = useContext(AuthContext)
-// 	if (context === undefined) {
-// 		throw new Error("useAuth must be used within an AuthProvider")
-// 	}
-// 	return context
-// }
-//
+"use client";
+
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import {
@@ -129,16 +30,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// These should be set via environment variables
-// const poolData = {
-//     UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || "",
-//     ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID || "",
-// };
 const poolData = {
   UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || "",
   ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "",
 };
-// const REGION = import.meta.env.VITE_AWS_REGION || "eu-central-1";
 const REGION = process.env.NEXT_PUBLIC_AWS_REGION || "eu-central-1";
 
 // Returns a new CognitoUserPool instance configured to use the given storage, so the
@@ -349,8 +244,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsAuthenticated(true);
           setIsLoading(false);
           return;
-          // Invalid token, clear it
-          // clearToken();
         }
       }
 
@@ -420,15 +313,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         onSuccess: (session: CognitoUserSession) => {
           const jwtToken = session.getIdToken().getJwtToken();
           const refreshToken = session.getRefreshToken().getToken();
-
-          // Check if user is in admin group
-          // if (!isAdminUser(jwtToken)) {
-          //     cognitoUser.signOut();
-          //     setError("Access denied: Admin privileges required");
-          //     setIsLoading(false);
-          //     reject(new Error("Access denied: Admin privileges required"));
-          //     return;
-          // }
 
           saveToken(jwtToken, refreshToken, username, keepLoggedIn);
           setIsLoading(false);
@@ -507,14 +391,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.AuthenticationResult?.IdToken) {
         const jwtToken = response.AuthenticationResult.IdToken;
         const refreshToken = response.AuthenticationResult.RefreshToken;
-
-        // Check if user is in admin group
-        // if (!isAdminUser(jwtToken)) {
-        //     setError("Access denied: Admin privileges required");
-        //     setIsLoading(false);
-        //     setSessionData(null);
-        //     throw new Error("Access denied: Admin privileges required");
-        // }
 
         saveToken(jwtToken, refreshToken, email, keepLoggedIn);
         setSessionData(null);
