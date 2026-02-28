@@ -21,6 +21,16 @@ export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Pro
 
 /**
  * Check if the current user is authenticated and is a member of the "admins" group.
+ * Throws an error if the user is not an admin.
+ */
+export async function requireAdmin(ctx: QueryCtx | MutationCtx): Promise<void> {
+  if (!(await isAdmin(ctx))) {
+    throw new Error("Forbidden: Admin privileges required");
+  }
+}
+
+/**
+ * Check if the current user is authenticated and is a member of the "admins" group.
  * Returns true if admin, false otherwise.
  */
 export async function isAdmin(ctx: QueryCtx | MutationCtx): Promise<boolean> {

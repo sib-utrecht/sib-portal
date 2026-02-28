@@ -1,14 +1,12 @@
 import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
 import { User } from "../types/user";
-import { requireLogin, isAdmin } from "./auth";
+import { requireLogin, requireAdmin } from "./auth";
 
 export const getUsers = query({
   args: {},
   handler: async (ctx): Promise<User[]> => {
-    if (!(await isAdmin(ctx))) {
-      throw new Error("Forbidden: Admin privileges required");
-    }
+    await requireAdmin(ctx);
     return await ctx.db.query("users").collect();
   },
 });
@@ -16,9 +14,7 @@ export const getUsers = query({
 export const getUserByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
-    if (!(await isAdmin(ctx))) {
-      throw new Error("Forbidden: Admin privileges required");
-    }
+    await requireAdmin(ctx);
     return await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("email"), email))
@@ -69,9 +65,7 @@ export const updateUserPhotoPermission = mutation({
     }
 
     if (user.email !== identity.email) {
-      if (!(await isAdmin(ctx))) {
-        throw new Error("Forbidden: Admin privileges required");
-      }
+      await requireAdmin(ctx);
     }
 
     await ctx.db.patch(user._id, { photoPermission });
