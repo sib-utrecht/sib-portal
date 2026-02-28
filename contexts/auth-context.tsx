@@ -166,9 +166,10 @@ const USERNAME_STORAGE_KEY = "cognito_username";
 const TOKEN_EXPIRY_STORAGE_KEY = "cognito_token_expiry";
 const KEEP_LOGGED_IN_KEY = "cognito_keep_logged_in";
 
-// Returns the storage used for persisting tokens based on user preference
+// Returns the storage used for persisting tokens based on user preference.
+// Defaults to sessionStorage when the preference key is absent.
 const getTokenStorage = (): Storage =>
-  localStorage.getItem(KEEP_LOGGED_IN_KEY) === "false" ? sessionStorage : localStorage;
+  localStorage.getItem(KEEP_LOGGED_IN_KEY) === "true" ? localStorage : sessionStorage;
 
 // Refresh token 5 minutes before expiry
 const REFRESH_BUFFER_MS = 5 * 60 * 1000;
@@ -181,8 +182,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [sessionData, setSessionData] = useState<string | null>(null); // Store session for OTP flow
 
-  // Helper to save token to localStorage
-  const saveToken = (jwtToken: string, refreshToken?: string, username?: string, keepLoggedIn = true) => {
+  // Helper to save token to appropriate storage based on keep-logged-in preference.
+  // When keepLoggedIn is not supplied, the existing stored preference is used so
+  // that refresh/restore paths do not accidentally change the user's selection.
+  const saveToken = (
+    jwtToken: string,
+    refreshToken?: string,
+    username?: string,
+    keepLoggedIn = localStorage.getItem(KEEP_LOGGED_IN_KEY) === "true",
+  ) => {
     setToken(jwtToken);
     setIsAuthenticated(true);
     setIsAdmin(isAdminUser(jwtToken));
@@ -258,14 +266,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             const jwtToken = session.getIdToken().getJwtToken();
             if (isAdminUser(jwtToken)) {
+              const storage = getTokenStorage();
               setToken(jwtToken);
-              localStorage.setItem(TOKEN_STORAGE_KEY, jwtToken);
+              storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
 
               // Update expiry
               try {
                 const payload = JSON.parse(atob(jwtToken.split(".")[1]));
                 const expiryTime = payload.exp * 1000;
-                localStorage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
+                storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
               } catch (error) {
                 console.error("Failed to parse token expiry:", error);
               }
@@ -527,9 +536,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return new Promise((resolve, reject) => {
       cognitoUser.forgotPassword({
-        onSuccess: () => {
+        // Called when Cognito has sent the verification code to the user.
+        // Resolve here so the UI can transition to the code-entry step.
+        inputVerificationCode: () => {
           setIsLoading(false);
           resolve();
+        },
+        // onSuccess fires after the full confirmPassword flow; not used here.
+        onSuccess: () => {
+          setIsLoading(false);
         },
         onFailure: (err: Error) => {
           setError(err.message);

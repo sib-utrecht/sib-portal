@@ -410,7 +410,7 @@ export function LoginForm() {
                 onClick={() => setMode("reset-password")}
                 disabled={isLoading}
               >
-                Resend Reset Code
+                Back
               </Button>
             </form>
           )}
