@@ -29,7 +29,7 @@ export const getProfile = query({
 
     const dbUser = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("email"), identity.email ?? ""))
+      .filter((q) => q.eq(q.field("email"), identity.email))
       .first();
 
     return {
@@ -37,7 +37,7 @@ export const getProfile = query({
         [identity.givenName, identity.familyName].filter(Boolean).join(" ") ||
         identity.name ||
         "User",
-      email: identity.email ?? "",
+      email: identity.email,
       role: dbUser?.role ?? "member",
       avatar: dbUser?.avatar ?? null,
     };
