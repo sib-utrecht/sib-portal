@@ -13,11 +13,8 @@ import { ActivitiesList } from "./activities-list";
 import { useRouter } from "next/navigation";
 
 export function MemberDashboard() {
-  const { logout, isAuthenticated } = useAuth();
+  const { logout } = useAuth();
   const router = useRouter();
-  if (!isAuthenticated) {
-    router.replace("/login");
-  }
 
   const profileData = useQuery(api.users.getProfile);
   const user = profileData ?? { name: "User", email: "", role: "member" as const, avatar: null };
