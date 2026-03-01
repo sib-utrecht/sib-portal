@@ -1,80 +1,61 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "../contexts/auth-context"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Mail } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "../contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { Mail } from "lucide-react";
+
+type LoginMode = "password" | "code" | "code-sent";
 
 export function LoginForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectUri = useMemo(() => searchParams.get("redirect_uri") || "/", [searchParams])
+  const [mode, setMode] = useState<LoginMode>("password");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const router = useRouter();
+  const { login, requestPasswordlessCode, loginWithCode, error, isLoading } = useAuth();
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const { login, isAuthenticated } = useAuth()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    const success = await login(email, password)
-
-    if (!success) {
-      setError("Invalid email or password")
-    } else {
-      router.replace(redirectUri)
-    }
-
-    setIsLoading(false)
-  }
-
-  // If already signed in, bounce to redirectUri
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.replace(redirectUri)
-    }
-  }, [isAuthenticated, redirectUri, router])
-
-  // Initialize remember-me preference from localStorage
-  useEffect(() => {
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const saved = localStorage.getItem("rememberMe")
-      if (saved !== null) {
-        setRememberMe(saved === "true")
-      }
-    } catch (e) {
-      // ignore storage errors
+      await login(email, password);
+      router.replace("/");
+    } catch (err) {
+      console.error("Login failed:", err);
     }
-  }, [])
+  };
 
-  // Persist remember-me preference
-  useEffect(() => {
+  const handleRequestCode = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      localStorage.setItem("rememberMe", String(rememberMe))
-    } catch (e) {
-      // ignore storage errors
+      await requestPasswordlessCode(email);
+      setMode("code-sent");
+    } catch (err) {
+      console.error("Failed to send code:", err);
     }
-  }, [rememberMe])
+  };
+
+  const handleCodeLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await loginWithCode(email, code);
+      router.replace("/");
+    } catch (err) {
+      console.error("Code login failed:", err);
+    }
+  };
 
   return (
     <div
       className="min-h-screen relative flex items-center justify-center overflow-hidden"
-      // Local brand theming for this page only
       style={{
-        // Using inline CSS custom properties so existing Tailwind variables (bg-primary, ring, etc.) pick up our brand color
         ["--primary" as any]: "#21526f",
         ["--primary-foreground" as any]: "#ffffff",
         ["--ring" as any]: "#21526f",
@@ -102,82 +83,138 @@ export function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <label htmlFor="remember" className="flex items-center select-none">
-                <input
-                  id="remember"
-                  type="checkbox"
-                  className="mr-2 h-4 w-4 rounded border-gray-300 text-[#21526f] focus:ring-[#21526f] accent-[#21526f]"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+          {mode === "password" && (
+            <form onSubmit={handlePasswordLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  disabled={isLoading}
                 />
-                Keep me logged in
-              </label>
-              <Link href="/login/reset" className="text-[#21526f] hover:underline font-medium">
-                Reset password
-              </Link>
-            </div>
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <Button
-              type="submit"
-              className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
-              disabled={isLoading}
-            >
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-          <div className="mt-4 text-sm text-gray-600">
-            <p>
-              <strong>Demo credentials:</strong>
-            </p>
-            <p>Member: john@example.com / password</p>
-            <p>Admin: jane@example.com / password</p>
-          </div>
-        </CardContent>
-        <CardContent>
-          {/* Additional actions */}
-          <div className="mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                // TODO: Implement email magic-code flow
-              }}
-            >
-              <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
-              <span>Get login code by email</span>
-            </Button>
-          </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing in..." : "Sign In"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => setMode("code")}
+                disabled={isLoading}
+              >
+                <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
+                <span>Get login code by email</span>
+              </Button>
+            </form>
+          )}
+
+          {mode === "code" && (
+            <form onSubmit={handleRequestCode} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
+                disabled={isLoading}
+              >
+                {isLoading ? "Sending..." : "Send Code"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => setMode("password")}
+                disabled={isLoading}
+              >
+                Back to Password Login
+              </Button>
+            </form>
+          )}
+
+          {mode === "code-sent" && (
+            <form onSubmit={handleCodeLogin} className="space-y-4">
+              <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
+                A verification code has been sent to {email}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="code">Verification Code</Label>
+                <Input
+                  id="code"
+                  type="text"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="Enter the code from your email"
+                  required
+                  disabled={isLoading}
+                  autoFocus
+                />
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
+                disabled={isLoading}
+              >
+                {isLoading ? "Verifying..." : "Verify Code"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => setMode("code")}
+                disabled={isLoading}
+              >
+                Resend Code
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
