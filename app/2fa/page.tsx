@@ -14,31 +14,33 @@ import { api } from "@/convex/_generated/api";
 import { useAction, useQuery } from "convex/react";
 import { Car, Link } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useAuth } from "../../contexts/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function twoFA() {
   return (
-    // <RequireAuth>
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">Two-Factor Authentication Codes</h1>
-            <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="lg">
-                <a href="/">Back to dashboard</a>
-              </Button>
+    <RequireAuth>
+      <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <h1 className="text-2xl font-bold text-gray-900">Two-Factor Authentication Codes</h1>
+              <div className="flex items-center gap-2">
+                <Button asChild variant="outline" size="lg">
+                  <a href="/">Back to dashboard</a>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-xl mx-auto">
-          <Content />
-        </div>
-      </main>
-    </div>
-    // </RequireAuth>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-xl mx-auto">
+            <Content />
+          </div>
+        </main>
+      </div>
+    </RequireAuth>
   );
 }
 
@@ -167,7 +169,7 @@ function Content() {
         </div>
       ) : committees.length === 0 ? (
         <div className="py-12">
-          <p className="text-center text-gray-500">No committees available.</p>
+          <p className="text-center text-gray-500">No committees available. Go join one!</p>
         </div>
       ) : (
         <div className="space-y-4">

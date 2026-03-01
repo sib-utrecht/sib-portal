@@ -14,7 +14,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { LogOut, Users, Camera, Eye, EyeOff, X, Filter } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useAuth } from "../contexts/auth-context";
+import { useRouter } from "next/navigation";
 import { mockUsers } from "../data/mock-users";
 import type { PhotoPermission } from "../types/user";
 
@@ -42,12 +45,23 @@ const getPermissionBadge = (permission: PhotoPermission) => {
 };
 
 export function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { logout, isAdmin } = useAuth();
+  const router = useRouter();
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
-  if (!user || user.role !== "admin") return null;
+  const profileData = useQuery(api.users.getProfile);
+  const user = profileData ?? { name: "Admin", email: "", avatar: null };
 
-  const members = mockUsers.filter((u) => u.role === "member");
+  const handleLogout = () => {
+    logout();
+    router.replace("/");
+  };
+
+  // if (!user || user.role !== "admin") return null
+  if (!isAdmin) {
+    return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
+  }
+
   const permissionStats = {
     "internal+external": mockUsers.filter((u) => u.photoPermission === "internal+external").length,
     internal: mockUsers.filter((u) => u.photoPermission === "internal").length,
@@ -100,7 +114,7 @@ export function AdminDashboard() {
                 <span className="text-sm font-medium">{user.name}</span>
                 <Badge variant="secondary">Admin</Badge>
               </div>
-              <Button variant="outline" size="sm" onClick={logout}>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
@@ -257,7 +271,7 @@ export function AdminDashboard() {
                       const isHighlighted = selectedPermissions.has(member.photoPermission);
 
                       return (
-                        <TableRow key={member.id} className={isHighlighted ? "bg-accent" : ""}>
+                        <TableRow key={member._id} className={isHighlighted ? "bg-accent" : ""}>
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">

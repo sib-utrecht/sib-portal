@@ -5,7 +5,6 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
-    password: v.string(),
     role: v.union(v.literal("admin"), v.literal("member")),
     photoPermission: v.union(
       v.literal("internal+external"),
@@ -17,6 +16,6 @@ export default defineSchema({
   committees: defineTable({
     name: v.string(),
     secret: v.string(),
-    members: v.array(v.id("users")),
+    members: v.array(v.string()),
   }),
 });

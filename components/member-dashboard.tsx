@@ -5,14 +5,24 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, LogOut, User } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useAuth } from "../contexts/auth-context";
 import { PhotoPermissionSettings } from "./photo-permission-settings";
 import { ActivitiesList } from "./activities-list";
+import { useRouter } from "next/navigation";
 
 export function MemberDashboard() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const router = useRouter();
 
-  if (!user) return null;
+  const profileData = useQuery(api.users.getProfile);
+  const user = profileData ?? { name: "User", email: "", role: "member" as const, avatar: null };
+
+  const handleLogout = () => {
+    logout();
+    router.replace("/");
+  };
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
@@ -36,7 +46,7 @@ export function MemberDashboard() {
               <Button asChild variant="outline" size="sm">
                 <Link href="/settings">Preferences</Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={logout}>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
