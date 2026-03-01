@@ -1,9 +1,9 @@
 "use node";
 import { authenticator } from "otplib";
 import { v } from "convex/values";
-import { query, mutation, action } from "./_generated/server";
-import { api, internal } from "./_generated/api";
-import { isAdmin, requireLogin } from "./auth";
+import { action } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { requireLogin } from "./auth";
 
 // Generate tokens for a list of committee ids
 export const generateTokens = action({
