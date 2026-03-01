@@ -24,7 +24,7 @@ export const generateTokens = action({
         if (s == null) {
           throw new Error("Invalid committee ID");
         }
-        if (!s.members.includes(identity["custom:conscribo-id"] as string)) {
+        if (!s.members.includes(identity.conscriboId)) {
           throw new Error("Unauthorized: Not a member of committee " + s.name);
         }
         return authenticator.generate(s.secret);

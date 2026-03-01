@@ -1,7 +1,13 @@
-import { UserIdentity } from "convex/server";
 import type { QueryCtx, MutationCtx, ActionCtx } from "./_generated/server";
 
-export type AuthenticatedIdentity = UserIdentity & { email: string };
+export type AuthenticatedIdentity = {
+  email: string;
+  name: string | undefined;
+  givenName: string | undefined;
+  familyName: string | undefined;
+  /** The member's Conscribo ID, sourced from the `custom:conscribo-id` JWT claim. */
+  conscriboId: string;
+};
 
 /**
  * Check if the current user is authenticated.
@@ -17,7 +23,14 @@ export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Pro
   if (!identity.email) {
     throw new Error("Unauthorized: Identity has no email address");
   }
-  return identity as AuthenticatedIdentity;
+
+  return {
+    email: identity.email,
+    name: identity.name,
+    givenName: identity.givenName,
+    familyName: identity.familyName,
+    conscriboId: (identity as Record<string, unknown>)["custom:conscribo-id"] as string,
+  };
 
   // const groups = (identity as any)["cognito:groups"] || [];
   // if (!groups.includes("admins")) {
