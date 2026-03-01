@@ -175,25 +175,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             const jwtToken = session.getIdToken().getJwtToken();
-            if (isAdminUser(jwtToken)) {
-              const storage = getTokenStorage();
-              setToken(jwtToken);
-              storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
+            const storage = getTokenStorage();
+            setToken(jwtToken);
+            storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
 
-              // Update expiry
-              try {
-                const payload = decodeJwtPayload(jwtToken);
-                const expiryTime = (payload.exp as number) * 1000;
-                storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
-              } catch (error) {
-                console.error("Failed to parse token expiry:", error);
-              }
-
-              resolve(true);
-            } else {
-              clearToken();
-              resolve(false);
+            // Update expiry
+            try {
+              const payload = decodeJwtPayload(jwtToken);
+              const expiryTime = (payload.exp as number) * 1000;
+              storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
+            } catch (error) {
+              console.error("Failed to parse token expiry:", error);
             }
+
+            resolve(true);
           });
         });
       }
