@@ -62,7 +62,6 @@ export function AdminDashboard() {
     return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
   }
 
-  const members = mockUsers.filter((u) => u.role === "member");
   const permissionStats = {
     "internal+external": mockUsers.filter((u) => u.photoPermission === "internal+external").length,
     internal: mockUsers.filter((u) => u.photoPermission === "internal").length,

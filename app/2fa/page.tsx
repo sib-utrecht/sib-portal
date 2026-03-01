@@ -66,9 +66,6 @@ function Content() {
   const generateTokens = useAction(api.generateToken.generateTokens);
   const committees = useQuery(api.committees.getCommittees);
 
-  const router = useRouter();
-  const { isAuthenticated } = useAuth();
-
   useEffect(() => {
     if (!committees || updated) return;
     setUpdate(true);
