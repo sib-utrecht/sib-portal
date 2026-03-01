@@ -49,11 +49,20 @@ const cognitoClient = new CognitoIdentityProviderClient({
   region: REGION,
 });
 
+// Correctly decodes the payload of a JWT token, handling base64url encoding
+// (which uses '-' and '_' instead of '+' and '/', and omits padding).
+const decodeJwtPayload = (jwtToken: string): Record<string, unknown> => {
+  const base64Url = jwtToken.split(".")[1];
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+  return JSON.parse(atob(padded));
+};
+
 // Helper function to decode JWT and check for admin group
 const isAdminUser = (jwtToken: string): boolean => {
   try {
-    const payload = JSON.parse(atob(jwtToken.split(".")[1]));
-    const groups = payload["cognito:groups"] || [];
+    const payload = decodeJwtPayload(jwtToken);
+    const groups = (payload["cognito:groups"] as string[]) || [];
     return groups.includes("admins");
   } catch (error) {
     console.error("Failed to decode JWT:", error);
@@ -111,8 +120,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Calculate and store token expiry
     try {
-      const payload = JSON.parse(atob(jwtToken.split(".")[1]));
-      const expiryTime = payload.exp * 1000; // Convert to milliseconds
+      const payload = decodeJwtPayload(jwtToken);
+      const expiryTime = (payload.exp as number) * 1000; // Convert to milliseconds
       storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
     } catch (error) {
       console.error("Failed to parse token expiry:", error);
@@ -173,8 +182,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
               // Update expiry
               try {
-                const payload = JSON.parse(atob(jwtToken.split(".")[1]));
-                const expiryTime = payload.exp * 1000;
+                const payload = decodeJwtPayload(jwtToken);
+                const expiryTime = (payload.exp as number) * 1000;
                 storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
               } catch (error) {
                 console.error("Failed to parse token expiry:", error);
