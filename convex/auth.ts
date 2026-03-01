@@ -1,18 +1,23 @@
 import { UserIdentity } from "convex/server";
 import type { QueryCtx, MutationCtx, ActionCtx } from "./_generated/server";
 
+export type AuthenticatedIdentity = UserIdentity & { email: string };
+
 /**
  * Check if the current user is authenticated.
  * Throws an error if the user is not authenticated.
  * Returns the user's identity if authenticated.
  */
-export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Promise<UserIdentity> {
+export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Promise<AuthenticatedIdentity> {
   const identity = await ctx.auth.getUserIdentity();
 
   if (!identity) {
     throw new Error("Unauthorized: Must be logged in");
   }
-  return identity;
+  if (!identity.email) {
+    throw new Error("Unauthorized: Identity has no email address");
+  }
+  return identity as AuthenticatedIdentity;
 
   // const groups = (identity as any)["cognito:groups"] || [];
   // if (!groups.includes("admins")) {
