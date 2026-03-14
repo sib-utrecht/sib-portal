@@ -10,6 +10,7 @@ export const querySecret = internalQuery({
     return await ctx.db.get(args.id);
   },
 });
+
 export const getCommittees = query({
   args: {},
   returns: v.array(

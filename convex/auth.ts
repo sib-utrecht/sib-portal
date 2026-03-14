@@ -20,6 +20,7 @@ export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Pro
   if (!identity) {
     throw new Error("Unauthorized: Must be logged in");
   }
+
   if (!identity.email) {
     throw new Error("Unauthorized: Identity has no email address");
   }
@@ -31,11 +32,6 @@ export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Pro
     familyName: identity.familyName,
     conscriboId: (identity as Record<string, unknown>)["custom:conscribo-id"] as string,
   };
-
-  // const groups = (identity as any)["cognito:groups"] || [];
-  // if (!groups.includes("admins")) {
-  //     throw new Error("Forbidden: Admin privileges required");
-  // }
 }
 
 /**
