@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { LogOut, Users, Camera, Eye, EyeOff, X, Filter, Search } from "lucide-react"
-import Link from "next/link"
-import { useAuth } from "../contexts/auth-context"
-import { mockUsers } from "../data/mock-users"
-import type { PhotoPermission } from "../types/user"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { LogOut, Users, Camera, Eye, EyeOff, X, Filter, Search } from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "../contexts/auth-context";
+import { mockUsers } from "../data/mock-users";
+import type { PhotoPermission } from "../types/user";
 
 const getPermissionBadge = (permission: PhotoPermission) => {
   switch (permission) {
