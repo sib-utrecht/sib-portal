@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Input } from "../../components/ui/input";
-import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Search } from "lucide-react";
-import { RequireAuth } from "../../components/require-auth";
+import { RequireAuth } from "@/components/require-auth";
 import Link from "next/link";
 import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import type { PhotoPermission } from "../../types/user";
+import { api } from "@/convex/_generated/api";
+import type { PhotoPermission } from "@/types/user";
 
 type FilterType = "all" | "internal+external" | "internal" | "nowhere";
 
@@ -59,7 +59,7 @@ export default function PhotoPermissionsPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
               <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">
-                Foto permissions
+                Photo permissions
               </h1>
               <Button asChild variant="outline" size="sm">
                 <Link href="/">Back to dashboard</Link>
@@ -76,7 +76,7 @@ export default function PhotoPermissionsPage() {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="search...."
+                  placeholder="Search members..."
                   className="pl-12 h-14 text-lg bg-[#6fa8c4] placeholder:text-gray-700 text-gray-900 border-2 border-[#5a8ba3] rounded-full focus-visible:ring-[#21526f]"
                 />
               </div>
