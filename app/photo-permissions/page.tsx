@@ -110,49 +110,27 @@ function PhotoPermissionsContent() {
           </div>
 
           <div className="w-80 space-y-4">
-            <Button
-              onClick={() => setActiveFilter("all")}
-              className={`w-full h-20 text-xl font-bold rounded-3xl transition-all ${
-                activeFilter === "all"
-                  ? "bg-[#81b9d5] hover:bg-[#71a9c5] text-gray-900 border-4 border-gray-900"
-                  : "bg-[#81b9d5] hover:bg-[#71a9c5] text-gray-900 border-2 border-transparent"
-              }`}
-            >
-              All
-            </Button>
-
-            <Button
-              onClick={() => setActiveFilter("internal+external")}
-              className={`w-full h-20 text-xl font-bold rounded-3xl transition-all ${
-                activeFilter === "internal+external"
-                  ? "bg-[#8dd4b8] hover:bg-[#7ac4a8] text-gray-900 border-4 border-gray-900"
-                  : "bg-[#8dd4b8] hover:bg-[#7ac4a8] text-gray-900 border-2 border-transparent"
-              }`}
-            >
-              Internally & Externally
-            </Button>
-
-            <Button
-              onClick={() => setActiveFilter("internal")}
-              className={`w-full h-20 text-xl font-bold rounded-3xl transition-all ${
-                activeFilter === "internal"
-                  ? "bg-[#e57373] hover:bg-[#d66363] text-gray-900 border-4 border-gray-900"
-                  : "bg-[#e57373] hover:bg-[#d66363] text-gray-900 border-2 border-transparent"
-              }`}
-            >
-              Internally
-            </Button>
-
-            <Button
-              onClick={() => setActiveFilter("nowhere")}
-              className={`w-full h-20 text-xl font-bold rounded-3xl transition-all ${
-                activeFilter === "nowhere"
-                  ? "bg-[#f4a896] hover:bg-[#e39886] text-gray-900 border-4 border-gray-900"
-                  : "bg-[#f4a896] hover:bg-[#e39886] text-gray-900 border-2 border-transparent"
-              }`}
-            >
-              No permissions
-            </Button>
+            {(
+              [
+                { value: "all", label: "All", color: "#81b9d5", hoverColor: "#71a9c5" },
+                { value: "internal+external", label: "Internally & Externally", color: "#8dd4b8", hoverColor: "#7ac4a8" },
+                { value: "internal", label: "Internally", color: "#e57373", hoverColor: "#d66363" },
+                { value: "nowhere", label: "No permissions", color: "#f4a896", hoverColor: "#e39886" },
+              ] as { value: FilterType; label: string; color: string; hoverColor: string }[]
+            ).map(({ value, label, color, hoverColor }) => (
+              <Button
+                key={value}
+                onClick={() => setActiveFilter(value)}
+                className={`w-full h-20 text-xl font-bold rounded-3xl transition-all text-gray-900 ${
+                  activeFilter === value ? "border-4 border-gray-900" : "border-2 border-transparent"
+                }`}
+                style={{ backgroundColor: color }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = hoverColor; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = color; }}
+              >
+                {label}
+              </Button>
+            ))}
           </div>
         </div>
       </main>
