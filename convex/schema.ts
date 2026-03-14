@@ -17,6 +17,6 @@ export default defineSchema({
   committees: defineTable({
     name: v.string(),
     secret: v.string(),
-    members: v.array(v.string()),
+    members: v.array(v.id("users")),
   }),
 });

@@ -1,56 +1,71 @@
 "use client";
 
 import type React from "react";
-
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "../contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
 import { Mail } from "lucide-react";
-
-type LoginMode = "password" | "code" | "code-sent";
+import Link from "next/link";
 
 export function LoginForm() {
-  const [mode, setMode] = useState<LoginMode>("password");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUri = useMemo(() => searchParams.get("redirect_uri") || "/", [searchParams]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
-  const router = useRouter();
-  const { login, requestPasswordlessCode, loginWithCode, error, isLoading } = useAuth();
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const { login } = useAuth();
+  const users = useQuery(api.users.getUsers);
 
-  const handlePasswordLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await login(email, password);
-      router.replace("/");
-    } catch (err) {
-      console.error("Login failed:", err);
+    setIsLoading(true);
+    setError("");
+    if (!users) {
+      setError("User data is not available. Please try again later.");
+      setIsLoading(false);
+      return;
     }
+
+    const success = await login(users, email, password);
+    if (!success) {
+      setError("Invalid email or password");
+    } else {
+      router.replace(redirectUri);
+    }
+
+    setIsLoading(false);
   };
 
-  const handleRequestCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Initialize remember-me preference from localStorage
+  useEffect(() => {
     try {
-      await requestPasswordlessCode(email);
-      setMode("code-sent");
-    } catch (err) {
-      console.error("Failed to send code:", err);
+      const saved = localStorage.getItem("rememberMe");
+      if (saved !== null) {
+        setRememberMe(saved === "true");
+      }
+    } catch (e) {
+      // ignore storage errors
     }
-  };
+  }, []);
 
-  const handleCodeLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
     try {
-      await loginWithCode(email, code);
-      router.replace("/");
-    } catch (err) {
-      console.error("Code login failed:", err);
+      localStorage.setItem("rememberMe", String(rememberMe));
+    } catch (e) {
+      // ignore storage errors
     }
-  };
+  }, [rememberMe]);
 
   return (
     <div
@@ -83,136 +98,85 @@ export function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {mode === "password" && (
-            <form onSubmit={handlePasswordLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                  disabled={isLoading}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <label htmlFor="remember" className="flex items-center select-none">
+                <input
+                  id="remember"
+                  type="checkbox"
+                  className="mr-2 h-4 w-4 rounded border-gray-300 text-[#21526f] focus:ring-[#21526f] accent-[#21526f]"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <Button
-                type="submit"
-                className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
-                disabled={isLoading}
-              >
-                {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => setMode("code")}
-                disabled={isLoading}
-              >
-                <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
-                <span>Get login code by email</span>
-              </Button>
-            </form>
-          )}
-
-          {mode === "code" && (
-            <form onSubmit={handleRequestCode} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <Button
-                type="submit"
-                className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
-                disabled={isLoading}
-              >
-                {isLoading ? "Sending..." : "Send Code"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => setMode("password")}
-                disabled={isLoading}
-              >
-                Back to Password Login
-              </Button>
-            </form>
-          )}
-
-          {mode === "code-sent" && (
-            <form onSubmit={handleCodeLogin} className="space-y-4">
-              <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
-                A verification code has been sent to {email}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="code">Verification Code</Label>
-                <Input
-                  id="code"
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="Enter the code from your email"
-                  required
-                  disabled={isLoading}
-                  autoFocus
-                />
-              </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <Button
-                type="submit"
-                className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
-                disabled={isLoading}
-              >
-                {isLoading ? "Verifying..." : "Verify Code"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => setMode("code")}
-                disabled={isLoading}
-              >
-                Resend Code
-              </Button>
-            </form>
-          )}
+                Keep me logged in
+              </label>
+              <Link href="/login/reset" className="text-[#21526f] hover:underline font-medium">
+                Reset password
+              </Link>
+            </div>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button
+              type="submit"
+              className="w-full shadow-md shadow-[#21526f]/20 hover:shadow-[#21526f]/30"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+          <div className="mt-4 text-sm text-gray-600">
+            <p>
+              <strong>Demo credentials:</strong>
+            </p>
+            {users?.map(({ email, password, name }) => (
+              <p key={email}>
+                {name}: {email} / {password}
+              </p>
+            ))}
+          </div>
+        </CardContent>
+        <CardContent>
+          {/* Additional actions */}
+          <div className="mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                // TODO: Implement email magic-code flow
+              }}
+            >
+              <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
+              <span>Get login code by email</span>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

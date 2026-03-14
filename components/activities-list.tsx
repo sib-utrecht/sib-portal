@@ -1,45 +1,49 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Calendar, MapPin, Users, Euro, ActivityIcon } from "lucide-react"
-import { useActivities } from "../hooks/use-activities"
-import { ActivityDialog } from "./activity-dialog"
-import { getActivityName, getActivityDescription, getActivityStartDate } from "../utils/activity-helpers"
-import type { Activity } from "../types/activity"
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar, MapPin, Users, Euro, ActivityIcon } from "lucide-react";
+import { useActivities } from "../hooks/use-activities";
+import { ActivityDialog } from "./activity-dialog";
+import {
+  getActivityName,
+  getActivityDescription,
+  getActivityStartDate,
+} from "../utils/activity-helpers";
+import type { Activity } from "../types/activity";
 
 export function ActivitiesList() {
-  const { activities, loading, error } = useActivities()
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const { activities, loading, error } = useActivities();
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleActivityClick = (activity: Activity) => {
-    setSelectedActivity(activity)
-    setDialogOpen(true)
-  }
+    setSelectedActivity(activity);
+    setDialogOpen(true);
+  };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "TBD"
+    if (!dateString) return "TBD";
     try {
       return new Date(dateString).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-      })
+      });
     } catch {
-      return "Invalid date"
+      return "Invalid date";
     }
-  }
+  };
 
   const formatPrice = (price: number) => {
-    return price === 0 ? "Free" : `€${price.toFixed(2)}`
-  }
+    return price === 0 ? "Free" : `€${price.toFixed(2)}`;
+  };
 
   // Ensure activities is always an array
-  const safeActivities = Array.isArray(activities) ? activities : []
+  const safeActivities = Array.isArray(activities) ? activities : [];
 
   if (loading) {
     return (
@@ -61,7 +65,7 @@ export function ActivitiesList() {
           ))}
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -72,13 +76,17 @@ export function ActivitiesList() {
             <ActivityIcon className="h-5 w-5" />
             Upcoming Activities
           </CardTitle>
-          <CardDescription className="text-red-600">Failed to load activities: {error}</CardDescription>
+          <CardDescription className="text-red-600">
+            Failed to load activities: {error}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500">Unable to fetch activities from the server. Please try again later.</p>
+          <p className="text-sm text-gray-500">
+            Unable to fetch activities from the server. Please try again later.
+          </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -90,7 +98,8 @@ export function ActivitiesList() {
             Upcoming Activities
           </CardTitle>
           <CardDescription>
-            Discover and join activities organized by SIB Utrecht ({safeActivities.length} activities)
+            Discover and join activities organized by SIB Utrecht ({safeActivities.length}{" "}
+            activities)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -99,9 +108,9 @@ export function ActivitiesList() {
           ) : (
             <div className="space-y-4">
               {safeActivities.map((activity) => {
-                const activityName = getActivityName(activity)
-                const activityDescription = getActivityDescription(activity)
-                const startDate = getActivityStartDate(activity)
+                const activityName = getActivityName(activity);
+                const activityDescription = getActivityDescription(activity);
+                const startDate = getActivityStartDate(activity);
 
                 return (
                   <div
@@ -110,8 +119,13 @@ export function ActivitiesList() {
                     onClick={() => handleActivityClick(activity)}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium text-sm line-clamp-1 flex-1 mr-2">{activityName}</h4>
-                      <Badge variant={activity.is_signup_open ? "default" : "secondary"} className="shrink-0">
+                      <h4 className="font-medium text-sm line-clamp-1 flex-1 mr-2">
+                        {activityName}
+                      </h4>
+                      <Badge
+                        variant={activity.is_signup_open ? "default" : "secondary"}
+                        className="shrink-0"
+                      >
                         {activity.is_signup_open ? "Open" : "Closed"}
                       </Badge>
                     </div>
@@ -138,21 +152,25 @@ export function ActivitiesList() {
                       </div>
                     </div>
 
-                    <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{activityDescription}</p>
+                    <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">
+                      {activityDescription}
+                    </p>
 
                     <div className="flex justify-between items-center">
                       <Badge variant="outline" className="text-xs">
                         {activity.category || "General"}
                       </Badge>
                       <div className="flex gap-1">
-                        {activity.is_full && <Badge className="bg-red-100 text-red-800 text-xs">Full</Badge>}
+                        {activity.is_full && (
+                          <Badge className="bg-red-100 text-red-800 text-xs">Full</Badge>
+                        )}
                         {(activity.price || 0) === 0 && (
                           <Badge className="bg-accent text-primary text-xs">Free</Badge>
                         )}
                       </div>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           )}
@@ -161,5 +179,5 @@ export function ActivitiesList() {
 
       <ActivityDialog activity={selectedActivity} open={dialogOpen} onOpenChange={setDialogOpen} />
     </>
-  )
+  );
 }

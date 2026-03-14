@@ -1,6 +1,6 @@
 # sib-portal
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+_Automatically synced with your [v0.dev](https://v0.dev) deployments_
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/vkuhlmanns-projects/v0-sib-portal)
 [![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/2SJmnr3dUHM)
@@ -12,9 +12,12 @@ Any changes you make to your deployed app will be automatically pushed to this r
 
 ## Deployment
 
-Your project is live at:
+Project is deployed at:
 
-**[https://vercel.com/vkuhlmanns-projects/v0-sib-portal](https://vercel.com/vkuhlmanns-projects/v0-sib-portal)**
+[portal.sib-utrecht.nl](portal.sib-utrecht.nl)
+
+for the old portal, go to:
+[app.sib-utrecht.nl](app.sib-utrecht.nl)
 
 ### GitHub Pages
 

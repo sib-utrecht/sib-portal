@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, LogOut, User } from "lucide-react"
-import { useAuth } from "../contexts/auth-context"
-import { PhotoPermissionSettings } from "./photo-permission-settings"
-import { ActivitiesList } from "./activities-list"
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera, LogOut, User } from "lucide-react";
+import { useAuth } from "../contexts/auth-context";
+import { PhotoPermissionSettings } from "./photo-permission-settings";
+import { ActivitiesList } from "./activities-list";
 
 export function MemberDashboard() {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth();
 
-  if (!user) return null
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
@@ -83,7 +83,9 @@ export function MemberDashboard() {
                   <Camera className="h-5 w-5" />
                   Photo Permissions
                 </CardTitle>
-                <CardDescription>Control how your photos can be used by the organization</CardDescription>
+                <CardDescription>
+                  Control how your photos can be used by the organization
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
                 <PhotoPermissionSettings />
@@ -98,5 +100,5 @@ export function MemberDashboard() {
         </div>
       </main>
     </div>
-  )
+  );
 }
