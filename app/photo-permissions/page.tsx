@@ -49,7 +49,14 @@ export default function PhotoPermissionsPage() {
   const renderPermissionDot = (permission: PhotoPermission) => {
     const config = permissionColors[permission];
     if (!config) return null;
-    return <div className={`w-8 h-8 rounded-full ${config.bg} shrink-0`} title={config.label} />;
+    return (
+      <div
+        className={`w-8 h-8 rounded-full ${config.bg} shrink-0`}
+        role="img"
+        aria-label={config.label}
+        title={config.label}
+      />
+    );
   };
 
   return (
