@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Search } from "lucide-react";
 import { RequireAuth } from "../../components/require-auth";
+import { RequireAdmin } from "../../components/require-admin";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -54,6 +55,7 @@ export default function PhotoPermissionsPage() {
 
   return (
     <RequireAuth>
+      <RequireAdmin>
       <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -150,6 +152,7 @@ export default function PhotoPermissionsPage() {
           </div>
         </main>
       </div>
+      </RequireAdmin>
     </RequireAuth>
   );
 }
