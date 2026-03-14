@@ -46,10 +46,15 @@ export default function PhotoPermissionsPage() {
     return filtered.sort((a, b) => a.name.localeCompare(b.name));
   }, [users, searchQuery, activeFilter]);
 
-  const renderPermissionDot = (permission: PhotoPermission) => {
+  const renderPermissionIndicator = (permission: PhotoPermission) => {
     const config = permissionColors[permission];
     if (!config) return null;
-    return <div className={`w-8 h-8 rounded-full ${config.bg} shrink-0`} title={config.label} />;
+    return (
+      <div className="flex items-center gap-2 shrink-0">
+        <div className={`w-4 h-4 rounded-full ${config.bg}`} aria-hidden="true" />
+        <span className="text-sm font-medium text-gray-900">{config.label}</span>
+      </div>
+    );
   };
 
   return (
@@ -94,7 +99,7 @@ export default function PhotoPermissionsPage() {
                         className="flex items-center justify-between p-4 bg-[#6fa8c4] rounded-full hover:bg-[#5a8ba3] transition-colors"
                       >
                         <span className="text-lg font-semibold text-gray-900">{user.name}</span>
-                        {renderPermissionDot(user.photoPermission)}
+                        {renderPermissionIndicator(user.photoPermission)}
                       </div>
                     ))}
                   </div>
