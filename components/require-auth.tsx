@@ -5,17 +5,24 @@ import { useAuth } from "@/contexts/auth-context";
 import { usePathname, useRouter } from "next/navigation";
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       const url = new URL("/login", window.location.origin);
       url.searchParams.set("redirect_uri", pathname || "/");
       router.replace(url.pathname + url.search);
     }
-  }, [isAuthenticated, pathname, router]);
+  }, [isAuthenticated, pathname, router, isLoading]);
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) return null;
   return <>{children}</>;

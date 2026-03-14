@@ -4,7 +4,6 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  password: string;
   role: "member" | "admin";
   photoPermission: PhotoPermission;
   avatar?: string;
