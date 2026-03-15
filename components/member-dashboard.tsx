@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Camera, LogOut, User } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -17,7 +18,12 @@ export function MemberDashboard() {
   const router = useRouter();
 
   const profileData = useQuery(api.users.getProfile);
+  const isLoading = profileData === undefined;
   const user = profileData ?? { name: "User", email: "", role: "member" as const, avatar: null };
+  const initials = user.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("");
 
   const handleLogout = () => {
     logout();
@@ -32,16 +38,20 @@ export function MemberDashboard() {
             <h1 className="text-2xl font-bold text-gray-900">Member Dashboard</h1>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                  <AvatarFallback>
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium">{user.name}</span>
+                {isLoading ? (
+                  <>
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </>
+                ) : (
+                  <>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
+                      <AvatarFallback>{initials}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium">{user.name}</span>
+                  </>
+                )}
               </div>
               <Button asChild variant="outline" size="sm">
                 <Link href="/settings">Preferences</Link>
@@ -69,20 +79,28 @@ export function MemberDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                    <AvatarFallback className="text-lg">
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-semibold text-lg">{user.name}</h3>
-                    <p className="text-gray-600">{user.email}</p>
-                    <p className="text-sm text-gray-500 capitalize">{user.role}</p>
-                  </div>
+                  {isLoading ? (
+                    <>
+                      <Skeleton className="h-16 w-16 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-5 w-36" />
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
+                        <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-semibold text-lg">{user.name}</h3>
+                        <p className="text-gray-600">{user.email}</p>
+                        <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -103,7 +121,6 @@ export function MemberDashboard() {
             </Card>
           </div>
 
-          {/* Activities List - Now takes up 2/5 of the width */}
           <div className="lg:col-span-2">
             <ActivitiesList />
           </div>
