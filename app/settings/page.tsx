@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,7 +25,6 @@ import {
 } from "@/components/ui/dialog";
 import { PhotoPermissionSettings } from "@/components/photo-permission-settings";
 import { RequireAuth } from "@/components/require-auth";
-import { useAuth } from "@/contexts/auth-context";
 import { Mail, PencilLine, Phone, ShieldQuestion, UserRoundCog } from "lucide-react";
 import { ChangeAddressDialog } from "@/components/quick-actions/change-address-dialog";
 import { ChangeEmailDialog } from "@/components/quick-actions/change-email-dialog";
@@ -33,17 +33,12 @@ import { ChangeBankDetailsDialog } from "@/components/quick-actions/change-bank-
 import { UpdateEcpDialog } from "@/components/quick-actions/update-ecp-dialog";
 
 export default function SettingsPage() {
-  const { user } = useAuth();
-
   // Local demo state only (no persistence yet)
   const [newsletter, setNewsletter] = useState(true);
   const [postalCards, setPostalCards] = useState(false);
   const [language, setLanguage] = useState<"Dutch" | "English">("Dutch");
-  const [ecp, setEcp] = useState("Dagobert Duck");
   const [pronouns, setPronouns] = useState("she/they");
   const [study, setStudy] = useState("Utrecht University");
-
-  // Quick action dialogs now manage their own local state
 
   return (
     <RequireAuth>
@@ -63,7 +58,6 @@ export default function SettingsPage() {
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid gap-6">
-            {/* Single column layout after removing right column */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -82,22 +76,22 @@ export default function SettingsPage() {
                     <CardDescription>Choose how we may contact you</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id="newsletter"
                         checked={newsletter}
-                        onChange={(e) => setNewsletter(e.target.checked)}
+                        onCheckedChange={(checked) => setNewsletter(checked === true)}
                       />
-                      <span>Newsletter (e-SIB)</span>
-                    </label>
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
+                      <Label htmlFor="newsletter">Newsletter (e-SIB)</Label>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id="postalCards"
                         checked={postalCards}
-                        onChange={(e) => setPostalCards(e.target.checked)}
+                        onCheckedChange={(checked) => setPostalCards(checked === true)}
                       />
-                      <span>Postal cards (e.g., for Christmas)</span>
-                    </label>
+                      <Label htmlFor="postalCards">Postal cards (e.g., for Christmas)</Label>
+                    </div>
                     <div className="space-y-2">
                       <Label>Language of preference</Label>
                       <Select
@@ -112,11 +106,6 @@ export default function SettingsPage() {
                           <SelectItem value="English">English</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Emergency contact person (ECP)</Label>
-                      {ecp}
-                      {/* <Input value={ecp} onChange={(e) => setEcp(e.target.value)} placeholder="Name of ECP" /> */}
                     </div>
                   </CardContent>
                 </Card>
@@ -240,14 +229,14 @@ export default function SettingsPage() {
                           {action.label}
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>{<action.content />}</DialogContent>
+                      <DialogContent>
+                        <action.content />
+                      </DialogContent>
                     </Dialog>
                   ))}
                 </CardContent>
               </Card>
             </div>
-
-            {/* Removed right column after migrating forms into dialogs */}
           </div>
         </main>
       </div>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { usePathname, useRouter } from "next/navigation";
 
-export function RequireAuth({ children }: { children: React.ReactNode }) {
+export function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();

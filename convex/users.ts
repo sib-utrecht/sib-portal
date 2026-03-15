@@ -34,6 +34,7 @@ export const getProfile = query({
       .first();
 
     return {
+      _id: dbUser?._id ?? null,
       name:
         [identity.givenName, identity.familyName].filter(Boolean).join(" ") ||
         identity.name ||
@@ -41,6 +42,7 @@ export const getProfile = query({
       email: identity.email,
       role: dbUser?.role ?? "member",
       avatar: dbUser?.avatar ?? null,
+      photoPermission: dbUser?.photoPermission ?? ("internal+external" as const),
     };
   },
 });

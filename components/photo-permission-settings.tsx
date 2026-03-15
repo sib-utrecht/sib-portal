@@ -1,15 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Camera, Eye, EyeOff, X } from "lucide-react";
-import { useAuth } from "../contexts/auth-context";
 import type { PhotoPermission } from "../types/user";
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 
 const permissionOptions = [
@@ -36,9 +34,19 @@ const permissionOptions = [
   },
 ];
 
+type PrefKey = "noAlcohol" | "noAudio" | "notProminently" | "noSocialMedia" | "noTiktok";
+
+const chipOptions: Array<{ key: PrefKey; label: string }> = [
+  { key: "noAlcohol", label: "No alcohol" },
+  { key: "noAudio", label: "No audio" },
+  { key: "notProminently", label: "Not prominently" },
+  { key: "noSocialMedia", label: "No social media" },
+  { key: "noTiktok", label: "No TikTok" },
+];
+
 export function PhotoPermissionSettings() {
-  const { user, updatePhotoPermission } = useAuth();
-  const updatePhotoPermissionDB = useMutation(api.users.updateUserPhotoPermission);
+  const profile = useQuery(api.users.getProfile);
+  const updatePhotoPermission = useMutation(api.users.updateUserPhotoPermission);
 
   const [prefs, setPrefs] = useState({
     noAlcohol: false,
@@ -48,27 +56,21 @@ export function PhotoPermissionSettings() {
     noTiktok: false,
     other: "",
   });
+  const [pickerOpen, setPickerOpen] = useState(false);
 
-  if (!user) return null;
+  if (!profile) return null;
 
   const handlePermissionChange = (value: string) => {
-    updatePhotoPermissionDB({ id: user._id, photoPermission: value as PhotoPermission });
-    updatePhotoPermission(value as PhotoPermission);
+    if (!profile._id) return;
+    updatePhotoPermission({ id: profile._id, photoPermission: value as PhotoPermission });
   };
 
-  const currentOption = permissionOptions.find((option) => option.value === user.photoPermission);
+  const currentOption = permissionOptions.find(
+    (option) => option.value === profile.photoPermission,
+  );
 
-  type PrefKey = "noAlcohol" | "noAudio" | "notProminently" | "noSocialMedia" | "noTiktok";
-  const chipOptions: Array<{ key: PrefKey; label: string }> = [
-    { key: "noAlcohol", label: "No alcohol" },
-    { key: "noAudio", label: "No audio" },
-    { key: "notProminently", label: "Not prominently" },
-    { key: "noSocialMedia", label: "No social media" },
-    { key: "noTiktok", label: "No TikTok" },
-  ];
   const enabledChips = chipOptions.filter(({ key }) => prefs[key]);
   const disabledChips = chipOptions.filter(({ key }) => !prefs[key]);
-  const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <div className="space-y-8">
@@ -78,7 +80,7 @@ export function PhotoPermissionSettings() {
       </div>
 
       <RadioGroup
-        value={user.photoPermission}
+        value={profile.photoPermission}
         onValueChange={handlePermissionChange}
         className="space-y-0"
       >
@@ -88,7 +90,6 @@ export function PhotoPermissionSettings() {
             <div
               key={option.value}
               className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-              onClick={() => handlePermissionChange(option.value)}
             >
               <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
               <div className="flex-1">

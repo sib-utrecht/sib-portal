@@ -5,16 +5,17 @@ import { Button } from "@/components/ui/button";
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/auth-context";
 import { MessagePreview } from "@/components/quick-actions/message-preview";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export function ChangeEmailDialog() {
-  const { user } = useAuth();
-  const [emailDraft, setEmailDraft] = useState(user?.email ?? "");
+  const profile = useQuery(api.users.getProfile);
+  const [emailDraft, setEmailDraft] = useState("");
 
   useEffect(() => {
-    setEmailDraft(user?.email ?? "");
-  }, [user?.email]);
+    setEmailDraft(profile?.email ?? "");
+  }, [profile?.email]);
 
   return (
     <>
@@ -27,7 +28,7 @@ export function ChangeEmailDialog() {
       <MessagePreview
         subject="Request: Change of e-mail address"
         to="info@sib-utrecht.nl"
-        replyTo={user?.email ?? undefined}
+        replyTo={profile?.email}
       >
         <p>Hi,</p>
         <p>I would like to update my account e-mail address.</p>
@@ -44,11 +45,11 @@ export function ChangeEmailDialog() {
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Current: <strong>{user?.email ?? "Not signed in"}</strong>
+          Current: <strong>{profile?.email ?? "Not signed in"}</strong>
         </p>
         <div className="pt-2">
           <p>Kind regards,</p>
-          <p className="font-medium">{user?.name ?? "[Your name]"}</p>
+          <p className="font-medium">{profile?.name ?? "[Your name]"}</p>
         </div>
       </MessagePreview>
       <DialogFooter>
