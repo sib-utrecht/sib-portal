@@ -9,6 +9,13 @@ import { MessagePreview } from "@/components/quick-actions/message-preview";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
+/**
+ * Dialog content for requesting a postal-address change.
+ *
+ * The member fills in their new postal code, house number, street, and place,
+ * which are embedded in a pre-formatted request email to the secretary.
+ * The postal code is automatically uppercased as the member types.
+ */
 export function ChangeAddressDialog() {
   const profile = useQuery(api.users.getProfile);
   const [postalCode, setPostalCode] = useState("");

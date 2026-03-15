@@ -19,12 +19,21 @@ import {
 } from "../utils/activity-helpers";
 import type { Activity } from "../types/activity";
 
+/** Props for the {@link ActivityDialog} component. */
 interface ActivityDialogProps {
+  /** The activity to display, or `null` when no activity is selected (renders nothing). */
   activity: Activity | null;
+  /** Whether the dialog is currently open. */
   open: boolean;
+  /** Callback invoked when the dialog open state should change. */
   onOpenChange: (open: boolean) => void;
 }
 
+/**
+ * Modal dialog that shows full details for a single activity: cover image,
+ * dates, location, participant count, price, sign-up period, description, and
+ * status badges.  Returns `null` when `activity` is `null`.
+ */
 export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogProps) {
   if (!activity) return null;
 

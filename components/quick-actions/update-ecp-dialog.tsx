@@ -9,6 +9,13 @@ import { MessagePreview } from "@/components/quick-actions/message-preview";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
+/**
+ * Dialog content for updating the member's emergency contact person (ECP).
+ *
+ * The member provides the contact's name and phone number, which are embedded
+ * in a pre-formatted request email to the secretary.  The "Send request"
+ * button is disabled until both fields have been filled in.
+ */
 export function UpdateEcpDialog() {
   const profile = useQuery(api.users.getProfile);
   const [name, setName] = useState("");

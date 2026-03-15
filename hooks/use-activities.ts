@@ -3,6 +3,16 @@
 import { useState, useEffect } from "react";
 import type { Activity } from "../types/activity";
 
+/**
+ * Custom hook that fetches the latest 50 upcoming activities from the
+ * SIB-Utrecht events API and exposes them alongside loading/error state.
+ *
+ * @returns An object containing:
+ * - `activities` — the fetched list of activities (empty array while loading or on error).
+ * - `loading` — `true` while the request is in flight.
+ * - `error` — an error message string if the fetch failed, otherwise `null`.
+ * - `refetch` — function to manually re-trigger the fetch.
+ */
 export function useActivities() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);

@@ -13,6 +13,14 @@ import { PhotoPermissionSettings } from "./photo-permission-settings";
 import { ActivitiesList } from "./activities-list";
 import { useRouter } from "next/navigation";
 
+/**
+ * Main dashboard for authenticated members.
+ *
+ * Displays the member's profile information (name, email, role, avatar),
+ * their current photo-permission settings via {@link PhotoPermissionSettings},
+ * and a live list of upcoming activities via {@link ActivitiesList}.
+ * Also provides logout and preferences navigation links in the header.
+ */
 export function MemberDashboard() {
   const { logout } = useAuth();
   const router = useRouter();

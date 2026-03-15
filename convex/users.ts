@@ -3,6 +3,10 @@ import { v } from "convex/values";
 import { User } from "../types/user";
 import { requireLogin, requireAdmin } from "./auth";
 
+/**
+ * Returns all user records in the database.
+ * Requires the caller to be an admin; throws `"Forbidden"` otherwise.
+ */
 export const getUsers = query({
   args: {},
   handler: async (ctx): Promise<User[]> => {
@@ -11,6 +15,12 @@ export const getUsers = query({
   },
 });
 
+/**
+ * Returns the user record matching the given email address.
+ * Requires the caller to be an admin; throws `"Forbidden"` otherwise.
+ *
+ * @param email - The exact email address to look up.
+ */
 export const getUserByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
@@ -22,6 +32,15 @@ export const getUserByEmail = query({
   },
 });
 
+/**
+ * Returns the profile for the currently authenticated user, merging data from
+ * both the Cognito identity (name, email) and the Convex `users` table
+ * (role, avatar, photoPermission).
+ *
+ * Returns `null` when the caller is not authenticated or has no email in their
+ * identity token.  If the user has no matching database record, sensible
+ * defaults (`role: "member"`, `photoPermission: "internal+external"`) are used.
+ */
 export const getProfile = query({
   args: {},
   handler: async (ctx) => {
@@ -47,6 +66,17 @@ export const getProfile = query({
   },
 });
 
+/**
+ * Updates the photo-permission setting for a user record.
+ *
+ * Members may only update their own record.  Admins may update any record.
+ * Throws `"Unauthorized"` if the caller is not authenticated, `"User not found"`
+ * if no record matches `id`, and `"Forbidden"` if a non-admin attempts to update
+ * another user's record.
+ *
+ * @param id              - Convex document ID of the user to update.
+ * @param photoPermission - The new photo-permission value to set.
+ */
 export const updateUserPhotoPermission = mutation({
   args: {
     id: v.string(),

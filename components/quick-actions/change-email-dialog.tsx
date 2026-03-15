@@ -9,6 +9,14 @@ import { MessagePreview } from "@/components/quick-actions/message-preview";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
+/**
+ * Dialog content for requesting an email-address change.
+ *
+ * Pre-populates the new-email field with the member's current address fetched
+ * from the Convex `getProfile` query.  Submitting the form sends a request
+ * email to the secretary at `info@sib-utrecht.nl`; the change is not applied
+ * automatically.
+ */
 export function ChangeEmailDialog() {
   const profile = useQuery(api.users.getProfile);
   const [emailDraft, setEmailDraft] = useState("");

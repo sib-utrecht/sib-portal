@@ -9,6 +9,14 @@ import { MessagePreview } from "@/components/quick-actions/message-preview";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
+/**
+ * Dialog content for requesting a bank-details change.
+ *
+ * The member enters their new IBAN (automatically uppercased and stripped of
+ * spaces).  A BIC field is conditionally shown when the IBAN country code is
+ * not `"NL"`, since non-Dutch IBANs require a BIC for SEPA transactions.
+ * The "Send request" button is disabled until an IBAN has been entered.
+ */
 export function ChangeBankDetailsDialog() {
   const profile = useQuery(api.users.getProfile);
   const [iban, setIban] = useState("");

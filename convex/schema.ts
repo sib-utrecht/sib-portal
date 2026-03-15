@@ -1,21 +1,52 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+/**
+ * Convex database schema for the SIB portal.
+ *
+ * Tables:
+ * - `users`      — one row per member; stores profile info and photo-permission consent.
+ * - `committees` — one row per committee; stores the TOTP secret used to generate
+ *                  door-access tokens and the list of Conscribo IDs for its members.
+ */
 export default defineSchema({
+  /**
+   * Member profile records.  A row is created the first time a member logs in
+   * and their Cognito identity is resolved against an existing Conscribo record.
+   */
   users: defineTable({
+    /** Full display name (given + family name). */
     name: v.string(),
+    /** Primary email address; used to match the Cognito identity to this record. */
     email: v.string(),
+    /** Access level — `"admin"` users can view and manage all member records. */
     role: v.union(v.literal("admin"), v.literal("member")),
+    /**
+     * The member's photo-usage consent level:
+     * - `"internal+external"` — may be used in internal and external communications.
+     * - `"internal"` — may only be used for internal communications.
+     * - `"nowhere"` — must not be used anywhere.
+     */
     photoPermission: v.union(
       v.literal("internal+external"),
       v.literal("internal"),
       v.literal("nowhere"),
     ),
+    /** URL of the member's profile avatar image. */
     avatar: v.string(),
   }),
+  /**
+   * Committee records used to generate TOTP 2FA codes for logging in to each
+   * committee's Google account.
+   * The `secret` field is never returned to clients; it is only read server-side
+   * via the `internal.committees.querySecret` internal query.
+   */
   committees: defineTable({
+    /** Human-readable committee name shown to members. */
     name: v.string(),
+    /** Base-32 TOTP secret used to generate time-based one-time 2FA codes. */
     secret: v.string(),
+    /** List of Conscribo IDs for members who belong to this committee. */
     members: v.array(v.string()),
   }),
 });

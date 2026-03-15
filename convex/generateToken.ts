@@ -5,7 +5,22 @@ import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { requireLogin } from "./auth";
 
-// Generate tokens for a list of committee ids
+/**
+ * Generates TOTP 2FA codes for one or more committees, used by members to log
+ * in to the Google account of each committee.
+ *
+ * For each committee ID the caller must be an authenticated member of that
+ * committee (verified via their Conscribo ID).  The TOTP secrets are fetched
+ * server-side via the internal `committees.querySecret` query and are never
+ * exposed to the client.
+ *
+ * @param ids - Array of Convex committee document IDs to generate codes for.
+ * @returns An object containing:
+ * - `secrets` — TOTP codes in the same order as the input `ids`.
+ * - `endTime`  — Unix timestamp (milliseconds) when the current TOTP window expires.
+ *
+ * @throws If any ID is invalid or the caller is not a member of the committee.
+ */
 export const generateTokens = action({
   args: {
     ids: v.array(v.id("committees")),

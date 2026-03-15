@@ -9,6 +9,13 @@ import { MessagePreview } from "@/components/quick-actions/message-preview";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
+/**
+ * Dialog content for requesting a phone-number change.
+ *
+ * The member enters their new phone number, which is embedded in a
+ * pre-formatted request email addressed to the secretary.  The "Send request"
+ * button is disabled until a phone number has been entered.
+ */
 export function ChangePhoneDialog() {
   const profile = useQuery(api.users.getProfile);
   const [phone, setPhone] = useState("");

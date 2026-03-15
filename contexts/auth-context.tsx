@@ -14,17 +14,46 @@ import {
   RespondToAuthChallengeCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 
+/** Shape of the value provided by {@link AuthContext} and consumed via {@link useAuth}. */
 interface AuthContextType {
+  /** Whether a user is currently signed in. */
   isAuthenticated: boolean;
+  /** Whether the signed-in user belongs to the Cognito `"admins"` group. */
   isAdmin: boolean;
+  /** `true` while the initial auth check or a login/logout operation is in progress. */
   isLoading: boolean;
+  /** The raw Cognito ID token (JWT) for the current session, or `null` when signed out. */
   token: string | null;
+  /**
+   * Signs in with a Cognito username (email) and password.
+   * @param keepLoggedIn - When `true`, tokens are persisted in `localStorage`; otherwise `sessionStorage`.
+   */
   login: (username: string, password: string, keepLoggedIn?: boolean) => Promise<void>;
+  /**
+   * Initiates a passwordless email OTP flow by sending a one-time code to the given address.
+   * Call {@link loginWithCode} with the received code to complete sign-in.
+   */
   requestPasswordlessCode: (email: string) => Promise<void>;
+  /**
+   * Completes a passwordless sign-in by submitting the OTP code sent to `email`.
+   * {@link requestPasswordlessCode} must have been called first.
+   * @param keepLoggedIn - When `true`, tokens are persisted in `localStorage`; otherwise `sessionStorage`.
+   */
   loginWithCode: (email: string, code: string, keepLoggedIn?: boolean) => Promise<void>;
+  /** Signs out the current user and clears all stored tokens. */
   logout: () => void;
+  /** The most recent authentication error message, or `null` when there is no error. */
   error: string | null;
+  /**
+   * Initiates a Cognito "forgot password" flow for the given email address.
+   * On success Cognito sends a reset code to that address; call {@link confirmResetPassword} next.
+   */
   resetPassword: (email: string) => Promise<void>;
+  /**
+   * Completes a password-reset flow by submitting the verification code and choosing a new password.
+   * @param code        - The reset code sent to the user's email by {@link resetPassword}.
+   * @param newPassword - The desired new password.
+   */
   confirmResetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
 }
 
@@ -84,6 +113,17 @@ const getTokenStorage = (): Storage =>
 // Refresh token 5 minutes before expiry
 const REFRESH_BUFFER_MS = 5 * 60 * 1000;
 
+/**
+ * Provides authentication state and Cognito operations to the React component
+ * tree.  Wrap your application (or a subtree) with this provider and consume
+ * the context via {@link useAuth}.
+ *
+ * On mount the provider attempts to restore a previous session from storage
+ * (preferring `localStorage` when "keep me logged in" was selected, falling
+ * back to `sessionStorage`).  If the stored token is within 5 minutes of
+ * expiry it is refreshed automatically.  A periodic check runs every minute
+ * while the user is authenticated to keep tokens fresh.
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -488,6 +528,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Returns the authentication context value.
+ * Must be called inside a component that is a descendant of {@link AuthProvider}.
+ *
+ * @throws If called outside of an `AuthProvider` tree.
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

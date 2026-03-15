@@ -22,6 +22,13 @@ import { useRouter } from "next/navigation";
 import { mockUsers } from "../data/mock-users";
 import type { PhotoPermission } from "../types/user";
 
+/**
+ * Returns display metadata (label, CSS class names, and icon component) for a
+ * given photo-permission value, used to render consistently styled badges in
+ * the admin member table and filter UI.
+ *
+ * @param permission - The photo-permission value to look up.
+ */
 const getPermissionBadge = (permission: PhotoPermission) => {
   switch (permission) {
     case "internal+external":
@@ -45,6 +52,17 @@ const getPermissionBadge = (permission: PhotoPermission) => {
   }
 };
 
+/**
+ * Admin-only dashboard for managing member photo permissions.
+ *
+ * Displays summary stat cards (total members, counts per permission level) that
+ * double as clickable filters.  The member table below updates in real-time to
+ * show only the rows that match the active filter selection.  A filter status
+ * bar with a "Clear All Filters" button is shown whenever at least one filter
+ * is active.
+ *
+ * Non-admin users see an "Access Denied" message instead of the dashboard.
+ */
 export function AdminDashboard() {
   const { logout, isAdmin } = useAuth();
   const router = useRouter();

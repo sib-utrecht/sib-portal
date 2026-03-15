@@ -44,6 +44,17 @@ const chipOptions: Array<{ key: PrefKey; label: string }> = [
   { key: "noTiktok", label: "No TikTok" },
 ];
 
+/**
+ * Lets the currently signed-in member view and update their photo-permission
+ * consent level and optional fine-grained preferences (e.g. "No alcohol",
+ * "No social media").
+ *
+ * The primary permission is persisted immediately to the Convex database via
+ * the `updateUserPhotoPermission` mutation on each radio-button change.
+ * The additional chip preferences are local UI state only (not yet persisted).
+ *
+ * Renders nothing while the user profile is loading.
+ */
 export function PhotoPermissionSettings() {
   const profile = useQuery(api.users.getProfile);
   const updatePhotoPermission = useMutation(api.users.updateUserPhotoPermission);

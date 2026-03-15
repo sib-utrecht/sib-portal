@@ -14,6 +14,13 @@ import {
 } from "../utils/activity-helpers";
 import type { Activity } from "../types/activity";
 
+/**
+ * Formats an ISO 8601 date string into a short locale string showing month,
+ * day, and time (e.g. "Mar 15, 02:30 PM").
+ *
+ * @param dateString - ISO 8601 date string to format.
+ * @returns Formatted date string, `"TBD"` for empty input, or `"Invalid date"` on parse error.
+ */
 function formatDate(dateString: string) {
   if (!dateString) return "TBD";
   try {
@@ -28,10 +35,22 @@ function formatDate(dateString: string) {
   }
 }
 
+/**
+ * Formats a euro price for display.
+ *
+ * @param price - Price in euros; `0` is treated as a free event.
+ * @returns `"Free"` for zero-price events, or a formatted euro string (e.g. `"€5.00"`).
+ */
 function formatPrice(price: number) {
   return price === 0 ? "Free" : `€${price.toFixed(2)}`;
 }
 
+/**
+ * Scrollable card listing upcoming SIB-Utrecht activities fetched from the
+ * external API.  Each activity row is clickable and opens an {@link ActivityDialog}
+ * with full details.  Skeleton placeholders are shown while loading, and an
+ * error message is displayed if the fetch fails.
+ */
 export function ActivitiesList() {
   const { activities, loading, error } = useActivities();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
