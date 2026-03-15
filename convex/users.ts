@@ -25,7 +25,8 @@ export const getUserByEmail = query({
 export const getProfile = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await requireLogin(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity || !identity.email) return null;
 
     const dbUser = await ctx.db
       .query("users")
