@@ -168,7 +168,7 @@ export function PhotoPermissionSettings() {
               value={prefs.other}
               onFocus={() => setPickerOpen(true)}
               onClick={() => setPickerOpen(true)}
-              onBlur={() => setTimeout(() => setPickerOpen(false), 120)}
+              onBlur={() => setPickerOpen(false)}
               onChange={(e) => setPrefs((p) => ({ ...p, other: e.target.value }))}
               aria-expanded={pickerOpen}
               aria-controls="photo-prefs-suggestions"

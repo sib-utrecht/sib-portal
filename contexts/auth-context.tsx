@@ -216,8 +216,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             const jwtToken = session.getIdToken().getJwtToken();
-            const refreshToken = session.getRefreshToken().getToken();
-            saveToken(jwtToken, refreshToken);
+            const sessionRefreshToken = session.getRefreshToken().getToken();
+            saveToken(jwtToken, sessionRefreshToken);
             setIsAuthenticated(true);
 
             resolve(true);
@@ -257,7 +257,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initAuth = async () => {
       // First, try to restore from localStorage
       const storedToken = getTokenStorage().getItem(TOKEN_STORAGE_KEY);
-      console.log("Restoring token");
       if (storedToken) {
         // Check if token needs refresh
         if (needsRefresh()) {

@@ -13,13 +13,53 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LogOut, Users, Camera, Eye, EyeOff, X, Filter, Search } from "lucide-react";
+import { LogOut, Users, Camera, Eye, EyeOff, X, Filter, Search, type LucideIcon } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import { useAuth } from "../contexts/auth-context";
 import { useRouter } from "next/navigation";
 import type { PhotoPermission } from "../types/user";
+
+interface FilterCardProps {
+  label: string;
+  Icon: LucideIcon;
+  colorClass: string;
+  ringClass: string;
+  bgClass: string;
+  count: number;
+  isSelected: boolean;
+  onToggle: () => void;
+}
+
+function FilterCard({ label, Icon, colorClass, ringClass, bgClass, count, isSelected, onToggle }: FilterCardProps) {
+  return (
+    <Card
+      className={`cursor-pointer transition-all hover:shadow-md relative ${
+        isSelected ? `ring-2 ${ringClass} ${bgClass}` : ""
+      }`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      onClick={onToggle}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-center gap-2">
+          <Icon className={`h-4 w-4 ${colorClass}`} />
+          <span className="text-sm font-medium text-gray-600">{label}</span>
+        </div>
+        <p className="text-2xl font-bold">{count}</p>
+        {isSelected && (
+          <div className="flex items-center gap-1 mt-1">
+            <Filter className={`h-3 w-3 ${colorClass}`} />
+            <p className={`text-xs ${colorClass}`}>Active filter</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 /**
  * Returns display metadata (label, CSS class names, and icon component) for a
@@ -68,9 +108,14 @@ export function AdminDashboard() {
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
   const profileData = useQuery(api.users.getProfile);
-  const user = profileData ?? { name: "Admin", email: "", avatar: null };
+  const usersData = useQuery(api.users.getUsers);
 
-  const users = useQuery(api.users.getUsers) ?? [];
+  if (profileData === undefined || usersData === undefined) {
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
+  }
+
+  const user = profileData ?? { name: "Admin", email: "", avatar: null };
+  const users = usersData ?? [];
 
   const handleLogout = () => {
     logout();
@@ -166,80 +211,38 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${
-                isPermissionSelected("internal+external") ? "ring-2 ring-green-500 bg-green-50" : ""
-              }`}
-              role="button"
-              tabIndex={0}
-              aria-pressed={isPermissionSelected("internal+external")}
-              onClick={() => togglePermissionFilter("internal+external")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePermissionFilter("internal+external"); } }}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <Camera className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-gray-600">Full Permission</span>
-                </div>
-                <p className="text-2xl font-bold">{permissionStats["internal+external"]}</p>
-                {isPermissionSelected("internal+external") && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Filter className="h-3 w-3 text-green-600" />
-                    <p className="text-xs text-green-600">Active filter</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <FilterCard
+              label="Full Permission"
+              Icon={Camera}
+              colorClass="text-green-600"
+              ringClass="ring-green-500"
+              bgClass="bg-green-50"
+              count={permissionStats["internal+external"]}
+              isSelected={isPermissionSelected("internal+external")}
+              onToggle={() => togglePermissionFilter("internal+external")}
+            />
 
-            <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${
-                isPermissionSelected("internal") ? "ring-2 ring-yellow-500 bg-yellow-50" : ""
-              }`}
-              role="button"
-              tabIndex={0}
-              aria-pressed={isPermissionSelected("internal")}
-              onClick={() => togglePermissionFilter("internal")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePermissionFilter("internal"); } }}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-yellow-600" />
-                  <span className="text-sm font-medium text-gray-600">Internal Only</span>
-                </div>
-                <p className="text-2xl font-bold">{permissionStats.internal}</p>
-                {isPermissionSelected("internal") && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Filter className="h-3 w-3 text-yellow-600" />
-                    <p className="text-xs text-yellow-600">Active filter</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <FilterCard
+              label="Internal Only"
+              Icon={Eye}
+              colorClass="text-yellow-600"
+              ringClass="ring-yellow-500"
+              bgClass="bg-yellow-50"
+              count={permissionStats.internal}
+              isSelected={isPermissionSelected("internal")}
+              onToggle={() => togglePermissionFilter("internal")}
+            />
 
-            <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${
-                isPermissionSelected("nowhere") ? "ring-2 ring-red-500 bg-red-50" : ""
-              }`}
-              role="button"
-              tabIndex={0}
-              aria-pressed={isPermissionSelected("nowhere")}
-              onClick={() => togglePermissionFilter("nowhere")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePermissionFilter("nowhere"); } }}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <EyeOff className="h-4 w-4 text-red-600" />
-                  <span className="text-sm font-medium text-gray-600">No Usage</span>
-                </div>
-                <p className="text-2xl font-bold">{permissionStats.nowhere}</p>
-                {isPermissionSelected("nowhere") && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Filter className="h-3 w-3 text-red-600" />
-                    <p className="text-xs text-red-600">Active filter</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <FilterCard
+              label="No Usage"
+              Icon={EyeOff}
+              colorClass="text-red-600"
+              ringClass="ring-red-500"
+              bgClass="bg-red-50"
+              count={permissionStats.nowhere}
+              isSelected={isPermissionSelected("nowhere")}
+              onToggle={() => togglePermissionFilter("nowhere")}
+            />
           </div>
 
           {/* Filter Status and Reset Button */}

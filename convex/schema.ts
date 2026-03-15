@@ -34,7 +34,7 @@ export default defineSchema({
     ),
     /** URL of the member's profile avatar image. */
     avatar: v.string(),
-  }),
+  }).index("by_email", ["email"]),
   /**
    * Committee records used to generate TOTP 2FA codes for logging in to each
    * committee's Google account.

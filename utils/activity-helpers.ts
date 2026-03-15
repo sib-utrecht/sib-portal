@@ -1,3 +1,4 @@
+import he from "he";
 import type { Activity } from "../types/activity";
 
 /**
@@ -131,14 +132,8 @@ function stripHtml(html: string): string {
   // Remove remaining HTML tags
   const stripped = withSpaces.replace(/<[^>]*>/g, "");
 
-  // Decode common HTML entities
-  const decoded = stripped
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
+  // Decode all HTML entities (numeric and named)
+  const decoded = he.decode(stripped);
 
   // Collapse multiple whitespace characters into a single space
   return decoded.replace(/\s+/g, " ").trim();

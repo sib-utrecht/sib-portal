@@ -23,10 +23,28 @@ export function ChangeEmailDialog() {
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    if (!isDirty) {
+    if (!isDirty && profile !== undefined) {
       setEmailDraft(profile?.email ?? "");
     }
-  }, [profile?.email, isDirty]);
+  }, [profile, isDirty]);
+
+  if (profile === undefined) {
+    return (
+      <>
+        <DialogHeader>
+          <DialogTitle>Change e-mail address</DialogTitle>
+          <DialogDescription>
+            This will send a message to the secretary who will process your request.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
+        <DialogFooter>
+          <Button variant="secondary">Close</Button>
+          <Button disabled>Send request</Button>
+        </DialogFooter>
+      </>
+    );
+  }
 
   return (
     <>
@@ -56,11 +74,11 @@ export function ChangeEmailDialog() {
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Current: <strong>{profile?.email ?? "Not signed in"}</strong>
+          Current: <strong>{profile === null ? "Not signed in" : profile.email}</strong>
         </p>
         <div className="pt-2">
           <p>Kind regards,</p>
-          <p className="font-medium">{profile?.name ?? "[Your name]"}</p>
+          <p className="font-medium">{profile === null ? "[Your name]" : profile.name}</p>
         </div>
       </MessagePreview>
       <DialogFooter>

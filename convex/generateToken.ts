@@ -2,6 +2,7 @@
 import { authenticator } from "otplib";
 import { v } from "convex/values";
 import { action } from "./_generated/server";
+import type { FunctionReturnType } from "convex/server";
 import { internal } from "./_generated/api";
 import { requireLogin } from "./auth";
 
@@ -28,9 +29,10 @@ export const generateTokens = action({
   handler: async (ctx, args): Promise<{ codes: string[]; endTime: number }> => {
     const identity = await requireLogin(ctx);
 
-    const secrets = await Promise.all(
-      args.ids.map((val) => ctx.runQuery(internal.committees.querySecret, { id: val })),
-    );
+    const secrets: Array<FunctionReturnType<typeof internal.committees.querySecret>> = [];
+    for (const val of args.ids) {
+      secrets.push(await ctx.runQuery(internal.committees.querySecret, { id: val }));
+    }
 
     const end = Date.now() + authenticator.timeRemaining() * 1000; // date.now is in milliseconds and authenticator is in second
 
