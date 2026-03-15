@@ -122,8 +122,14 @@ export function getActivityImage(activity: Activity): string | null {
 function stripHtml(html: string): string {
   if (!html) return "";
 
-  // Remove HTML tags
-  const stripped = html.replace(/<[^>]*>/g, "");
+  // Replace block-level tags with a space so adjacent text isn't concatenated
+  const withSpaces = html.replace(
+    /<\/?(p|br|div|li|h[1-6]|blockquote|tr|td|th)[^>]*>/gi,
+    " ",
+  );
+
+  // Remove remaining HTML tags
+  const stripped = withSpaces.replace(/<[^>]*>/g, "");
 
   // Decode common HTML entities
   const decoded = stripped
@@ -134,5 +140,6 @@ function stripHtml(html: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, " ");
 
-  return decoded.trim();
+  // Collapse multiple whitespace characters into a single space
+  return decoded.replace(/\s+/g, " ").trim();
 }

@@ -80,7 +80,7 @@ export const getProfile = query({
  */
 export const updateUserPhotoPermission = mutation({
   args: {
-    id: v.string(),
+    id: v.id("users"),
     photoPermission: v.union(
       v.literal("internal+external"),
       v.literal("internal"),
@@ -90,10 +90,7 @@ export const updateUserPhotoPermission = mutation({
   handler: async (ctx, { id, photoPermission }) => {
     const identity = await requireLogin(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("_id"), id))
-      .first();
+    const user = await ctx.db.get(id);
     if (!user) {
       throw new Error("User not found");
     }
@@ -102,6 +99,6 @@ export const updateUserPhotoPermission = mutation({
       await requireAdmin(ctx);
     }
 
-    await ctx.db.patch(user._id, { photoPermission });
+    await ctx.db.patch(id, { photoPermission });
   },
 });

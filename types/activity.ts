@@ -16,7 +16,7 @@ export interface Activity {
     description?: string | { html: string };
   };
   /** ISO 8601 start and end timestamps for the activity (nested form). */
-  date: { start: string; end: string };
+  date?: { start?: string; end?: string };
   /** ISO 8601 timestamp when member sign-up opens, or `null` if not applicable. */
   signup_start?: string | null;
   /** ISO 8601 timestamp when member sign-up closes, or `null` if not applicable. */

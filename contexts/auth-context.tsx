@@ -172,6 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearToken = () => {
     setToken(null);
     setIsAuthenticated(false);
+    setIsAdmin(false);
     [localStorage, sessionStorage].forEach((storage) => {
       storage.removeItem(TOKEN_STORAGE_KEY);
       storage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
@@ -215,18 +216,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             const jwtToken = session.getIdToken().getJwtToken();
-            const storage = getTokenStorage();
-            setToken(jwtToken);
-            storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
-
-            // Update expiry
-            try {
-              const payload = decodeJwtPayload(jwtToken);
-              const expiryTime = (payload.exp as number) * 1000;
-              storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
-            } catch (error) {
-              console.error("Failed to parse token expiry:", error);
-            }
+            const refreshToken = session.getRefreshToken().getToken();
+            saveToken(jwtToken, refreshToken);
+            setIsAuthenticated(true);
 
             resolve(true);
           });
@@ -246,12 +238,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.AuthenticationResult?.IdToken) {
         const jwtToken = response.AuthenticationResult.IdToken;
-
-        if (isAdminUser(jwtToken)) {
-          // Keep the same refresh token and username
-          saveToken(jwtToken, response.AuthenticationResult.RefreshToken || refreshToken, username);
-          return true;
-        }
+        // Keep the same refresh token and username
+        saveToken(jwtToken, response.AuthenticationResult.RefreshToken || refreshToken, username);
+        return true;
       }
 
       clearToken();
@@ -416,7 +405,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!sessionData) {
       setError("No active session. Please request a code first.");
       setIsLoading(false);
-      return;
+      throw new Error("No active session. Please request a code first.");
     }
 
     try {

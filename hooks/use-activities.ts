@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Activity } from "../types/activity";
 
 /**
@@ -18,7 +18,7 @@ export function useActivities() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch("https://api2.sib-utrecht.nl/v2/events?count=50");
@@ -46,11 +46,11 @@ export function useActivities() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchActivities();
-  }, []);
+  }, [fetchActivities]);
 
   return { activities, loading, error, refetch: fetchActivities };
 }

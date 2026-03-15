@@ -68,12 +68,22 @@ export function PhotoPermissionSettings() {
     other: "",
   });
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   if (!profile) return null;
 
-  const handlePermissionChange = (value: string) => {
+  const handlePermissionChange = async (value: string) => {
     if (!profile._id) return;
-    updatePhotoPermission({ id: profile._id, photoPermission: value as PhotoPermission });
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await updatePhotoPermission({ id: profile._id, photoPermission: value as PhotoPermission });
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save preference");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const currentOption = permissionOptions.find(
@@ -90,9 +100,12 @@ export function PhotoPermissionSettings() {
         {currentOption && <Badge className={currentOption.color}>{currentOption.label}</Badge>}
       </div>
 
+      {saveError && <p className="text-sm text-red-600">{saveError}</p>}
+
       <RadioGroup
         value={profile.photoPermission}
         onValueChange={handlePermissionChange}
+        disabled={isSaving || !profile._id}
         className="space-y-0"
       >
         {permissionOptions.map((option) => {
@@ -100,7 +113,7 @@ export function PhotoPermissionSettings() {
           return (
             <div
               key={option.value}
-              className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+              className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50"
             >
               <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
               <div className="flex-1">

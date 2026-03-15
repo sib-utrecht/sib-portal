@@ -70,7 +70,7 @@ function Content() {
     setUpdated(true);
     const committeeIds = committees.map((c) => c._id);
     generateTokens({ ids: committeeIds }).then((res) => {
-      setCodes(res.secrets);
+      setCodes(res.codes);
       setEndTime(res.endTime);
       setNow(Date.now());
     });

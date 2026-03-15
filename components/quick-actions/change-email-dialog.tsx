@@ -20,10 +20,13 @@ import { api } from "@/convex/_generated/api";
 export function ChangeEmailDialog() {
   const profile = useQuery(api.users.getProfile);
   const [emailDraft, setEmailDraft] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    setEmailDraft(profile?.email ?? "");
-  }, [profile?.email]);
+    if (!isDirty) {
+      setEmailDraft(profile?.email ?? "");
+    }
+  }, [profile?.email, isDirty]);
 
   return (
     <>
@@ -48,7 +51,7 @@ export function ChangeEmailDialog() {
             id="newEmail"
             type="email"
             value={emailDraft}
-            onChange={(e) => setEmailDraft(e.target.value)}
+            onChange={(e) => { setEmailDraft(e.target.value); setIsDirty(true); }}
             placeholder="new.address@example.com"
           />
         </div>

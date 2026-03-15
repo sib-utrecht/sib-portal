@@ -19,7 +19,6 @@ import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import { useAuth } from "../contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { mockUsers } from "../data/mock-users";
 import type { PhotoPermission } from "../types/user";
 
 /**
@@ -71,6 +70,8 @@ export function AdminDashboard() {
   const profileData = useQuery(api.users.getProfile);
   const user = profileData ?? { name: "Admin", email: "", avatar: null };
 
+  const users = useQuery(api.users.getUsers) ?? [];
+
   const handleLogout = () => {
     logout();
     router.replace("/");
@@ -82,16 +83,16 @@ export function AdminDashboard() {
   }
 
   const permissionStats = {
-    "internal+external": mockUsers.filter((u) => u.photoPermission === "internal+external").length,
-    internal: mockUsers.filter((u) => u.photoPermission === "internal").length,
-    nowhere: mockUsers.filter((u) => u.photoPermission === "nowhere").length,
+    "internal+external": users.filter((u) => u.photoPermission === "internal+external").length,
+    internal: users.filter((u) => u.photoPermission === "internal").length,
+    nowhere: users.filter((u) => u.photoPermission === "nowhere").length,
   };
 
   // Filter members based on selected permissions
   const filteredMembers =
     selectedPermissions.size === 0
-      ? mockUsers
-      : mockUsers.filter((u) => selectedPermissions.has(u.photoPermission));
+      ? users
+      : users.filter((u) => selectedPermissions.has(u.photoPermission));
 
   const togglePermissionFilter = (permission: PhotoPermission) => {
     const newSelectedPermissions = new Set(selectedPermissions);
@@ -158,7 +159,7 @@ export function AdminDashboard() {
                   <Users className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium text-gray-600">Total Members</span>
                 </div>
-                <p className="text-2xl font-bold">{mockUsers.length}</p>
+                <p className="text-2xl font-bold">{users.length}</p>
                 {!hasActiveFilters && (
                   <p className="text-xs text-primary mt-1">Showing all members</p>
                 )}
@@ -169,7 +170,11 @@ export function AdminDashboard() {
               className={`cursor-pointer transition-all hover:shadow-md relative ${
                 isPermissionSelected("internal+external") ? "ring-2 ring-green-500 bg-green-50" : ""
               }`}
+              role="button"
+              tabIndex={0}
+              aria-pressed={isPermissionSelected("internal+external")}
               onClick={() => togglePermissionFilter("internal+external")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePermissionFilter("internal+external"); } }}
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
@@ -190,7 +195,11 @@ export function AdminDashboard() {
               className={`cursor-pointer transition-all hover:shadow-md relative ${
                 isPermissionSelected("internal") ? "ring-2 ring-yellow-500 bg-yellow-50" : ""
               }`}
+              role="button"
+              tabIndex={0}
+              aria-pressed={isPermissionSelected("internal")}
               onClick={() => togglePermissionFilter("internal")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePermissionFilter("internal"); } }}
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
@@ -211,7 +220,11 @@ export function AdminDashboard() {
               className={`cursor-pointer transition-all hover:shadow-md relative ${
                 isPermissionSelected("nowhere") ? "ring-2 ring-red-500 bg-red-50" : ""
               }`}
+              role="button"
+              tabIndex={0}
+              aria-pressed={isPermissionSelected("nowhere")}
               onClick={() => togglePermissionFilter("nowhere")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePermissionFilter("nowhere"); } }}
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
@@ -262,7 +275,7 @@ export function AdminDashboard() {
                 Member Photo Permissions
                 {hasActiveFilters && (
                   <span className="text-base font-normal text-gray-600 ml-2">
-                    ({filteredMembers.length} of {mockUsers.length} members)
+                    ({filteredMembers.length} of {users.length} members)
                   </span>
                 )}
               </CardTitle>

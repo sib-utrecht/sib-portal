@@ -16,7 +16,7 @@ import { requireLogin } from "./auth";
  *
  * @param ids - Array of Convex committee document IDs to generate codes for.
  * @returns An object containing:
- * - `secrets` — TOTP codes in the same order as the input `ids`.
+ * - `codes` — TOTP codes in the same order as the input `ids`.
  * - `endTime`  — Unix timestamp (milliseconds) when the current TOTP window expires.
  *
  * @throws If any ID is invalid or the caller is not a member of the committee.
@@ -25,7 +25,7 @@ export const generateTokens = action({
   args: {
     ids: v.array(v.id("committees")),
   },
-  handler: async (ctx, args): Promise<{ secrets: string[]; endTime: number }> => {
+  handler: async (ctx, args): Promise<{ codes: string[]; endTime: number }> => {
     const identity = await requireLogin(ctx);
 
     const secrets = await Promise.all(
@@ -35,7 +35,7 @@ export const generateTokens = action({
     const end = Date.now() + authenticator.timeRemaining() * 1000; // date.now is in milliseconds and authenticator is in second
 
     return {
-      secrets: secrets.map((s) => {
+      codes: secrets.map((s) => {
         if (s == null) {
           throw new Error("Invalid committee ID");
         }
