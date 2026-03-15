@@ -37,9 +37,8 @@ export const getUserByEmail = query({
  * both the Cognito identity (name, email) and the Convex `users` table
  * (role, avatar, photoPermission).
  *
- * Returns `null` when the caller is not authenticated or has no email in their
- * identity token.  If the user has no matching database record, sensible
- * defaults (`role: "member"`, `photoPermission: "internal+external"`) are used.
+ * Returns `null` when the caller is not authenticated, has no email in their
+ * identity token, or has no matching record in the `users` table.
  */
 export const getProfile = query({
   args: {},
@@ -52,16 +51,18 @@ export const getProfile = query({
       .filter((q) => q.eq(q.field("email"), identity.email))
       .first();
 
+    if (!dbUser) return null;
+
     return {
-      _id: dbUser?._id ?? null,
+      _id: dbUser._id,
       name:
         [identity.givenName, identity.familyName].filter(Boolean).join(" ") ||
         identity.name ||
         "User",
       email: identity.email,
-      role: dbUser?.role ?? "member",
-      avatar: dbUser?.avatar ?? null,
-      photoPermission: dbUser?.photoPermission ?? ("internal+external" as const),
+      role: dbUser.role,
+      avatar: dbUser.avatar ?? null,
+      photoPermission: dbUser.photoPermission,
     };
   },
 });
