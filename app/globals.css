@@ -114,12 +114,12 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@keyframes copiedFade {
+@keyframes copied-fade {
   0% { opacity: 1; }
   100% { opacity: 0; }
 }
 
-@keyframes circleResetFill {
+@keyframes circle-reset-fill {
   from { stroke-dashoffset: var(--circumference); }
   to { stroke-dashoffset: 0; }
 }

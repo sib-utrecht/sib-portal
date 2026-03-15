@@ -187,7 +187,7 @@ function Content() {
                     left: copiedToast.x,
                     top: copiedToast.y,
                     transform: "translate(12px, -50%)",
-                    animation: `copiedFade ${TOAST_MS}ms ease-out forwards`,
+                    animation: `copied-fade ${TOAST_MS}ms ease-out forwards`,
                   }}
                 >
                   {copiedToast.text}
@@ -221,7 +221,7 @@ function Content() {
                       style={
                         {
                           ...(isResettingCircle
-                            ? { animation: "circleResetFill 350ms ease-out" }
+                            ? { animation: "circle-reset-fill 350ms ease-out" }
                             : null),
                           "--circumference": `${circumference}`,
                         } as React.CSSProperties

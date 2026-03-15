@@ -8,7 +8,7 @@ The `main` branch is deployed at **[portal.sib-utrecht.nl](https://portal.sib-ut
 
 Every branch is automatically deployed to its own preview URL:
 
-```
+```text
 https://portal.sib-utrecht.nl/versions/<branch-slug>/
 ```
 

@@ -64,7 +64,7 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
   };
 
   const handleSignup = () => {
-    // TODO: Implement signup process
+    window.open(`https://app.sib-utrecht.nl/#/event/wp-${activity.id}`, "_blank");
   };
 
   const isSignupAvailable = activity.is_signup_open && !activity.is_full;

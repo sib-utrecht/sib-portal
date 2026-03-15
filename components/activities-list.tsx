@@ -42,7 +42,8 @@ function formatDate(dateString: string) {
  * @param price - Price in euros; `0` is treated as a free event.
  * @returns `"Free"` for zero-price events, or a formatted euro string (e.g. `"€5.00"`).
  */
-function formatPrice(price: number) {
+function formatPrice(price: number | undefined) {
+  if (price === undefined) return "—";
   return price === 0 ? "Free" : `€${price.toFixed(2)}`;
 }
 
@@ -103,7 +104,7 @@ export function ActivitiesList() {
                 const activityName = getActivityName(activity);
                 const activityDescription = getActivityDescription(activity);
                 const startDate = getActivityStartDate(activity);
-                const price = activity.price ?? 0;
+                const price = activity.price;
 
                 return (
                   <button
