@@ -16,7 +16,7 @@ import type { Activity } from "../types/activity";
 
 /**
  * Formats an ISO 8601 date string into a short locale string showing month,
- * day, and time (e.g. "Mar 15, 02:30 PM").
+ * day, and time (e.g. "Mar 15, 14:30").
  *
  * @param dateString - ISO 8601 date string to format.
  * @returns Formatted date string, `"TBD"` for empty input, or `"Invalid date"` on parse error.
@@ -29,6 +29,7 @@ function formatDate(dateString: string) {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
     });
   } catch {
     return "Invalid date";
