@@ -114,6 +114,16 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@keyframes copiedFade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes circleResetFill {
+  from { stroke-dashoffset: var(--circumference); }
+  to { stroke-dashoffset: 0; }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
