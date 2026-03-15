@@ -13,11 +13,11 @@ export const generateTokens = action({
   handler: async (ctx, args): Promise<{ secrets: string[]; endTime: number }> => {
     const identity = await requireLogin(ctx);
 
-    var secrets = await Promise.all(
+    const secrets = await Promise.all(
       args.ids.map((val) => ctx.runQuery(internal.committees.querySecret, { id: val })),
     );
 
-    var end = Date.now() + authenticator.timeRemaining() * 1000; // date.now is in milliseconds and authenticator is in second
+    const end = Date.now() + authenticator.timeRemaining() * 1000; // date.now is in milliseconds and authenticator is in second
 
     return {
       secrets: secrets.map((s) => {

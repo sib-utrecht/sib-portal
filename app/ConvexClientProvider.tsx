@@ -5,7 +5,11 @@ import { ReactNode } from "react";
 import { AuthProvider, useAuth } from "../contexts/auth-context";
 import { useEffect } from "react";
 
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL!);
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL;
+if (!convexUrl) {
+  throw new Error("Missing required environment variable: NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL");
+}
+const convex = new ConvexReactClient(convexUrl);
 
 function ConvexAuthWrapper({ children }: { children: React.ReactNode }) {
   const { token } = useAuth();

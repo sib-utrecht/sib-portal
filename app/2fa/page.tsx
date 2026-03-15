@@ -1,4 +1,5 @@
 "use client";
+import type React from "react";
 import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -217,12 +218,14 @@ function Content() {
                       strokeDasharray={circumference}
                       strokeDashoffset={dashoffset}
                       className="transition-none"
-                      style={{
-                        ...(isResettingCircle
-                          ? { animation: "circleResetFill 350ms ease-out" }
-                          : null),
-                        ["--circumference" as any]: `${circumference}`,
-                      }}
+                      style={
+                        {
+                          ...(isResettingCircle
+                            ? { animation: "circleResetFill 350ms ease-out" }
+                            : null),
+                          "--circumference": `${circumference}`,
+                        } as React.CSSProperties
+                      }
                     />
                   </svg>
                   <span className="text-lg font-semibold text-foreground relative z-10">

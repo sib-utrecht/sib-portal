@@ -18,7 +18,6 @@ export function useActivities() {
       }
 
       const data = await response.json();
-      console.log("API Response:", data); // Debug log
 
       // Handle different possible response structures
       let activitiesData: Activity[] = data.data?.events;

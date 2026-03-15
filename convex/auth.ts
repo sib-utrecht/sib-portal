@@ -55,7 +55,8 @@ export async function isAdmin(ctx: QueryCtx | MutationCtx): Promise<boolean> {
       return false;
     }
 
-    const groups = (identity as any)["cognito:groups"] || [];
+    const rawGroups = (identity as Record<string, unknown>)["cognito:groups"];
+    const groups = Array.isArray(rawGroups) ? rawGroups : [];
     return groups.includes("admins");
   } catch {
     return false;

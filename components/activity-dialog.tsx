@@ -55,8 +55,7 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
   };
 
   const handleSignup = () => {
-    // In a real app, this would handle the signup process
-    alert(`Signing up for: ${activityName}`);
+    // TODO: Implement signup process
   };
 
   const isSignupAvailable = activity.is_signup_open && !activity.is_full;
