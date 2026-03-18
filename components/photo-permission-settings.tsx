@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Camera, Eye, EyeOff, X } from "lucide-react";
 import type { PhotoPermission } from "../types/user";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 
@@ -68,6 +68,7 @@ export function PhotoPermissionSettings() {
     other: "",
   });
   const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -80,7 +81,8 @@ export function PhotoPermissionSettings() {
     try {
       await updatePhotoPermission({ id: profile._id, photoPermission: value as PhotoPermission });
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to save preference");
+      console.error("Failed to save photo permission preference:", err);
+      setSaveError("Failed to save preference. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -168,7 +170,11 @@ export function PhotoPermissionSettings() {
               value={prefs.other}
               onFocus={() => setPickerOpen(true)}
               onClick={() => setPickerOpen(true)}
-              onBlur={() => setPickerOpen(false)}
+              onBlur={(e) => {
+                if (!pickerRef.current?.contains(e.relatedTarget as Node | null)) {
+                  setPickerOpen(false);
+                }
+              }}
               onChange={(e) => setPrefs((p) => ({ ...p, other: e.target.value }))}
               aria-expanded={pickerOpen}
               aria-controls="photo-prefs-suggestions"
@@ -176,6 +182,7 @@ export function PhotoPermissionSettings() {
             />
             {pickerOpen && disabledChips.length > 0 && (
               <div
+                ref={pickerRef}
                 id="photo-prefs-suggestions"
                 role="listbox"
                 className="absolute z-10 mt-1 w-full rounded-md border bg-background shadow-md"

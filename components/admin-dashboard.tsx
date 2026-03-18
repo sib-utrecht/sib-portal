@@ -108,10 +108,14 @@ export function AdminDashboard() {
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
   const profileData = useQuery(api.users.getProfile);
-  const usersData = useQuery(api.users.getUsers);
+  const usersData = useQuery(api.users.getUsers, isAdmin ? {} : "skip");
 
-  if (profileData === undefined || usersData === undefined) {
+  if (profileData === undefined || (isAdmin && usersData === undefined)) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
+  }
+
+  if (!isAdmin) {
+    return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
   }
 
   const user = profileData ?? { name: "Admin", email: "", avatar: null };
@@ -121,11 +125,6 @@ export function AdminDashboard() {
     logout();
     router.replace("/");
   };
-
-  // if (!user || user.role !== "admin") return null
-  if (!isAdmin) {
-    return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
-  }
 
   const permissionStats = {
     "internal+external": users.filter((u) => u.photoPermission === "internal+external").length,

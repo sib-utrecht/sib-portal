@@ -1,4 +1,5 @@
 import he from "he";
+import DOMPurify from "isomorphic-dompurify";
 import type { Activity } from "../types/activity";
 
 /**
@@ -49,6 +50,32 @@ export function getActivityDescription(activity: Activity): string {
   }
 
   return "No description available";
+}
+
+/**
+ * Returns a sanitized HTML description for an activity, suitable for rendering
+ * with `dangerouslySetInnerHTML`. Falls back to plain text wrapped in a `<p>`
+ * when only a plain-text description is available.
+ *
+ * @param activity - The activity whose description should be resolved.
+ * @returns Sanitized HTML string, or `null` when no description is available.
+ */
+export function getActivityDescriptionHtml(activity: Activity): string | null {
+  let raw: string | null = null;
+
+  if (activity.body?.description) {
+    if (typeof activity.body.description === "object" && activity.body.description.html) {
+      raw = activity.body.description.html;
+    } else if (typeof activity.body.description === "string") {
+      raw = activity.body.description;
+    }
+  } else if (activity.description && typeof activity.description === "string") {
+    raw = activity.description;
+  }
+
+  if (!raw) return null;
+
+  return DOMPurify.sanitize(raw);
 }
 
 /**

@@ -13,6 +13,7 @@ import { Calendar, MapPin, Users, Euro, Clock } from "lucide-react";
 import {
   getActivityName,
   getActivityDescription,
+  getActivityDescriptionHtml,
   getActivityStartDate,
   getActivityEndDate,
   getActivityImage,
@@ -39,6 +40,7 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
 
   const activityName = getActivityName(activity);
   const activityDescription = getActivityDescription(activity);
+  const activityDescriptionHtml = getActivityDescriptionHtml(activity);
   const startDate = getActivityStartDate(activity);
   const endDate = getActivityEndDate(activity);
   const imageUrl = getActivityImage(activity);
@@ -161,7 +163,14 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
           {/* Description */}
           <div>
             <h4 className="font-medium mb-2">Description</h4>
-            <p className="text-sm text-gray-700 leading-relaxed">{activityDescription}</p>
+            {activityDescriptionHtml ? (
+              <div
+                className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: activityDescriptionHtml }}
+              />
+            ) : (
+              <p className="text-sm text-gray-700 leading-relaxed">{activityDescription}</p>
+            )}
           </div>
 
           {/* Status Badges */}
