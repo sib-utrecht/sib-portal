@@ -1,15 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Camera, Eye, EyeOff, X } from "lucide-react";
-import { useAuth } from "../contexts/auth-context";
 import type { PhotoPermission } from "../types/user";
-import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useRef, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 
 const permissionOptions = [
@@ -36,9 +34,30 @@ const permissionOptions = [
   },
 ];
 
+type PrefKey = "noAlcohol" | "noAudio" | "notProminently" | "noSocialMedia" | "noTiktok";
+
+const chipOptions: Array<{ key: PrefKey; label: string }> = [
+  { key: "noAlcohol", label: "No alcohol" },
+  { key: "noAudio", label: "No audio" },
+  { key: "notProminently", label: "Not prominently" },
+  { key: "noSocialMedia", label: "No social media" },
+  { key: "noTiktok", label: "No TikTok" },
+];
+
+/**
+ * Lets the currently signed-in member view and update their photo-permission
+ * consent level and optional fine-grained preferences (e.g. "No alcohol",
+ * "No social media").
+ *
+ * The primary permission is persisted immediately to the Convex database via
+ * the `updateUserPhotoPermission` mutation on each radio-button change.
+ * The additional chip preferences are local UI state only (not yet persisted).
+ *
+ * Renders nothing while the user profile is loading.
+ */
 export function PhotoPermissionSettings() {
-  const { user, updatePhotoPermission } = useAuth();
-  const updatePhotoPermissionDB = useMutation(api.users.updateUserPhotoPermission);
+  const profile = useQuery(api.users.getProfile);
+  const updatePhotoPermission = useMutation(api.users.updateUserPhotoPermission);
 
   const [prefs, setPrefs] = useState({
     noAlcohol: false,
@@ -48,27 +67,33 @@ export function PhotoPermissionSettings() {
     noTiktok: false,
     other: "",
   });
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  if (!user) return null;
+  if (!profile) return null;
 
-  const handlePermissionChange = (value: string) => {
-    updatePhotoPermissionDB({ id: user._id, photoPermission: value as PhotoPermission });
-    updatePhotoPermission(value as PhotoPermission);
+  const handlePermissionChange = async (value: string) => {
+    if (!profile._id) return;
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await updatePhotoPermission({ id: profile._id, photoPermission: value as PhotoPermission });
+    } catch (err) {
+      console.error("Failed to save photo permission preference:", err);
+      setSaveError("Failed to save preference. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const currentOption = permissionOptions.find((option) => option.value === user.photoPermission);
+  const currentOption = permissionOptions.find(
+    (option) => option.value === profile.photoPermission,
+  );
 
-  type PrefKey = "noAlcohol" | "noAudio" | "notProminently" | "noSocialMedia" | "noTiktok";
-  const chipOptions: Array<{ key: PrefKey; label: string }> = [
-    { key: "noAlcohol", label: "No alcohol" },
-    { key: "noAudio", label: "No audio" },
-    { key: "notProminently", label: "Not prominently" },
-    { key: "noSocialMedia", label: "No social media" },
-    { key: "noTiktok", label: "No TikTok" },
-  ];
   const enabledChips = chipOptions.filter(({ key }) => prefs[key]);
   const disabledChips = chipOptions.filter(({ key }) => !prefs[key]);
-  const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <div className="space-y-8">
@@ -77,9 +102,12 @@ export function PhotoPermissionSettings() {
         {currentOption && <Badge className={currentOption.color}>{currentOption.label}</Badge>}
       </div>
 
+      {saveError && <p className="text-sm text-red-600">{saveError}</p>}
+
       <RadioGroup
-        value={user.photoPermission}
+        value={profile.photoPermission}
         onValueChange={handlePermissionChange}
+        disabled={isSaving || !profile._id}
         className="space-y-0"
       >
         {permissionOptions.map((option) => {
@@ -87,8 +115,7 @@ export function PhotoPermissionSettings() {
           return (
             <div
               key={option.value}
-              className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-              onClick={() => handlePermissionChange(option.value)}
+              className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50"
             >
               <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
               <div className="flex-1">
@@ -143,7 +170,11 @@ export function PhotoPermissionSettings() {
               value={prefs.other}
               onFocus={() => setPickerOpen(true)}
               onClick={() => setPickerOpen(true)}
-              onBlur={() => setTimeout(() => setPickerOpen(false), 120)}
+              onBlur={(e) => {
+                if (!pickerRef.current?.contains(e.relatedTarget as Node | null)) {
+                  setPickerOpen(false);
+                }
+              }}
               onChange={(e) => setPrefs((p) => ({ ...p, other: e.target.value }))}
               aria-expanded={pickerOpen}
               aria-controls="photo-prefs-suggestions"
@@ -151,6 +182,7 @@ export function PhotoPermissionSettings() {
             />
             {pickerOpen && disabledChips.length > 0 && (
               <div
+                ref={pickerRef}
                 id="photo-prefs-suggestions"
                 role="listbox"
                 className="absolute z-10 mt-1 w-full rounded-md border bg-background shadow-md"

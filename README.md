@@ -1,37 +1,40 @@
 # sib-portal
 
-_Automatically synced with your [v0.dev](https://v0.dev) deployments_
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/vkuhlmanns-projects/v0-sib-portal)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/2SJmnr3dUHM)
-
-## Overview
-
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+Member portal for SIB Utrecht.
 
 ## Deployment
 
-Project is deployed at:
+The `main` branch is deployed at **[portal.sib-utrecht.nl](https://portal.sib-utrecht.nl)**.
 
-[portal.sib-utrecht.nl](portal.sib-utrecht.nl)
+Every branch is automatically deployed to its own preview URL:
 
-for the old portal, go to:
-[app.sib-utrecht.nl](app.sib-utrecht.nl)
+```text
+https://portal.sib-utrecht.nl/versions/<branch-slug>/
+```
 
-### GitHub Pages
+For example, a branch named `my-feature` is available at `portal.sib-utrecht.nl/versions/my-feature/`.
 
-Live at https://sib-utrecht.github.io/sib-portal.
+For the old portal, go to [app.sib-utrecht.nl](https://app.sib-utrecht.nl).
 
-## Build your app
+## Tech stack
 
-Continue building your app on:
+- [Next.js](https://nextjs.org) — React 19, TypeScript
+- [Convex](https://convex.dev) — backend / database
+- [AWS Cognito](https://aws.amazon.com/cognito/) — authentication
+- [Tailwind CSS](https://tailwindcss.com) v4 + [Radix UI](https://www.radix-ui.com) — styling & components
 
-**[https://v0.dev/chat/projects/2SJmnr3dUHM](https://v0.dev/chat/projects/2SJmnr3dUHM)**
+## Development
 
-## How It Works
+Install dependencies and start the dev server:
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+```bash
+pnpm install
+pnpm dev
+```
+
+## CI / GitHub Pages
+
+Deployments are handled by [`.github/workflows/pages.yml`](.github/workflows/pages.yml):
+
+- Pushing to `main` deploys to the root of `portal.sib-utrecht.nl`.
+- Pushing to any other branch deploys to `portal.sib-utrecht.nl/versions/<branch-slug>/`, preserving all other branch deployments on the `gh-pages` branch.

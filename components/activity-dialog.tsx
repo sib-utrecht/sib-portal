@@ -13,23 +13,34 @@ import { Calendar, MapPin, Users, Euro, Clock } from "lucide-react";
 import {
   getActivityName,
   getActivityDescription,
+  getActivityDescriptionHtml,
   getActivityStartDate,
   getActivityEndDate,
   getActivityImage,
 } from "../utils/activity-helpers";
 import type { Activity } from "../types/activity";
 
+/** Props for the {@link ActivityDialog} component. */
 interface ActivityDialogProps {
+  /** The activity to display, or `null` when no activity is selected (renders nothing). */
   activity: Activity | null;
+  /** Whether the dialog is currently open. */
   open: boolean;
+  /** Callback invoked when the dialog open state should change. */
   onOpenChange: (open: boolean) => void;
 }
 
+/**
+ * Modal dialog that shows full details for a single activity: cover image,
+ * dates, location, participant count, price, sign-up period, description, and
+ * status badges.  Returns `null` when `activity` is `null`.
+ */
 export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogProps) {
   if (!activity) return null;
 
   const activityName = getActivityName(activity);
   const activityDescription = getActivityDescription(activity);
+  const activityDescriptionHtml = getActivityDescriptionHtml(activity);
   const startDate = getActivityStartDate(activity);
   const endDate = getActivityEndDate(activity);
   const imageUrl = getActivityImage(activity);
@@ -55,8 +66,7 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
   };
 
   const handleSignup = () => {
-    // In a real app, this would handle the signup process
-    alert(`Signing up for: ${activityName}`);
+    window.open(`https://app.sib-utrecht.nl/#/event/wp-${activity.id}`, "_blank");
   };
 
   const isSignupAvailable = activity.is_signup_open && !activity.is_full;
@@ -153,7 +163,14 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
           {/* Description */}
           <div>
             <h4 className="font-medium mb-2">Description</h4>
-            <p className="text-sm text-gray-700 leading-relaxed">{activityDescription}</p>
+            {activityDescriptionHtml ? (
+              <div
+                className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: activityDescriptionHtml }}
+              />
+            ) : (
+              <p className="text-sm text-gray-700 leading-relaxed">{activityDescription}</p>
+            )}
           </div>
 
           {/* Status Badges */}

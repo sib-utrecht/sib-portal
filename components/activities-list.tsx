@@ -14,6 +14,45 @@ import {
 } from "../utils/activity-helpers";
 import type { Activity } from "../types/activity";
 
+/**
+ * Formats an ISO 8601 date string into a short locale string showing month,
+ * day, and time (e.g. "Mar 15, 14:30").
+ *
+ * @param dateString - ISO 8601 date string to format.
+ * @returns Formatted date string, `"TBD"` for empty input, or `"Invalid date"` on parse error.
+ */
+function formatDate(dateString: string) {
+  if (!dateString) return "TBD";
+  try {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  } catch {
+    return "Invalid date";
+  }
+}
+
+/**
+ * Formats a euro price for display.
+ *
+ * @param price - Price in euros; `0` is treated as a free event.
+ * @returns `"Free"` for zero-price events, or a formatted euro string (e.g. `"€5.00"`).
+ */
+function formatPrice(price: number | undefined) {
+  if (price === undefined) return "—";
+  return price === 0 ? "Free" : `€${price.toFixed(2)}`;
+}
+
+/**
+ * Scrollable card listing upcoming SIB-Utrecht activities fetched from the
+ * external API.  Each activity row is clickable and opens an {@link ActivityDialog}
+ * with full details.  Skeleton placeholders are shown while loading, and an
+ * error message is displayed if the fetch fails.
+ */
 export function ActivitiesList() {
   const { activities, loading, error } = useActivities();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
@@ -24,70 +63,11 @@ export function ActivitiesList() {
     setDialogOpen(true);
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "TBD";
-    try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return "Invalid date";
-    }
-  };
-
-  const formatPrice = (price: number) => {
-    return price === 0 ? "Free" : `€${price.toFixed(2)}`;
-  };
-
-  // Ensure activities is always an array
-  const safeActivities = Array.isArray(activities) ? activities : [];
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ActivityIcon className="h-5 w-5" />
-            Upcoming Activities
-          </CardTitle>
-          <CardDescription>Loading activities...</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="p-4 border rounded-lg">
-              <Skeleton className="h-4 w-3/4 mb-2" />
-              <Skeleton className="h-3 w-1/2 mb-2" />
-              <Skeleton className="h-3 w-full" />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ActivityIcon className="h-5 w-5" />
-            Upcoming Activities
-          </CardTitle>
-          <CardDescription className="text-red-600">
-            Failed to load activities: {error}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-500">
-            Unable to fetch activities from the server. Please try again later.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const cardDescription = loading
+    ? "Loading activities..."
+    : error
+      ? "Failed to load activities"
+      : `Discover and join activities organized by SIB Utrecht (${activities.length} activities)`;
 
   return (
     <>
@@ -97,25 +77,39 @@ export function ActivitiesList() {
             <ActivityIcon className="h-5 w-5" />
             Upcoming Activities
           </CardTitle>
-          <CardDescription>
-            Discover and join activities organized by SIB Utrecht ({safeActivities.length}{" "}
-            activities)
+          <CardDescription className={error ? "text-red-600" : undefined}>
+            {cardDescription}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {safeActivities.length === 0 ? (
+          {loading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="p-4 border rounded-lg">
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-3 w-1/2 mb-2" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <p className="text-sm text-gray-500">
+              Unable to fetch activities from the server. Please try again later.
+            </p>
+          ) : activities.length === 0 ? (
             <p className="text-gray-500 text-center py-8">No activities available at the moment.</p>
           ) : (
             <div className="space-y-4">
-              {safeActivities.map((activity) => {
+              {activities.map((activity) => {
                 const activityName = getActivityName(activity);
                 const activityDescription = getActivityDescription(activity);
                 const startDate = getActivityStartDate(activity);
+                const price = activity.price;
 
                 return (
-                  <div
+                  <button
                     key={activity.id}
-                    className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="w-full text-left p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                     onClick={() => handleActivityClick(activity)}
                   >
                     <div className="flex justify-between items-start mb-2">
@@ -137,18 +131,18 @@ export function ActivitiesList() {
                       </div>
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        <span className="truncate">{activity.location || "TBD"}</span>
+                        <span className="truncate">{activity.location ?? "TBD"}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
                         <span>
-                          {activity.current_participants || 0}
+                          {activity.current_participants ?? 0}
                           {activity.max_participants && `/${activity.max_participants}`}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Euro className="h-3 w-3" />
-                        <span>{formatPrice(activity.price || 0)}</span>
+                        <span>{formatPrice(price)}</span>
                       </div>
                     </div>
 
@@ -158,18 +152,20 @@ export function ActivitiesList() {
 
                     <div className="flex justify-between items-center">
                       <Badge variant="outline" className="text-xs">
-                        {activity.category || "General"}
+                        {activity.category ?? "General"}
                       </Badge>
                       <div className="flex gap-1">
                         {activity.is_full && (
-                          <Badge className="bg-red-100 text-red-800 text-xs">Full</Badge>
+                          <Badge variant="destructive" className="text-xs">
+                            Full
+                          </Badge>
                         )}
-                        {(activity.price || 0) === 0 && (
+                        {price === 0 && (
                           <Badge className="bg-accent text-primary text-xs">Free</Badge>
                         )}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>

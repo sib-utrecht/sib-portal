@@ -6,12 +6,19 @@ import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/co
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessagePreview } from "@/components/quick-actions/message-preview";
-import { useAuth } from "@/contexts/auth-context";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
+/**
+ * Dialog content for requesting a phone-number change.
+ *
+ * The member enters their new phone number, which is embedded in a
+ * pre-formatted request email addressed to the secretary.  The "Send request"
+ * button is disabled until a phone number has been entered.
+ */
 export function ChangePhoneDialog() {
-  const { user } = useAuth();
+  const profile = useQuery(api.users.getProfile);
   const [phone, setPhone] = useState("");
-  const [note, setNote] = useState("");
   return (
     <>
       <DialogHeader>
@@ -23,7 +30,7 @@ export function ChangePhoneDialog() {
       <MessagePreview
         subject="Request: Change of phone number"
         to="info@sib-utrecht.nl"
-        replyTo={user?.email ?? undefined}
+        replyTo={profile?.email}
       >
         <p>Hi,</p>
         <p>I would like to update my phone number.</p>
@@ -43,7 +50,7 @@ export function ChangePhoneDialog() {
         </div>
         <div className="pt-2">
           <p>Kind regards,</p>
-          <p className="font-medium">{user?.name ?? "[Your name]"}</p>
+          <p className="font-medium">{profile?.name ?? "[Your name]"}</p>
         </div>
       </MessagePreview>
       <DialogFooter>

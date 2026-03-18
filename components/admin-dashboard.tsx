@@ -13,15 +13,61 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LogOut, Users, Camera, Eye, EyeOff, X, Filter, Search } from "lucide-react";
+import { LogOut, Users, Camera, Eye, EyeOff, X, Filter, Search, type LucideIcon } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
 import { useAuth } from "../contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { mockUsers } from "../data/mock-users";
 import type { PhotoPermission } from "../types/user";
 
+interface FilterCardProps {
+  label: string;
+  Icon: LucideIcon;
+  colorClass: string;
+  ringClass: string;
+  bgClass: string;
+  count: number;
+  isSelected: boolean;
+  onToggle: () => void;
+}
+
+function FilterCard({ label, Icon, colorClass, ringClass, bgClass, count, isSelected, onToggle }: FilterCardProps) {
+  return (
+    <Card
+      className={`cursor-pointer transition-all hover:shadow-md relative ${
+        isSelected ? `ring-2 ${ringClass} ${bgClass}` : ""
+      }`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      onClick={onToggle}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-center gap-2">
+          <Icon className={`h-4 w-4 ${colorClass}`} />
+          <span className="text-sm font-medium text-gray-600">{label}</span>
+        </div>
+        <p className="text-2xl font-bold">{count}</p>
+        {isSelected && (
+          <div className="flex items-center gap-1 mt-1">
+            <Filter className={`h-3 w-3 ${colorClass}`} />
+            <p className={`text-xs ${colorClass}`}>Active filter</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Returns display metadata (label, CSS class names, and icon component) for a
+ * given photo-permission value, used to render consistently styled badges in
+ * the admin member table and filter UI.
+ *
+ * @param permission - The photo-permission value to look up.
+ */
 const getPermissionBadge = (permission: PhotoPermission) => {
   switch (permission) {
     case "internal+external":
@@ -45,35 +91,52 @@ const getPermissionBadge = (permission: PhotoPermission) => {
   }
 };
 
+/**
+ * Admin-only dashboard for managing member photo permissions.
+ *
+ * Displays summary stat cards (total members, counts per permission level) that
+ * double as clickable filters.  The member table below updates in real-time to
+ * show only the rows that match the active filter selection.  A filter status
+ * bar with a "Clear All Filters" button is shown whenever at least one filter
+ * is active.
+ *
+ * Non-admin users see an "Access Denied" message instead of the dashboard.
+ */
 export function AdminDashboard() {
   const { logout, isAdmin } = useAuth();
   const router = useRouter();
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
   const profileData = useQuery(api.users.getProfile);
+  const usersData = useQuery(api.users.getUsers, isAdmin ? {} : "skip");
+
+  if (profileData === undefined || (isAdmin && usersData === undefined)) {
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
+  }
+
+  if (!isAdmin) {
+    return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
+  }
+
   const user = profileData ?? { name: "Admin", email: "", avatar: null };
+  const users = usersData ?? [];
 
   const handleLogout = () => {
     logout();
     router.replace("/");
   };
 
-  // if (!user || user.role !== "admin") return null
-  if (!isAdmin) {
-    return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
-  }
-
   const permissionStats = {
-    "internal+external": mockUsers.filter((u) => u.photoPermission === "internal+external").length,
-    internal: mockUsers.filter((u) => u.photoPermission === "internal").length,
-    nowhere: mockUsers.filter((u) => u.photoPermission === "nowhere").length,
+    "internal+external": users.filter((u) => u.photoPermission === "internal+external").length,
+    internal: users.filter((u) => u.photoPermission === "internal").length,
+    nowhere: users.filter((u) => u.photoPermission === "nowhere").length,
   };
 
   // Filter members based on selected permissions
   const filteredMembers =
     selectedPermissions.size === 0
-      ? mockUsers
-      : mockUsers.filter((u) => selectedPermissions.has(u.photoPermission));
+      ? users
+      : users.filter((u) => selectedPermissions.has(u.photoPermission));
 
   const togglePermissionFilter = (permission: PhotoPermission) => {
     const newSelectedPermissions = new Set(selectedPermissions);
@@ -140,75 +203,45 @@ export function AdminDashboard() {
                   <Users className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium text-gray-600">Total Members</span>
                 </div>
-                <p className="text-2xl font-bold">{mockUsers.length}</p>
+                <p className="text-2xl font-bold">{users.length}</p>
                 {!hasActiveFilters && (
                   <p className="text-xs text-primary mt-1">Showing all members</p>
                 )}
               </CardContent>
             </Card>
 
-            <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${
-                isPermissionSelected("internal+external") ? "ring-2 ring-green-500 bg-green-50" : ""
-              }`}
-              onClick={() => togglePermissionFilter("internal+external")}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <Camera className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-gray-600">Full Permission</span>
-                </div>
-                <p className="text-2xl font-bold">{permissionStats["internal+external"]}</p>
-                {isPermissionSelected("internal+external") && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Filter className="h-3 w-3 text-green-600" />
-                    <p className="text-xs text-green-600">Active filter</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <FilterCard
+              label="Full Permission"
+              Icon={Camera}
+              colorClass="text-green-600"
+              ringClass="ring-green-500"
+              bgClass="bg-green-50"
+              count={permissionStats["internal+external"]}
+              isSelected={isPermissionSelected("internal+external")}
+              onToggle={() => togglePermissionFilter("internal+external")}
+            />
 
-            <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${
-                isPermissionSelected("internal") ? "ring-2 ring-yellow-500 bg-yellow-50" : ""
-              }`}
-              onClick={() => togglePermissionFilter("internal")}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <Eye className="h-4 w-4 text-yellow-600" />
-                  <span className="text-sm font-medium text-gray-600">Internal Only</span>
-                </div>
-                <p className="text-2xl font-bold">{permissionStats.internal}</p>
-                {isPermissionSelected("internal") && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Filter className="h-3 w-3 text-yellow-600" />
-                    <p className="text-xs text-yellow-600">Active filter</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <FilterCard
+              label="Internal Only"
+              Icon={Eye}
+              colorClass="text-yellow-600"
+              ringClass="ring-yellow-500"
+              bgClass="bg-yellow-50"
+              count={permissionStats.internal}
+              isSelected={isPermissionSelected("internal")}
+              onToggle={() => togglePermissionFilter("internal")}
+            />
 
-            <Card
-              className={`cursor-pointer transition-all hover:shadow-md relative ${
-                isPermissionSelected("nowhere") ? "ring-2 ring-red-500 bg-red-50" : ""
-              }`}
-              onClick={() => togglePermissionFilter("nowhere")}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2">
-                  <EyeOff className="h-4 w-4 text-red-600" />
-                  <span className="text-sm font-medium text-gray-600">No Usage</span>
-                </div>
-                <p className="text-2xl font-bold">{permissionStats.nowhere}</p>
-                {isPermissionSelected("nowhere") && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Filter className="h-3 w-3 text-red-600" />
-                    <p className="text-xs text-red-600">Active filter</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <FilterCard
+              label="No Usage"
+              Icon={EyeOff}
+              colorClass="text-red-600"
+              ringClass="ring-red-500"
+              bgClass="bg-red-50"
+              count={permissionStats.nowhere}
+              isSelected={isPermissionSelected("nowhere")}
+              onToggle={() => togglePermissionFilter("nowhere")}
+            />
           </div>
 
           {/* Filter Status and Reset Button */}
@@ -244,7 +277,7 @@ export function AdminDashboard() {
                 Member Photo Permissions
                 {hasActiveFilters && (
                   <span className="text-base font-normal text-gray-600 ml-2">
-                    ({filteredMembers.length} of {mockUsers.length} members)
+                    ({filteredMembers.length} of {users.length} members)
                   </span>
                 )}
               </CardTitle>

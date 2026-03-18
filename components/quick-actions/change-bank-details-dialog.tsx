@@ -6,13 +6,21 @@ import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/co
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessagePreview } from "@/components/quick-actions/message-preview";
-import { useAuth } from "@/contexts/auth-context";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
+/**
+ * Dialog content for requesting a bank-details change.
+ *
+ * The member enters their new IBAN (automatically uppercased and stripped of
+ * spaces).  A BIC field is conditionally shown when the IBAN country code is
+ * not `"NL"`, since non-Dutch IBANs require a BIC for SEPA transactions.
+ * The "Send request" button is disabled until an IBAN has been entered.
+ */
 export function ChangeBankDetailsDialog() {
-  const { user } = useAuth();
+  const profile = useQuery(api.users.getProfile);
   const [iban, setIban] = useState("");
   const [bic, setBic] = useState("");
-  const [note, setNote] = useState("");
   const showBic = iban.trim().length >= 2 && !iban.toUpperCase().startsWith("NL");
 
   return (
@@ -26,7 +34,7 @@ export function ChangeBankDetailsDialog() {
       <MessagePreview
         subject="Request: Change of bank details"
         to="info@sib-utrecht.nl"
-        replyTo={user?.email ?? undefined}
+        replyTo={profile?.email}
       >
         <p>Hi,</p>
         <p>I would like to update my bank details.</p>
@@ -58,7 +66,7 @@ export function ChangeBankDetailsDialog() {
         </div>
         <div className="pt-2">
           <p>Kind regards,</p>
-          <p className="font-medium">{user?.name ?? "[Your name]"}</p>
+          <p className="font-medium">{profile?.name ?? "[Your name]"}</p>
         </div>
       </MessagePreview>
       <DialogFooter>

@@ -6,27 +6,22 @@ import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/co
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessagePreview } from "@/components/quick-actions/message-preview";
-import { useAuth } from "@/contexts/auth-context";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
+/**
+ * Dialog content for requesting a postal-address change.
+ *
+ * The member fills in their new postal code, house number, street, and place,
+ * which are embedded in a pre-formatted request email to the secretary.
+ * The postal code is automatically uppercased as the member types.
+ */
 export function ChangeAddressDialog() {
-  const { user } = useAuth();
+  const profile = useQuery(api.users.getProfile);
   const [postalCode, setPostalCode] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
   const [street, setStreet] = useState("");
   const [place, setPlace] = useState("");
-
-  const autoFillFromPostal = () => {
-    if (postalCode && houseNumber && !street && !place) {
-      setStreet("Sesamstraat");
-      setPlace("Utrecht");
-    }
-  };
-
-  const autoFillFromStreet = () => {
-    if (street && place && !postalCode) {
-      setPostalCode("3500AA");
-    }
-  };
 
   return (
     <>
@@ -40,7 +35,7 @@ export function ChangeAddressDialog() {
         <MessagePreview
           subject="Request: Change of address"
           to="info@sib-utrecht.nl"
-          replyTo={user?.email ?? undefined}
+          replyTo={profile?.email}
         >
           <p>Hi,</p>
           <p>I would like to update my address to:</p>
@@ -53,7 +48,6 @@ export function ChangeAddressDialog() {
                 id="postalCode"
                 value={postalCode}
                 onChange={(e) => setPostalCode(e.target.value.toUpperCase())}
-                onBlur={autoFillFromPostal}
                 placeholder=""
               />
             </div>
@@ -65,7 +59,6 @@ export function ChangeAddressDialog() {
                 id="houseNumber"
                 value={houseNumber}
                 onChange={(e) => setHouseNumber(e.target.value)}
-                onBlur={autoFillFromPostal}
                 placeholder=""
               />
             </div>
@@ -79,7 +72,6 @@ export function ChangeAddressDialog() {
                 id="street"
                 value={street}
                 onChange={(e) => setStreet(e.target.value)}
-                onBlur={autoFillFromStreet}
                 placeholder=""
               />
             </div>
@@ -91,14 +83,13 @@ export function ChangeAddressDialog() {
                 id="place"
                 value={place}
                 onChange={(e) => setPlace(e.target.value)}
-                onBlur={autoFillFromStreet}
                 placeholder=""
               />
             </div>
           </div>
           <div className="pt-2">
             <p>Kind regards,</p>
-            <p className="font-medium">{user?.name ?? "[Your name]"}</p>
+            <p className="font-medium">{profile?.name ?? "[Your name]"}</p>
           </div>
         </MessagePreview>
       </div>

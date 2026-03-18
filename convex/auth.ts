@@ -1,9 +1,17 @@
 import type { QueryCtx, MutationCtx, ActionCtx } from "./_generated/server";
 
+/**
+ * Normalised representation of a successfully authenticated Cognito identity,
+ * returned by {@link requireLogin} after stripping SDK-specific fields.
+ */
 export type AuthenticatedIdentity = {
+  /** Primary email address from the Cognito identity token. */
   email: string;
+  /** Full display name, if present in the identity token. */
   name: string | undefined;
+  /** Given (first) name, if present in the identity token. */
   givenName: string | undefined;
+  /** Family (last) name, if present in the identity token. */
   familyName: string | undefined;
   /** The member's Conscribo ID, sourced from the `custom:conscribo-id` JWT claim. */
   conscriboId: string;
@@ -55,7 +63,8 @@ export async function isAdmin(ctx: QueryCtx | MutationCtx): Promise<boolean> {
       return false;
     }
 
-    const groups = (identity as any)["cognito:groups"] || [];
+    const rawGroups = (identity as Record<string, unknown>)["cognito:groups"];
+    const groups = Array.isArray(rawGroups) ? rawGroups : [];
     return groups.includes("admins");
   } catch {
     return false;
