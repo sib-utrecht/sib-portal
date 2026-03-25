@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessagePreview } from "@/components/quick-actions/message-preview";
@@ -39,7 +39,7 @@ export function ChangeEmailDialog() {
         </DialogHeader>
         <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
         <DialogFooter>
-          <Button variant="secondary">Close</Button>
+          <DialogClose asChild><Button variant="secondary">Close</Button></DialogClose>
           <Button disabled>Send request</Button>
         </DialogFooter>
       </>
@@ -82,7 +82,7 @@ export function ChangeEmailDialog() {
         </div>
       </MessagePreview>
       <DialogFooter>
-        <Button variant="secondary">Close</Button>
+        <DialogClose asChild><Button variant="secondary">Close</Button></DialogClose>
         <Button>Send request</Button>
       </DialogFooter>
     </>
