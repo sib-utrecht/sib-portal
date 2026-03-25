@@ -5,8 +5,6 @@ const basePath = basePathEnv && basePathEnv !== "/" ? basePathEnv : undefined;
 const assetPrefix = basePath ? `${basePath}/` : undefined;
 
 const nextConfig = {
-  // Export a fully static site compatible with GitHub Pages
-  output: "export",
   trailingSlash: true,
 
   // Prevent webpack from bundling jsdom (used by isomorphic-dompurify) so that

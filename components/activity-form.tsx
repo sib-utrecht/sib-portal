@@ -10,42 +10,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DateTimePicker } from "@/components/date-time-picker";
 
-/** Convert a Unix ms timestamp to the value required by <input type="datetime-local">. */
-function tsToDatetimeLocal(ts: number): string {
-  const d = new Date(ts);
-  // Adjust to local time for the input
-  const offset = d.getTimezoneOffset() * 60000;
-  return new Date(d.getTime() - offset).toISOString().slice(0, 16);
-}
-
-/** Convert the string from <input type="datetime-local"> back to a Unix ms timestamp. */
-function datetimeLocalToTs(value: string): number {
-  return new Date(value).getTime();
-}
-
-export type ActivityFormData = {
+type ActivityFormData = {
   title: string;
-  startTime: string;
-  endTime: string;
+  startTime: Date | undefined;
+  endTime: Date | undefined;
   description: string;
   promotionalImage: string;
   location: string;
   allowSignup: boolean;
-  registrationDeadline: string;
+  registrationDeadline: Date | undefined;
   maxParticipants: string;
 };
 
 function emptyForm(): ActivityFormData {
   return {
     title: "",
-    startTime: "",
-    endTime: "",
+    startTime: undefined,
+    endTime: undefined,
     description: "",
     promotionalImage: "",
     location: "",
     allowSignup: false,
-    registrationDeadline: "",
+    registrationDeadline: undefined,
     maxParticipants: "",
   };
 }
@@ -63,15 +51,15 @@ function activityToForm(activity: {
 }): ActivityFormData {
   return {
     title: activity.title,
-    startTime: tsToDatetimeLocal(activity.startTime),
-    endTime: tsToDatetimeLocal(activity.endTime),
+    startTime: new Date(activity.startTime),
+    endTime: new Date(activity.endTime),
     description: activity.description,
     promotionalImage: activity.promotionalImage ?? "",
     location: activity.location,
     allowSignup: activity.allowSignup,
     registrationDeadline: activity.registrationDeadline
-      ? tsToDatetimeLocal(activity.registrationDeadline)
-      : "",
+      ? new Date(activity.registrationDeadline)
+      : undefined,
     maxParticipants: activity.maxParticipants?.toString() ?? "",
   };
 }
@@ -95,7 +83,7 @@ export function ActivityForm({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  function set(field: keyof ActivityFormData, value: string | boolean) {
+  function set<K extends keyof ActivityFormData>(field: K, value: ActivityFormData[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -107,24 +95,22 @@ export function ActivityForm({
       setError("Start and end times are required.");
       return;
     }
-    const startTime = datetimeLocalToTs(form.startTime);
-    const endTime = datetimeLocalToTs(form.endTime);
-    if (endTime <= startTime) {
+    if (form.endTime <= form.startTime) {
       setError("End time must be after start time.");
       return;
     }
 
     const payload = {
       title: form.title.trim(),
-      startTime,
-      endTime,
+      startTime: form.startTime.getTime(),
+      endTime: form.endTime.getTime(),
       description: form.description,
       promotionalImage: form.promotionalImage.trim() || undefined,
       location: form.location.trim(),
       allowSignup: form.allowSignup,
       registrationDeadline:
         form.allowSignup && form.registrationDeadline
-          ? datetimeLocalToTs(form.registrationDeadline)
+          ? form.registrationDeadline.getTime()
           : undefined,
       maxParticipants:
         form.allowSignup && form.maxParticipants
@@ -167,24 +153,24 @@ export function ActivityForm({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="startTime">Start</Label>
-          <Input
+          <DateTimePicker
             id="startTime"
-            type="datetime-local"
-            required
             value={form.startTime}
-            onChange={(e) => set("startTime", e.target.value)}
+            onChange={(d) => set("startTime", d)}
             disabled={saving}
+            placeholder="Pick start date & time"
+            required
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="endTime">End</Label>
-          <Input
+          <DateTimePicker
             id="endTime"
-            type="datetime-local"
-            required
             value={form.endTime}
-            onChange={(e) => set("endTime", e.target.value)}
+            onChange={(d) => set("endTime", d)}
             disabled={saving}
+            placeholder="Pick end date & time"
+            required
           />
         </div>
       </div>
@@ -245,12 +231,12 @@ export function ActivityForm({
         <div className="pl-6 border-l-2 border-[#21526f] space-y-4">
           <div className="space-y-2">
             <Label htmlFor="registrationDeadline">Registration deadline (optional)</Label>
-            <Input
+            <DateTimePicker
               id="registrationDeadline"
-              type="datetime-local"
               value={form.registrationDeadline}
-              onChange={(e) => set("registrationDeadline", e.target.value)}
+              onChange={(d) => set("registrationDeadline", d)}
               disabled={saving}
+              placeholder="Pick deadline"
             />
           </div>
           <div className="space-y-2">
