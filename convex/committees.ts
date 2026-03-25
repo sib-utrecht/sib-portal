@@ -2,6 +2,13 @@ import { v } from "convex/values";
 import { internalQuery, query } from "./_generated/server";
 import { requireLogin } from "./auth";
 
+/**
+ * Internal query that returns the full committee record including its TOTP secret.
+ * Only callable from other Convex functions via `internal.committees.querySecret`;
+ * the secret is never exposed directly to clients.
+ *
+ * @param id - Convex document ID of the committee to fetch.
+ */
 export const querySecret = internalQuery({
   args: {
     id: v.id("committees"),
@@ -11,6 +18,16 @@ export const querySecret = internalQuery({
   },
 });
 
+/**
+ * Returns all committees that the currently authenticated user belongs to,
+ * sorted alphabetically by name.  The `secret` field is intentionally excluded
+ * from the response to prevent TOTP secrets from leaking to clients; use
+ * `generateToken.generateTokens` to obtain the actual 2FA codes.
+ *
+ * Requires the caller to be authenticated; throws `"Unauthorized"` otherwise.
+ * Membership is determined by matching the caller's Conscribo ID against each
+ * committee's `members` array.
+ */
 export const getCommittees = query({
   args: {},
   returns: v.array(

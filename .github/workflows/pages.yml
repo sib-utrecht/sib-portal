@@ -67,7 +67,6 @@ jobs:
         run: |
           echo "Using basePath=${NEXT_PUBLIC_BASE_PATH}"
           pnpm build
-          # Next 15+ export happens automatically when output:'export' is set
 
       - name: Checkout existing gh-pages into publish (if exists)
         uses: actions/checkout@v4

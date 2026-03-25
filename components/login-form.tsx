@@ -13,8 +13,26 @@ import { useAuth } from "../contexts/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail } from "lucide-react";
 
+/**
+ * The currently active login step shown inside {@link LoginForm}.
+ * - `"password"`              — email + password sign-in form.
+ * - `"code"`                  — passwordless: enter email to request an OTP.
+ * - `"code-sent"`             — passwordless: enter the OTP that was emailed.
+ * - `"reset-password"`        — enter email to receive a password-reset code.
+ * - `"reset-password-confirm"` — enter the reset code and choose a new password.
+ */
 type LoginMode = "password" | "code" | "code-sent" | "reset-password" | "reset-password-confirm";
 
+/**
+ * Full-page login form that supports multiple authentication flows:
+ * - Email + password (Cognito `USER_PASSWORD_AUTH`)
+ * - Passwordless email OTP (Cognito `USER_AUTH` / `EMAIL_OTP` challenge)
+ * - Forgot-password / password-reset flow
+ *
+ * After a successful sign-in the user is redirected to the path specified by
+ * the `redirect_uri` query parameter (validated to be a same-origin relative
+ * path), defaulting to `/`.
+ */
 export function LoginForm() {
   const [mode, setMode] = useState<LoginMode>("password");
   const [email, setEmail] = useState("");

@@ -9,6 +9,10 @@ const nextConfig = {
   output: "export",
   trailingSlash: true,
 
+  // Prevent webpack from bundling jsdom (used by isomorphic-dompurify) so that
+  // its readFileSync calls resolve correctly at build time.
+  serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
+
   eslint: {
     ignoreDuringBuilds: true,
   },

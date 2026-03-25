@@ -4,6 +4,13 @@ import { useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 
+/**
+ * Route guard that restricts access to admin users only.
+ *
+ * While the auth state is still loading a placeholder is rendered.  Once
+ * loading completes, non-admin users are redirected to the root path (`/`).
+ * Admin users see the wrapped `children` as normal.
+ */
 export function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { isAdmin, isLoading } = useAuth();
   const router = useRouter();

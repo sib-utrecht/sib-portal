@@ -1,5 +1,14 @@
+import he from "he";
+import DOMPurify from "isomorphic-dompurify";
 import type { Activity } from "../types/activity";
 
+/**
+ * Returns the display name for an activity, normalising both the flat string
+ * form and the `{ long: string }` object form returned by the API.
+ *
+ * @param activity - The activity whose name should be resolved.
+ * @returns The human-readable activity title, or `"Unnamed Activity"` as a fallback.
+ */
 export function getActivityName(activity: Activity): string {
   if (!activity.name) return "Unnamed Activity";
 
@@ -14,6 +23,15 @@ export function getActivityName(activity: Activity): string {
   return "Unnamed Activity";
 }
 
+/**
+ * Returns a plain-text description for an activity, normalising both the flat
+ * `description` field and the nested `body.description` field (which may be a
+ * raw HTML string or a `{ html: string }` object).  HTML tags and common
+ * entities are stripped before returning.
+ *
+ * @param activity - The activity whose description should be resolved.
+ * @returns Plain-text description, or `"No description available"` as a fallback.
+ */
 export function getActivityDescription(activity: Activity): string {
   // Check direct description field first
   if (activity.description && typeof activity.description === "string") {
@@ -34,6 +52,39 @@ export function getActivityDescription(activity: Activity): string {
   return "No description available";
 }
 
+/**
+ * Returns a sanitized HTML description for an activity, suitable for rendering
+ * with `dangerouslySetInnerHTML`. Falls back to plain text wrapped in a `<p>`
+ * when only a plain-text description is available.
+ *
+ * @param activity - The activity whose description should be resolved.
+ * @returns Sanitized HTML string, or `null` when no description is available.
+ */
+export function getActivityDescriptionHtml(activity: Activity): string | null {
+  let raw: string | null = null;
+
+  if (activity.body?.description) {
+    if (typeof activity.body.description === "object" && activity.body.description.html) {
+      raw = activity.body.description.html;
+    } else if (typeof activity.body.description === "string") {
+      raw = activity.body.description;
+    }
+  } else if (activity.description && typeof activity.description === "string") {
+    raw = activity.description;
+  }
+
+  if (!raw) return null;
+
+  return DOMPurify.sanitize(raw);
+}
+
+/**
+ * Returns the ISO 8601 start timestamp for an activity, preferring the flat
+ * `start_date` field over the nested `date.start` field.
+ *
+ * @param activity - The activity whose start date should be resolved.
+ * @returns ISO 8601 date string, or an empty string when not available.
+ */
 export function getActivityStartDate(activity: Activity): string {
   // Check direct start_date field
   if (activity.start_date) {
@@ -48,6 +99,13 @@ export function getActivityStartDate(activity: Activity): string {
   return "";
 }
 
+/**
+ * Returns the ISO 8601 end timestamp for an activity, preferring the flat
+ * `end_date` field over the nested `date.end` field.
+ *
+ * @param activity - The activity whose end date should be resolved.
+ * @returns ISO 8601 date string, or an empty string when not available.
+ */
 export function getActivityEndDate(activity: Activity): string {
   // Check direct end_date field
   if (activity.end_date) {
@@ -62,6 +120,13 @@ export function getActivityEndDate(activity: Activity): string {
   return "";
 }
 
+/**
+ * Returns the cover image URL for an activity, preferring the flat `image_url`
+ * field over the nested `body.image` field.
+ *
+ * @param activity - The activity whose image URL should be resolved.
+ * @returns Image URL string, or `null` when no image is available.
+ */
 export function getActivityImage(activity: Activity): string | null {
   // Check direct image_url field
   if (activity.image_url) {
@@ -76,21 +141,27 @@ export function getActivityImage(activity: Activity): string | null {
   return null;
 }
 
-// Helper function to strip HTML tags from strings
+/**
+ * Strips HTML tags from a string and decodes common HTML entities.
+ *
+ * @param html - Raw HTML string to sanitise.
+ * @returns Plain-text string with tags removed and entities decoded.
+ */
 function stripHtml(html: string): string {
   if (!html) return "";
 
-  // Remove HTML tags
-  const stripped = html.replace(/<[^>]*>/g, "");
+  // Replace block-level tags with a space so adjacent text isn't concatenated
+  const withSpaces = html.replace(
+    /<\/?(p|br|div|li|h[1-6]|blockquote|tr|td|th)[^>]*>/gi,
+    " ",
+  );
 
-  // Decode common HTML entities
-  const decoded = stripped
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
+  // Remove remaining HTML tags
+  const stripped = withSpaces.replace(/<[^>]*>/g, "");
 
-  return decoded.trim();
+  // Decode all HTML entities (numeric and named)
+  const decoded = he.decode(stripped);
+
+  // Collapse multiple whitespace characters into a single space
+  return decoded.replace(/\s+/g, " ").trim();
 }
