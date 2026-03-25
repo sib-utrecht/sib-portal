@@ -1,0 +1,297 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+/** Convert a Unix ms timestamp to the value required by <input type="datetime-local">. */
+function tsToDatetimeLocal(ts: number): string {
+  const d = new Date(ts);
+  // Adjust to local time for the input
+  const offset = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+}
+
+/** Convert the string from <input type="datetime-local"> back to a Unix ms timestamp. */
+function datetimeLocalToTs(value: string): number {
+  return new Date(value).getTime();
+}
+
+export type ActivityFormData = {
+  title: string;
+  startTime: string;
+  endTime: string;
+  description: string;
+  promotionalImage: string;
+  location: string;
+  allowSignup: boolean;
+  registrationDeadline: string;
+  maxParticipants: string;
+};
+
+function emptyForm(): ActivityFormData {
+  return {
+    title: "",
+    startTime: "",
+    endTime: "",
+    description: "",
+    promotionalImage: "",
+    location: "",
+    allowSignup: false,
+    registrationDeadline: "",
+    maxParticipants: "",
+  };
+}
+
+function activityToForm(activity: {
+  title: string;
+  startTime: number;
+  endTime: number;
+  description: string;
+  promotionalImage?: string;
+  location: string;
+  allowSignup: boolean;
+  registrationDeadline?: number;
+  maxParticipants?: number;
+}): ActivityFormData {
+  return {
+    title: activity.title,
+    startTime: tsToDatetimeLocal(activity.startTime),
+    endTime: tsToDatetimeLocal(activity.endTime),
+    description: activity.description,
+    promotionalImage: activity.promotionalImage ?? "",
+    location: activity.location,
+    allowSignup: activity.allowSignup,
+    registrationDeadline: activity.registrationDeadline
+      ? tsToDatetimeLocal(activity.registrationDeadline)
+      : "",
+    maxParticipants: activity.maxParticipants?.toString() ?? "",
+  };
+}
+
+export function ActivityForm({
+  mode,
+  activityId,
+  initial,
+}: {
+  mode: "create" | "edit";
+  activityId?: Id<"activities">;
+  initial?: Parameters<typeof activityToForm>[0];
+}) {
+  const router = useRouter();
+  const createActivity = useMutation(api.activities.createActivity);
+  const updateActivity = useMutation(api.activities.updateActivity);
+
+  const [form, setForm] = useState<ActivityFormData>(
+    initial ? activityToForm(initial) : emptyForm(),
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  function set(field: keyof ActivityFormData, value: string | boolean) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (!form.startTime || !form.endTime) {
+      setError("Start and end times are required.");
+      return;
+    }
+    const startTime = datetimeLocalToTs(form.startTime);
+    const endTime = datetimeLocalToTs(form.endTime);
+    if (endTime <= startTime) {
+      setError("End time must be after start time.");
+      return;
+    }
+
+    const payload = {
+      title: form.title.trim(),
+      startTime,
+      endTime,
+      description: form.description,
+      promotionalImage: form.promotionalImage.trim() || undefined,
+      location: form.location.trim(),
+      allowSignup: form.allowSignup,
+      registrationDeadline:
+        form.allowSignup && form.registrationDeadline
+          ? datetimeLocalToTs(form.registrationDeadline)
+          : undefined,
+      maxParticipants:
+        form.allowSignup && form.maxParticipants
+          ? parseInt(form.maxParticipants, 10)
+          : undefined,
+    };
+
+    setSaving(true);
+    try {
+      if (mode === "create") {
+        const id = await createActivity(payload);
+        router.push(`/activities/${id}`);
+      } else {
+        if (!activityId) throw new Error("Missing activity ID");
+        await updateActivity({ id: activityId, ...payload });
+        router.push(`/activities/${activityId}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+      {/* Title */}
+      <div className="space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          required
+          value={form.title}
+          onChange={(e) => set("title", e.target.value)}
+          placeholder="Activity title"
+          disabled={saving}
+        />
+      </div>
+
+      {/* Start / End */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="startTime">Start</Label>
+          <Input
+            id="startTime"
+            type="datetime-local"
+            required
+            value={form.startTime}
+            onChange={(e) => set("startTime", e.target.value)}
+            disabled={saving}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="endTime">End</Label>
+          <Input
+            id="endTime"
+            type="datetime-local"
+            required
+            value={form.endTime}
+            onChange={(e) => set("endTime", e.target.value)}
+            disabled={saving}
+          />
+        </div>
+      </div>
+
+      {/* Location */}
+      <div className="space-y-2">
+        <Label htmlFor="location">Location</Label>
+        <Input
+          id="location"
+          required
+          value={form.location}
+          onChange={(e) => set("location", e.target.value)}
+          placeholder="e.g. Utrecht city centre"
+          disabled={saving}
+        />
+      </div>
+
+      {/* Promotional image */}
+      <div className="space-y-2">
+        <Label htmlFor="promotionalImage">Promotional image URL (optional)</Label>
+        <Input
+          id="promotionalImage"
+          type="url"
+          value={form.promotionalImage}
+          onChange={(e) => set("promotionalImage", e.target.value)}
+          placeholder="https://example.com/image.jpg"
+          disabled={saving}
+        />
+      </div>
+
+      {/* Description */}
+      <div className="space-y-2">
+        <Label htmlFor="description">Description (HTML allowed)</Label>
+        <textarea
+          id="description"
+          required
+          value={form.description}
+          onChange={(e) => set("description", e.target.value)}
+          placeholder="Describe the activity…"
+          disabled={saving}
+          rows={6}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 font-mono"
+        />
+      </div>
+
+      {/* Allow sign-up */}
+      <div className="flex items-center gap-3">
+        <Checkbox
+          id="allowSignup"
+          checked={form.allowSignup}
+          onCheckedChange={(v) => set("allowSignup", v === true)}
+          disabled={saving}
+        />
+        <Label htmlFor="allowSignup">Allow sign-ups</Label>
+      </div>
+
+      {form.allowSignup && (
+        <div className="pl-6 border-l-2 border-[#21526f] space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="registrationDeadline">Registration deadline (optional)</Label>
+            <Input
+              id="registrationDeadline"
+              type="datetime-local"
+              value={form.registrationDeadline}
+              onChange={(e) => set("registrationDeadline", e.target.value)}
+              disabled={saving}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxParticipants">Maximum participants (optional)</Label>
+            <Input
+              id="maxParticipants"
+              type="number"
+              min={1}
+              value={form.maxParticipants}
+              onChange={(e) => set("maxParticipants", e.target.value)}
+              placeholder="Unlimited"
+              disabled={saving}
+            />
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex gap-3">
+        <Button
+          type="submit"
+          disabled={saving}
+          className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full px-8"
+        >
+          {saving ? "Saving…" : mode === "create" ? "Create activity" : "Save changes"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={saving}
+          onClick={() => router.back()}
+          className="rounded-full"
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}

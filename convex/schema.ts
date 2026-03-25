@@ -49,4 +49,49 @@ export default defineSchema({
     /** List of Conscribo IDs for members who belong to this committee. */
     members: v.array(v.string()),
   }),
+
+  /**
+   * Activities (events) organised by SIB Utrecht.
+   */
+  activities: defineTable({
+    /** Activity title. */
+    title: v.string(),
+    /** Unix timestamp (ms) for when the activity starts. */
+    startTime: v.number(),
+    /** Unix timestamp (ms) for when the activity ends. */
+    endTime: v.number(),
+    /** HTML description of the activity. */
+    description: v.string(),
+    /** URL of the promotional image. */
+    promotionalImage: v.optional(v.string()),
+    /** Location where the activity takes place. */
+    location: v.string(),
+    /** Whether members can sign up for this activity. */
+    allowSignup: v.boolean(),
+    /**
+     * Unix timestamp (ms) after which sign-ups are closed.
+     * Only present when `allowSignup` is true.
+     */
+    registrationDeadline: v.optional(v.number()),
+    /**
+     * Maximum number of participants allowed to sign up.
+     * Only present when `allowSignup` is true.
+     */
+    maxParticipants: v.optional(v.number()),
+  }).index("by_startTime", ["startTime"]),
+
+  /**
+   * Registrations linking a user to an activity they have signed up for.
+   */
+  activityRegistrations: defineTable({
+    /** The activity this registration belongs to. */
+    activityId: v.id("activities"),
+    /** The user who registered. */
+    userId: v.id("users"),
+    /** Unix timestamp (ms) when the registration was created. */
+    registeredAt: v.number(),
+  })
+    .index("by_activity", ["activityId"])
+    .index("by_user", ["userId"])
+    .index("by_activity_and_user", ["activityId", "userId"]),
 });
