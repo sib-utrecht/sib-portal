@@ -156,7 +156,18 @@ export function ActivityForm({
           <DateTimePicker
             id="startTime"
             value={form.startTime}
-            onChange={(d) => set("startTime", d)}
+            onChange={(d) => {
+              set("startTime", d);
+              if (d && !form.endTime) {
+                const endDate = new Date(d);
+                endDate.setHours(d.getHours() + 1, d.getMinutes(), 0, 0);
+                set("endTime", endDate);
+              } else if (d && form.endTime) {
+                const endDate = new Date(form.endTime);
+                endDate.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
+                set("endTime", endDate);
+              }
+            }}
             disabled={saving}
             placeholder="Pick start date & time"
             required
@@ -171,6 +182,7 @@ export function ActivityForm({
             disabled={saving}
             placeholder="Pick end date & time"
             required
+            focusTime
           />
         </div>
       </div>

@@ -1,20 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { nl } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface DateTimePickerProps {
   value?: Date;
@@ -23,112 +16,343 @@ interface DateTimePickerProps {
   placeholder?: string;
   required?: boolean;
   id?: string;
+  /** When true, focusing this field puts the cursor in the time input instead of the date input */
+  focusTime?: boolean;
+}
+
+// digit positions in "dd/MM/yyyy": 0,1=day  3,4=month  6,7,8,9=year  (2,5 are '/')
+const DATE_SLOTS = [0, 1, 3, 4, 6, 7, 8, 9];
+
+function snapDate(pos: number) {
+  if (pos <= 1) return pos;
+  if (pos === 2) return 3;
+  if (pos <= 4) return pos;
+  if (pos === 5) return 6;
+  return Math.min(pos, 9);
+}
+
+function nextDateSlot(pos: number) {
+  const i = DATE_SLOTS.indexOf(pos);
+  return i === -1 || i === DATE_SLOTS.length - 1
+    ? DATE_SLOTS[DATE_SLOTS.length - 1]
+    : DATE_SLOTS[i + 1];
+}
+
+function prevDateSlot(pos: number) {
+  const i = DATE_SLOTS.indexOf(pos);
+  return i <= 0 ? DATE_SLOTS[0] : DATE_SLOTS[i - 1];
 }
 
 export function DateTimePicker({
   value,
   onChange,
   disabled,
-  placeholder = "Pick a date & time",
   id,
+  focusTime = false,
 }: DateTimePickerProps) {
   const [open, setOpen] = React.useState(false);
-
-  // Keep a local time string ("HH:MM") in sync with the value prop
-  const [timeStr, setTimeStr] = React.useState<string>(
+  const [dateStr, setDateStr] = React.useState(
+    value ? format(value, "dd/MM/yyyy") : "00/00/0000",
+  );
+  const [timeStr, setTimeStr] = React.useState(
     value ? format(value, "HH:mm") : "00:00",
   );
+  const dateFocused = React.useRef(false);
+  const timeFocused = React.useRef(false);
+  const dateInputRef = React.useRef<HTMLInputElement>(null);
+  const timeInputRef = React.useRef<HTMLInputElement>(null);
 
-  // When the parent value changes externally, sync the time string
   React.useEffect(() => {
-    if (value) setTimeStr(format(value, "HH:mm"));
+    if (!dateFocused.current)
+      setDateStr(value ? format(value, "dd/MM/yyyy") : "00/00/0000");
   }, [value]);
 
+  const displayDate = React.useMemo(() => {
+    const dm = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!dm) return value;
+    const day = Number(dm[1]), month = Number(dm[2]), year = Number(dm[3]);
+    if (day < 1 || month < 1 || year < 1000) return value;
+    const d = new Date(year, month - 1, day);
+    if (isValid(d) && d.getDate() === day && d.getMonth() === month - 1) return d;
+    return value;
+  }, [dateStr, value]);
+
+  React.useEffect(() => {
+    if (!timeFocused.current)
+      setTimeStr(value ? format(value, "HH:mm") : "00:00");
+  }, [value]);
+
+  function tryCommit(dStr: string, tStr: string) {
+    const dm = dStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const tm = tStr.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+    if (!dm || !tm) return;
+    const day = Number(dm[1]), month = Number(dm[2]), year = Number(dm[3]);
+    if (day < 1 || month < 1 || year < 1000) return;
+    const date = new Date(year, month - 1, day, Number(tm[1]), Number(tm[2]), 0, 0);
+    if (isValid(date) && date.getDate() === day && date.getMonth() === month - 1)
+      onChange(date);
+  }
+
   function handleDaySelect(day: Date | undefined) {
-    if (!day) {
-      onChange(undefined);
-      return;
-    }
-    const [hours, minutes] = timeStr.split(":").map(Number);
+    if (!day) { onChange(undefined); return; }
+    const tm = timeStr.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
     const combined = new Date(day);
-    combined.setHours(hours, minutes, 0, 0);
+    combined.setHours(tm ? Number(tm[1]) : 0, tm ? Number(tm[2]) : 0, 0, 0);
     onChange(combined);
     setOpen(false);
   }
 
+  // ── date input ──────────────────────────────────────────────────────────────
+
+  function handleDateKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    const pos = snapDate(input.selectionStart ?? 0);
+
+    if (/^\d$/.test(e.key)) {
+      e.preventDefault();
+      const d = e.key;
+      if (pos === 0 && d > "3") return;
+      if (pos === 1 && dateStr[0] === "3" && d > "1") return;
+      if (pos === 3 && d > "1") return;
+      if (pos === 4 && dateStr[3] === "1" && d > "2") return;
+      const chars = dateStr.split("");
+      chars[pos] = d;
+      const newStr = chars.join("");
+      setDateStr(newStr);
+      // after month (pos 4) or year (pos 9), jump to the time input
+      if (pos === 4 || pos === 9) {
+        requestAnimationFrame(() => {
+          timeInputRef.current?.focus();
+          timeInputRef.current?.setSelectionRange(0, 0);
+        });
+      } else {
+        const next = nextDateSlot(pos);
+        requestAnimationFrame(() => input.setSelectionRange(next, next));
+      }
+      return;
+    }
+
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      const clearAt = prevDateSlot(pos);
+      const chars = dateStr.split("");
+      chars[clearAt] = "0";
+      setDateStr(chars.join(""));
+      requestAnimationFrame(() => input.setSelectionRange(clearAt, clearAt));
+      return;
+    }
+
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      const p = prevDateSlot(pos);
+      requestAnimationFrame(() => input.setSelectionRange(p, p));
+      return;
+    }
+
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      const p = nextDateSlot(pos);
+      if (p === pos) {
+        // already at last slot — cross to time
+        requestAnimationFrame(() => {
+          timeInputRef.current?.focus();
+          timeInputRef.current?.setSelectionRange(0, 0);
+        });
+      } else {
+        requestAnimationFrame(() => input.setSelectionRange(p, p));
+      }
+      return;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      dateFocused.current = false;
+      tryCommit(dateStr, timeStr);
+      return;
+    }
+
+    if (e.key.length === 1) e.preventDefault();
+  }
+
+  function handleDateBlur() {
+    dateFocused.current = false;
+    tryCommit(dateStr, timeStr);
+    setDateStr(value ? format(value, "dd/MM/yyyy") : "00/00/0000");
+  }
+
+  function handleDateClick(e: React.MouseEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    requestAnimationFrame(() => {
+      const p = snapDate(input.selectionStart ?? 0);
+      input.setSelectionRange(p, p);
+    });
+  }
+
+  // ── time input ──────────────────────────────────────────────────────────────
+
+  function handleTimeKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    const pos = input.selectionStart ?? 0;
+
+    if (/^\d$/.test(e.key)) {
+      e.preventDefault();
+      const p = pos === 2 ? 3 : Math.min(pos, 4);
+      const d = e.key;
+      if (p === 0 && d > "2") return;
+      if (p === 1 && timeStr[0] === "2" && d > "3") return;
+      if (p === 3 && d > "5") return;
+      const chars = timeStr.split("");
+      chars[p] = d;
+      setTimeStr(chars.join(""));
+      if (p === 4) {
+        // last digit — advance to next focusable element like Tab
+        requestAnimationFrame(() => {
+          const selector = 'a[href]:not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
+          const all = Array.from(document.querySelectorAll<HTMLElement>(selector));
+          const idx = all.indexOf(input);
+          if (idx !== -1 && all[idx + 1]) all[idx + 1].focus();
+        });
+      } else {
+        const next = p === 1 ? 3 : p + 1;
+        requestAnimationFrame(() => input.setSelectionRange(next, next));
+      }
+      return;
+    }
+
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      let clearAt = pos - 1;
+      if (clearAt === 2) clearAt = 1;
+      if (clearAt < 0) return;
+      const chars = timeStr.split("");
+      chars[clearAt] = "0";
+      setTimeStr(chars.join(""));
+      requestAnimationFrame(() => input.setSelectionRange(clearAt, clearAt));
+      return;
+    }
+
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      const dir = e.key === "ArrowLeft" ? -1 : 1;
+      if (dir === -1 && pos === 0) {
+        // cross to date, last slot
+        requestAnimationFrame(() => {
+          dateInputRef.current?.focus();
+          dateInputRef.current?.setSelectionRange(9, 9);
+        });
+        return;
+      }
+      let next = pos + dir;
+      if (next === 2) next += dir;
+      next = Math.max(0, Math.min(4, next));
+      requestAnimationFrame(() => input.setSelectionRange(next, next));
+      return;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      timeFocused.current = false;
+      tryCommit(dateStr, timeStr);
+      return;
+    }
+
+    if (e.key.length === 1) e.preventDefault();
+  }
+
+  function handleTimeBlur() {
+    timeFocused.current = false;
+    tryCommit(dateStr, timeStr);
+    setTimeStr(value ? format(value, "HH:mm") : "00:00");
+  }
+
+  function handleTimeClick(e: React.MouseEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    requestAnimationFrame(() => {
+      const p = input.selectionStart ?? 0;
+      const snapped = p <= 1 ? p : p === 2 ? 3 : Math.min(p, 4);
+      input.setSelectionRange(snapped, snapped);
+    });
+  }
+
+  // ── render ──────────────────────────────────────────────────────────────────
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
+      <div
+        className={cn(
+          "flex items-center w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
+          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+          disabled && "pointer-events-none opacity-50",
+        )}
+      >
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            tabIndex={-1}
+            className="mr-2 shrink-0 text-muted-foreground hover:text-foreground focus:outline-none"
+          >
+            <CalendarIcon className="h-4 w-4" />
+          </button>
+        </PopoverTrigger>
+
+        <span className="mr-2 text-muted-foreground shrink-0 select-none inline-block w-[2ch] text-center">
+          {displayDate && isValid(displayDate) ? format(displayDate, "EEEEEE", { locale: nl }) : ""}
+        </span>
+
+        <Input
           id={id}
-          variant="outline"
+          type="text"
+          inputMode="numeric"
+          ref={dateInputRef}
+          tabIndex={focusTime ? -1 : undefined}
+          value={dateStr}
+          onChange={() => {}}
+          onKeyDown={handleDateKeyDown}
+          onClick={handleDateClick}
+          onFocus={() => { dateFocused.current = true; }}
+          onBlur={handleDateBlur}
           disabled={disabled}
           className={cn(
-            "w-full justify-start text-left font-normal",
+            "border-0 p-0 h-auto shadow-none focus-visible:ring-0 tabular-nums w-[88px] shrink-0",
             !value && "text-muted-foreground",
           )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-          {value
-            ? format(value, "dd/MM/yyyy HH:mm", { locale: nl })
-            : placeholder}
-        </Button>
-      </PopoverTrigger>
+        />
+
+        <span className="mx-2 text-muted-foreground shrink-0">·</span>
+
+        <Input
+          type="text"
+          inputMode="numeric"
+          value={timeStr}
+          onChange={() => {}}
+          onKeyDown={handleTimeKeyDown}
+          onClick={handleTimeClick}
+          onFocus={(e) => {
+            timeFocused.current = true;
+            if (focusTime) {
+              const input = e.currentTarget;
+              requestAnimationFrame(() => input.setSelectionRange(0, 0));
+            }
+          }}
+          onBlur={handleTimeBlur}
+          disabled={disabled}
+          ref={timeInputRef}
+          className={cn(
+            "border-0 p-0 h-auto shadow-none focus-visible:ring-0 tabular-nums w-[48px] shrink-0",
+            !value && "text-muted-foreground",
+          )}
+        />
+      </div>
+
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
           selected={value}
           onSelect={handleDaySelect}
           locale={nl}
-          initialFocus
+          autoFocus
         />
-        <div className="border-t p-3 flex items-center gap-2">
-          <span className="text-sm text-muted-foreground w-10 shrink-0">Time</span>
-          <Select
-            value={timeStr.split(":")[0]}
-            onValueChange={(h) => {
-              const newTime = `${h}:${timeStr.split(":")[1]}`;
-              setTimeStr(newTime);
-              if (value) {
-                const combined = new Date(value);
-                combined.setHours(Number(h), Number(timeStr.split(":")[1]), 0, 0);
-                onChange(combined);
-              }
-            }}
-          >
-            <SelectTrigger className="flex-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((h) => (
-                <SelectItem key={h} value={h}>{h}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <span className="text-sm text-muted-foreground">:</span>
-          <Select
-            value={timeStr.split(":")[1]}
-            onValueChange={(m) => {
-              const newTime = `${timeStr.split(":")[0]}:${m}`;
-              setTimeStr(newTime);
-              if (value) {
-                const combined = new Date(value);
-                combined.setHours(Number(timeStr.split(":")[0]), Number(m), 0, 0);
-                onChange(combined);
-              }
-            }}
-          >
-            <SelectTrigger className="flex-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")).map((m) => (
-                <SelectItem key={m} value={m}>{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </PopoverContent>
     </Popover>
   );
