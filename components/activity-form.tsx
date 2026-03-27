@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -17,7 +17,6 @@ type ActivityFormData = {
   startTime: Date | undefined;
   endTime: Date | undefined;
   description: string;
-  promotionalImage: string;
   location: string;
   allowSignup: boolean;
   registrationDeadline: Date | undefined;
@@ -30,7 +29,6 @@ function emptyForm(): ActivityFormData {
     startTime: undefined,
     endTime: undefined,
     description: "",
-    promotionalImage: "",
     location: "",
     allowSignup: false,
     registrationDeadline: undefined,
@@ -38,23 +36,24 @@ function emptyForm(): ActivityFormData {
   };
 }
 
-function activityToForm(activity: {
+type InitialActivity = {
   title: string;
   startTime: number;
   endTime: number;
   description: string;
-  promotionalImage?: string;
+  promotionalImageStorageId?: Id<"_storage">;
   location: string;
   allowSignup: boolean;
   registrationDeadline?: number;
   maxParticipants?: number;
-}): ActivityFormData {
+};
+
+function activityToForm(activity: InitialActivity): ActivityFormData {
   return {
     title: activity.title,
     startTime: new Date(activity.startTime),
     endTime: new Date(activity.endTime),
     description: activity.description,
-    promotionalImage: activity.promotionalImage ?? "",
     location: activity.location,
     allowSignup: activity.allowSignup,
     registrationDeadline: activity.registrationDeadline
@@ -71,7 +70,7 @@ export function ActivityForm({
 }: {
   mode: "create" | "edit";
   activityId?: Id<"activities">;
-  initial?: Parameters<typeof activityToForm>[0];
+  initial?: InitialActivity;
 }) {
   const router = useRouter();
   const createActivity = useMutation(api.activities.createActivity);
@@ -84,7 +83,9 @@ export function ActivityForm({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const [imageStorageId, setImageStorageId] = useState<string | null>(null);
+  const [imageStorageId, setImageStorageId] = useState<Id<"_storage"> | null>(
+    initial?.promotionalImageStorageId ?? null,
+  );
   const [imageUploading, setImageUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -92,12 +93,6 @@ export function ActivityForm({
     api.activities.getImageUrl,
     imageStorageId ? { storageId: imageStorageId } : "skip",
   );
-
-  useEffect(() => {
-    if (resolvedImageUrl) {
-      set("promotionalImage", resolvedImageUrl);
-    }
-  }, [resolvedImageUrl]);
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -152,7 +147,7 @@ export function ActivityForm({
       startTime: form.startTime.getTime(),
       endTime: form.endTime.getTime(),
       description: form.description,
-      promotionalImage: form.promotionalImage.trim() || undefined,
+      promotionalImageStorageId: imageStorageId ?? undefined,
       location: form.location.trim(),
       allowSignup: form.allowSignup,
       registrationDeadline:
@@ -253,11 +248,11 @@ export function ActivityForm({
           onChange={handleImageChange}
           disabled={saving || imageUploading}
         />
-        {(resolvedImageUrl ?? form.promotionalImage) && (
+        {imageStorageId && resolvedImageUrl && (
           <div className="rounded-lg overflow-hidden border border-input bg-muted flex justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={resolvedImageUrl ?? form.promotionalImage}
+              src={resolvedImageUrl}
               alt="Promotional image preview"
               className="max-h-64 w-auto object-contain"
             />
@@ -272,18 +267,15 @@ export function ActivityForm({
           >
             {imageUploading
               ? "Uploading…"
-              : form.promotionalImage
+              : imageStorageId
                 ? "Replace image"
                 : "Upload image"}
           </Button>
-          {form.promotionalImage && (
+          {imageStorageId && (
             <Button
               type="button"
               variant="ghost"
-              onClick={() => {
-                set("promotionalImage", "");
-                setImageStorageId(null);
-              }}
+              onClick={() => setImageStorageId(null)}
               disabled={saving || imageUploading}
               className="text-red-600 hover:text-red-700"
             >

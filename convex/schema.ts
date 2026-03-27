@@ -62,8 +62,8 @@ export default defineSchema({
     endTime: v.number(),
     /** HTML description of the activity. */
     description: v.string(),
-    /** URL of the promotional image. */
-    promotionalImage: v.optional(v.string()),
+    /** Convex storage ID of the promotional image. */
+    promotionalImageStorageId: v.optional(v.id("_storage")),
     /** Location where the activity takes place. */
     location: v.string(),
     /** Whether members can sign up for this activity. */

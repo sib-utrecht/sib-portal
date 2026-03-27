@@ -26,7 +26,15 @@ export const getActivities = query({
   args: {},
   handler: async (ctx) => {
     await requireLogin(ctx);
-    return await ctx.db.query("activities").withIndex("by_startTime").order("asc").collect();
+    const activities = await ctx.db.query("activities").withIndex("by_startTime").order("asc").collect();
+    return await Promise.all(
+      activities.map(async (a) => ({
+        ...a,
+        promotionalImage: a.promotionalImageStorageId
+          ? ((await ctx.storage.getUrl(a.promotionalImageStorageId)) ?? undefined)
+          : undefined,
+      })),
+    );
   },
 });
 
@@ -35,7 +43,14 @@ export const getActivity = query({
   args: { id: v.id("activities") },
   handler: async (ctx, { id }) => {
     await requireLogin(ctx);
-    return await ctx.db.get(id);
+    const activity = await ctx.db.get(id);
+    if (!activity) return null;
+    return {
+      ...activity,
+      promotionalImage: activity.promotionalImageStorageId
+        ? ((await ctx.storage.getUrl(activity.promotionalImageStorageId)) ?? undefined)
+        : undefined,
+    };
   },
 });
 
@@ -44,7 +59,7 @@ type ActivityFields = {
   startTime: number;
   endTime: number;
   description: string;
-  promotionalImage?: string;
+  promotionalImageStorageId?: Id<"_storage">;
   location: string;
   allowSignup: boolean;
   registrationDeadline?: number;
@@ -75,7 +90,7 @@ export const createActivity = mutation({
     startTime: v.number(),
     endTime: v.number(),
     description: v.string(),
-    promotionalImage: v.optional(v.string()),
+    promotionalImageStorageId: v.optional(v.id("_storage")),
     location: v.string(),
     allowSignup: v.boolean(),
     registrationDeadline: v.optional(v.number()),
@@ -95,7 +110,7 @@ export const updateActivity = mutation({
     startTime: v.number(),
     endTime: v.number(),
     description: v.string(),
-    promotionalImage: v.optional(v.string()),
+    promotionalImageStorageId: v.optional(v.id("_storage")),
     location: v.string(),
     allowSignup: v.boolean(),
     registrationDeadline: v.optional(v.number()),
@@ -105,15 +120,26 @@ export const updateActivity = mutation({
     await requireAdmin(ctx);
     const activity = await ctx.db.get(id);
     if (!activity) throw new Error("Activity not found");
+    // If the image was replaced, delete the old file from storage
+    if (
+      activity.promotionalImageStorageId &&
+      activity.promotionalImageStorageId !== fields.promotionalImageStorageId
+    ) {
+      await ctx.storage.delete(activity.promotionalImageStorageId);
+    }
     await ctx.db.patch(id, validateAndNormalizeActivity(fields));
   },
 });
 
-/** Delete an activity and all its registrations. Admin only. */
+/** Delete an activity, its registrations, and its promotional image. Admin only. */
 export const deleteActivity = mutation({
   args: { id: v.id("activities") },
   handler: async (ctx, { id }) => {
     await requireAdmin(ctx);
+    const activity = await ctx.db.get(id);
+    if (activity?.promotionalImageStorageId) {
+      await ctx.storage.delete(activity.promotionalImageStorageId);
+    }
     const registrations = await ctx.db
       .query("activityRegistrations")
       .withIndex("by_activity", (q) => q.eq("activityId", id))
@@ -122,6 +148,49 @@ export const deleteActivity = mutation({
       await ctx.db.delete(reg._id);
     }
     await ctx.db.delete(id);
+  },
+});
+
+/**
+ * List all activity images with metadata and their linked activity. Admin only.
+ */
+export const listActivityImages = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const activities = await ctx.db.query("activities").collect();
+    const withImages = activities.filter((a) => a.promotionalImageStorageId != null);
+    return await Promise.all(
+      withImages.map(async (a) => {
+        const storageId = a.promotionalImageStorageId!;
+        const [url, metadata] = await Promise.all([
+          ctx.storage.getUrl(storageId),
+          ctx.db.system.get(storageId),
+        ]);
+        return {
+          storageId,
+          url,
+          size: metadata?.size,
+          contentType: metadata?.contentType,
+          activity: { _id: a._id, title: a.title },
+        };
+      }),
+    );
+  },
+});
+
+/**
+ * Delete a promotional image from storage and unlink it from its activity. Admin only.
+ */
+export const deleteStorageImage = mutation({
+  args: {
+    storageId: v.id("_storage"),
+    activityId: v.id("activities"),
+  },
+  handler: async (ctx, { storageId, activityId }) => {
+    await requireAdmin(ctx);
+    await ctx.storage.delete(storageId);
+    await ctx.db.patch(activityId, { promotionalImageStorageId: undefined });
   },
 });
 
