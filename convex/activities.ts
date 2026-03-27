@@ -1,6 +1,25 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireLogin, requireAdmin, isAdmin } from "./auth";
+import { Id } from "./_generated/dataModel";
+
+/** Generate a short-lived upload URL for storing a promotional image. Admin only. */
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+/** Resolve a Convex storage ID to a public URL. */
+export const getImageUrl = query({
+  args: { storageId: v.string() },
+  handler: async (ctx, { storageId }) => {
+    await requireLogin(ctx);
+    return await ctx.storage.getUrl(storageId as Id<"_storage">);
+  },
+});
 
 /** Return all activities ordered by start time (ascending). */
 export const getActivities = query({

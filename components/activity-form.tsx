@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -76,12 +76,49 @@ export function ActivityForm({
   const router = useRouter();
   const createActivity = useMutation(api.activities.createActivity);
   const updateActivity = useMutation(api.activities.updateActivity);
+const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
 
   const [form, setForm] = useState<ActivityFormData>(
     initial ? activityToForm(initial) : emptyForm(),
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const [imageStorageId, setImageStorageId] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const resolvedImageUrl = useQuery(
+    api.activities.getImageUrl,
+    imageStorageId ? { storageId: imageStorageId } : "skip",
+  );
+
+  useEffect(() => {
+    if (resolvedImageUrl) {
+      set("promotionalImage", resolvedImageUrl);
+    }
+  }, [resolvedImageUrl]);
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    setError(null);
+    try {
+      const uploadUrl = await generateUploadUrl();
+      const result = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      const { storageId } = await result.json();
+      setImageStorageId(storageId);
+    } catch {
+      setError("Failed to upload image. Please try again.");
+    } finally {
+      setImageUploading(false);
+    }
+  }
 
   function set<K extends keyof ActivityFormData>(field: K, value: ActivityFormData[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -202,15 +239,46 @@ export function ActivityForm({
 
       {/* Promotional image */}
       <div className="space-y-2">
-        <Label htmlFor="promotionalImage">Promotional image URL (optional)</Label>
-        <Input
-          id="promotionalImage"
-          type="url"
-          value={form.promotionalImage}
-          onChange={(e) => set("promotionalImage", e.target.value)}
-          placeholder="https://example.com/image.jpg"
-          disabled={saving}
+        <Label>Promotional image (optional)</Label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageChange}
+          disabled={saving || imageUploading}
         />
+        {(resolvedImageUrl ?? form.promotionalImage) && (
+          <div className="rounded-lg overflow-hidden border border-input bg-muted flex justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={resolvedImageUrl ?? form.promotionalImage}
+          alt="Promotional image preview"
+              className="max-h-64 w-auto object-contain"
+            />
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={saving || imageUploading}
+          >
+            {imageUploading ? "Uploading…" : form.promotionalImage ? "Replace image" : "Upload image"}
+          </Button>
+          {form.promotionalImage && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => { set("promotionalImage", ""); setImageStorageId(null); }}
+              disabled={saving || imageUploading}
+              className="text-red-600 hover:text-red-700"
+            >
+              Remove
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Description */}

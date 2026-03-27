@@ -118,12 +118,12 @@ function ActivityCard({
         }`}
       >
         {activity.promotionalImage && (
-          <div className="w-40 shrink-0">
+          <div className="w-40 shrink-0 bg-muted flex items-center justify-center overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={activity.promotionalImage}
               alt=""
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
         )}
