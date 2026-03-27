@@ -76,7 +76,7 @@ export function ActivityForm({
   const router = useRouter();
   const createActivity = useMutation(api.activities.createActivity);
   const updateActivity = useMutation(api.activities.updateActivity);
-const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
+  const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
 
   const [form, setForm] = useState<ActivityFormData>(
     initial ? activityToForm(initial) : emptyForm(),
@@ -213,7 +213,6 @@ const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
               }
             }}
             disabled={saving}
-            placeholder="Pick start date & time"
             required
           />
         </div>
@@ -224,7 +223,6 @@ const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
             value={form.endTime}
             onChange={(d) => set("endTime", d)}
             disabled={saving}
-            placeholder="Pick end date & time"
             required
             focusTime
           />
@@ -260,7 +258,7 @@ const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={resolvedImageUrl ?? form.promotionalImage}
-          alt="Promotional image preview"
+              alt="Promotional image preview"
               className="max-h-64 w-auto object-contain"
             />
           </div>
@@ -323,7 +321,6 @@ const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
               value={form.registrationDeadline}
               onChange={(d) => set("registrationDeadline", d)}
               disabled={saving}
-              placeholder="Pick deadline"
             />
           </div>
           <div className="space-y-2">

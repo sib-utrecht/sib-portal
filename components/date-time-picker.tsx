@@ -13,7 +13,6 @@ interface DateTimePickerProps {
   value?: Date;
   onChange: (date: Date | undefined) => void;
   disabled?: boolean;
-  placeholder?: string;
   required?: boolean;
   id?: string;
   /** When true, focusing this field puts the cursor in the time input instead of the date input */
@@ -47,6 +46,7 @@ export function DateTimePicker({
   value,
   onChange,
   disabled,
+  required,
   id,
   focusTime = false,
 }: DateTimePickerProps) {
@@ -61,6 +61,7 @@ export function DateTimePicker({
   const timeFocused = React.useRef(false);
   const dateInputRef = React.useRef<HTMLInputElement>(null);
   const timeInputRef = React.useRef<HTMLInputElement>(null);
+  const calendarButtonRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (!dateFocused.current)
@@ -144,8 +145,12 @@ export function DateTimePicker({
 
     if (e.key === "ArrowLeft") {
       e.preventDefault();
-      const p = prevDateSlot(pos);
-      requestAnimationFrame(() => input.setSelectionRange(p, p));
+      if (pos === 0) {
+        calendarButtonRef.current?.focus();
+      } else {
+        const p = prevDateSlot(pos);
+        requestAnimationFrame(() => input.setSelectionRange(p, p));
+      }
       return;
     }
 
@@ -287,10 +292,12 @@ export function DateTimePicker({
       >
         <PopoverTrigger asChild>
           <button
+            ref={calendarButtonRef}
             type="button"
             disabled={disabled}
             tabIndex={-1}
-            className="mr-2 shrink-0 text-muted-foreground hover:text-foreground focus:outline-none"
+            aria-label="Open calendar"
+            className="mr-2 shrink-0 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
           >
             <CalendarIcon className="h-4 w-4" />
           </button>
@@ -306,6 +313,7 @@ export function DateTimePicker({
           inputMode="numeric"
           ref={dateInputRef}
           tabIndex={focusTime ? -1 : undefined}
+          required={required}
           value={dateStr}
           onChange={() => {}}
           onKeyDown={handleDateKeyDown}
