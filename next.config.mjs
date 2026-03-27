@@ -5,6 +5,7 @@ const basePath = basePathEnv && basePathEnv !== "/" ? basePathEnv : undefined;
 const assetPrefix = basePath ? `${basePath}/` : undefined;
 
 const nextConfig = {
+  output: "export",
   trailingSlash: true,
 
   // Prevent webpack from bundling jsdom (used by isomorphic-dompurify) so that
