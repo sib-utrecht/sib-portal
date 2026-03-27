@@ -215,7 +215,7 @@ export function ActivityForm({
 
       {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description">Description (HTML allowed)</Label>
+        <Label htmlFor="description">Description (Markdown, HTML tags allowed)</Label>
         <textarea
           id="description"
           required

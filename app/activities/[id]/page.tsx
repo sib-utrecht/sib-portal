@@ -12,6 +12,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import Link from "next/link";
 import { MapPin, Calendar, Clock, Users, Pencil, Trash2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 
 function formatDate(ts: number) {
   return new Date(ts).toLocaleDateString("nl-NL", {
@@ -178,7 +181,14 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
 
       {/* Description */}
       <Card className="p-6 border-2 border-[#21526f] rounded-3xl shadow-sm prose max-w-none">
-        <div dangerouslySetInnerHTML={{ __html: activity.description }} />
+        <ReactMarkdown
+          rehypePlugins={[
+            rehypeRaw,
+            [rehypeSanitize, { ...defaultSchema, attributes: { ...defaultSchema.attributes, "*": ["style", "className", ...(defaultSchema.attributes?.["*"] ?? [])] } }],
+          ]}
+        >
+          {activity.description}
+        </ReactMarkdown>
       </Card>
 
       {/* Sign-up section */}
