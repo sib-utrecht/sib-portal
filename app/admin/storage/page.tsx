@@ -8,6 +8,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { RequireAdmin } from "@/components/require-admin";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
@@ -20,6 +21,14 @@ function formatBytes(bytes: number | undefined) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function formatDate(ms: number) {
+  return new Date(ms).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 function StorageContent() {
   const images = useQuery(api.activities.listActivityImages);
   const deleteImage = useMutation(api.activities.deleteStorageImage);
@@ -28,11 +37,11 @@ function StorageContent() {
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  async function handleDelete(storageId: Id<"_storage">, activityId: Id<"activities">) {
+  async function handleDelete(storageId: Id<"_storage">) {
     setDeleting(true);
     setError(null);
     try {
-      await deleteImage({ storageId, activityId });
+      await deleteImage({ storageId });
       setConfirmDelete(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -44,7 +53,7 @@ function StorageContent() {
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
       <header className="bg-white shadow-sm border-b">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">
               Stored images
@@ -56,7 +65,7 @@ function StorageContent() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -64,89 +73,100 @@ function StorageContent() {
         )}
 
         {images === undefined ? (
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-28 rounded-2xl" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="aspect-square rounded-xl" />
+                <Skeleton className="h-3 w-3/4 rounded" />
+                <Skeleton className="h-3 w-1/2 rounded" />
+              </div>
             ))}
           </div>
         ) : images.length === 0 ? (
           <p className="text-gray-500">No images stored yet.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {images.map((img) => (
               <Card
                 key={img.storageId}
-                className="flex items-center gap-4 p-3 border-2 border-[#21526f] rounded-2xl"
+                className="group flex flex-col border-2 border-[#21526f] rounded-2xl overflow-hidden"
               >
-                {/* Thumbnail */}
-                <div className="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                {/* Square image preview */}
+                <div className="relative aspect-square bg-muted flex items-center justify-center">
                   {img.url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={img.url}
-                      alt={img.activity.title}
-                      className="w-full h-full object-contain"
+                      alt={img.activity?.title ?? "Deleted activity"}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="text-xs text-gray-400">No URL</span>
                   )}
-                </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0 space-y-0.5">
-                  <p className="font-semibold text-gray-900 truncate">
-                    <Link
-                      href={`/activities/${img.activity._id}`}
-                      className="hover:underline text-[#21526f]"
-                    >
-                      {img.activity.title}
-                    </Link>
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {img.contentType ?? "unknown type"} · {formatBytes(img.size)}
-                  </p>
-                  <p className="text-xs text-gray-400 font-mono truncate">{img.storageId}</p>
-                </div>
-
-                {/* Delete */}
-                <div className="shrink-0">
-                  {confirmDelete === img.storageId ? (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() =>
-                          handleDelete(
-                            img.storageId as Id<"_storage">,
-                            img.activity._id as Id<"activities">,
-                          )
-                        }
-                        disabled={deleting}
-                      >
-                        Confirm delete
-                      </Button>
+                  {/* Delete overlay button */}
+                  <div className="absolute top-1.5 right-1.5">
+                    {confirmDelete === img.storageId ? (
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="text-xs px-2 h-7"
+                          onClick={() => handleDelete(img.storageId as Id<"_storage">)}
+                          disabled={deleting}
+                        >
+                          Confirm
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs px-2 h-7 bg-white"
+                          onClick={() => setConfirmDelete(null)}
+                          disabled={deleting}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
                       <Button
                         variant="outline"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => setConfirmDelete(null)}
-                        disabled={deleting}
+                        size="icon"
+                        className="h-7 w-7 bg-white/80 hover:bg-red-50 text-red-600 border-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setConfirmDelete(img.storageId)}
                       >
-                        Cancel
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
-                    </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Metadata below the image */}
+                <div className="p-2 space-y-0.5">
+                  {img.activity ? (
+                    <p className="text-xs font-semibold truncate">
+                      <Link
+                        href={`/activities/${img.activity._id}`}
+                        className="hover:underline text-[#21526f]"
+                      >
+                        {img.activity.title}
+                      </Link>
+                    </p>
                   ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full text-red-600 border-red-300 hover:bg-red-50"
-                      onClick={() => setConfirmDelete(img.storageId)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
+                    <p className="text-xs font-semibold text-gray-400 italic truncate">Deleted activity</p>
                   )}
+                  <div className="flex items-center gap-1">
+                    {img.isCurrentImage ? (
+                      <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 bg-[#21526f]">
+                        Current
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-gray-400 border-gray-300">
+                        Replaced
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-gray-400">{formatBytes(img.size)}</p>
+                  <p className="text-[10px] text-gray-400">{formatDate(img.uploadedAt)}</p>
                 </div>
               </Card>
             ))}

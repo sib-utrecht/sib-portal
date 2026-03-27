@@ -76,6 +76,7 @@ export function ActivityForm({
   const createActivity = useMutation(api.activities.createActivity);
   const updateActivity = useMutation(api.activities.updateActivity);
   const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
+  const trackUploadedImage = useMutation(api.activities.trackUploadedImage);
 
   const [form, setForm] = useState<ActivityFormData>(
     initial ? activityToForm(initial) : emptyForm(),
@@ -107,6 +108,7 @@ export function ActivityForm({
         body: file,
       });
       const { storageId } = await result.json();
+      await trackUploadedImage({ storageId, activityId: activityId ?? undefined });
       setImageStorageId(storageId);
     } catch {
       setError("Failed to upload image. Please try again.");

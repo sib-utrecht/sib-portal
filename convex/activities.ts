@@ -12,6 +12,29 @@ export const generateUploadUrl = mutation({
   },
 });
 
+/**
+ * Record an uploaded image immediately after it lands in storage, before the
+ * activity form is saved. This ensures every upload is visible in the storage
+ * management page even if the form is abandoned.
+ * Admin only.
+ */
+export const trackUploadedImage = mutation({
+  args: {
+    storageId: v.id("_storage"),
+    activityId: v.optional(v.id("activities")),
+  },
+  handler: async (ctx, { storageId, activityId }) => {
+    await requireAdmin(ctx);
+    const existing = await ctx.db
+      .query("activityImages")
+      .withIndex("by_storageId", (q) => q.eq("storageId", storageId))
+      .first();
+    if (!existing) {
+      await ctx.db.insert("activityImages", { storageId, activityId, uploadedAt: Date.now() });
+    }
+  },
+});
+
 /** Resolve a Convex storage ID to a public URL. */
 export const getImageUrl = query({
   args: { storageId: v.string() },
@@ -98,7 +121,24 @@ export const createActivity = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    return await ctx.db.insert("activities", validateAndNormalizeActivity(args));
+    const id = await ctx.db.insert("activities", validateAndNormalizeActivity(args));
+    if (args.promotionalImageStorageId) {
+      // Link the tracking record created at upload time, or create one for pre-existing images
+      const existing = await ctx.db
+        .query("activityImages")
+        .withIndex("by_storageId", (q) => q.eq("storageId", args.promotionalImageStorageId!))
+        .first();
+      if (existing) {
+        await ctx.db.patch(existing._id, { activityId: id });
+      } else {
+        await ctx.db.insert("activityImages", {
+          storageId: args.promotionalImageStorageId,
+          activityId: id,
+          uploadedAt: Date.now(),
+        });
+      }
+    }
+    return id;
   },
 });
 
@@ -120,24 +160,47 @@ export const updateActivity = mutation({
     await requireAdmin(ctx);
     const activity = await ctx.db.get(id);
     if (!activity) throw new Error("Activity not found");
-    // If the image was replaced, delete the old file from storage
+    // If a new image was set, link its tracking record — the old one is kept in storage
     if (
-      activity.promotionalImageStorageId &&
-      activity.promotionalImageStorageId !== fields.promotionalImageStorageId
+      fields.promotionalImageStorageId &&
+      fields.promotionalImageStorageId !== activity.promotionalImageStorageId
     ) {
-      await ctx.storage.delete(activity.promotionalImageStorageId);
+      const existing = await ctx.db
+        .query("activityImages")
+        .withIndex("by_storageId", (q) => q.eq("storageId", fields.promotionalImageStorageId!))
+        .first();
+      if (existing) {
+        await ctx.db.patch(existing._id, { activityId: id });
+      } else {
+        await ctx.db.insert("activityImages", {
+          storageId: fields.promotionalImageStorageId,
+          activityId: id,
+          uploadedAt: Date.now(),
+        });
+      }
     }
     await ctx.db.patch(id, validateAndNormalizeActivity(fields));
   },
 });
 
-/** Delete an activity, its registrations, and its promotional image. Admin only. */
+/** Delete an activity, its registrations, and all its stored images. Admin only. */
 export const deleteActivity = mutation({
   args: { id: v.id("activities") },
   handler: async (ctx, { id }) => {
     await requireAdmin(ctx);
     const activity = await ctx.db.get(id);
-    if (activity?.promotionalImageStorageId) {
+    // Delete all tracked images for this activity
+    const imageRecords = await ctx.db
+      .query("activityImages")
+      .withIndex("by_activity", (q) => q.eq("activityId", id))
+      .collect();
+    const trackedStorageIds = new Set(imageRecords.map((r) => r.storageId));
+    for (const record of imageRecords) {
+      await ctx.storage.delete(record.storageId);
+      await ctx.db.delete(record._id);
+    }
+    // Also clean up the current image if it predates the tracking table
+    if (activity?.promotionalImageStorageId && !trackedStorageIds.has(activity.promotionalImageStorageId)) {
       await ctx.storage.delete(activity.promotionalImageStorageId);
     }
     const registrations = await ctx.db
@@ -152,27 +215,29 @@ export const deleteActivity = mutation({
 });
 
 /**
- * List all activity images with metadata and their linked activity. Admin only.
+ * List all tracked activity images with metadata. Includes images no longer
+ * linked to their activity (replaced ones). Admin only.
  */
 export const listActivityImages = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    const activities = await ctx.db.query("activities").collect();
-    const withImages = activities.filter((a) => a.promotionalImageStorageId != null);
+    const imageRecords = await ctx.db.query("activityImages").order("desc").collect();
     return await Promise.all(
-      withImages.map(async (a) => {
-        const storageId = a.promotionalImageStorageId!;
-        const [url, metadata] = await Promise.all([
-          ctx.storage.getUrl(storageId),
-          ctx.db.system.get(storageId),
+      imageRecords.map(async (record) => {
+        const [url, metadata, activity] = await Promise.all([
+          ctx.storage.getUrl(record.storageId),
+          ctx.db.system.get(record.storageId),
+          record.activityId ? ctx.db.get(record.activityId) : Promise.resolve(null),
         ]);
         return {
-          storageId,
+          storageId: record.storageId,
           url,
           size: metadata?.size,
           contentType: metadata?.contentType,
-          activity: { _id: a._id, title: a.title },
+          uploadedAt: record.uploadedAt,
+          isCurrentImage: activity?.promotionalImageStorageId === record.storageId,
+          activity: activity ? { _id: activity._id, title: activity.title } : null,
         };
       }),
     );
@@ -180,17 +245,29 @@ export const listActivityImages = query({
 });
 
 /**
- * Delete a promotional image from storage and unlink it from its activity. Admin only.
+ * Delete an image from storage. If it is currently the active promotional image
+ * of its activity, it is also unlinked. Admin only.
  */
 export const deleteStorageImage = mutation({
   args: {
     storageId: v.id("_storage"),
-    activityId: v.id("activities"),
   },
-  handler: async (ctx, { storageId, activityId }) => {
+  handler: async (ctx, { storageId }) => {
     await requireAdmin(ctx);
+    const imageRecord = await ctx.db
+      .query("activityImages")
+      .withIndex("by_storageId", (q) => q.eq("storageId", storageId))
+      .first();
+    if (imageRecord) {
+      if (imageRecord.activityId) {
+        const activity = await ctx.db.get(imageRecord.activityId);
+        if (activity?.promotionalImageStorageId === storageId) {
+          await ctx.db.patch(imageRecord.activityId, { promotionalImageStorageId: undefined });
+        }
+      }
+      await ctx.db.delete(imageRecord._id);
+    }
     await ctx.storage.delete(storageId);
-    await ctx.db.patch(activityId, { promotionalImageStorageId: undefined });
   },
 });
 

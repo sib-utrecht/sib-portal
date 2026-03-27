@@ -81,6 +81,25 @@ export default defineSchema({
   }).index("by_startTime", ["startTime"]),
 
   /**
+   * Tracks every promotional image ever uploaded for an activity.
+   * Images are kept in storage even when replaced; deletion happens manually
+   * via the admin storage page.
+   */
+  activityImages: defineTable({
+    /** Convex storage ID of the image. */
+    storageId: v.id("_storage"),
+    /**
+     * The activity this image was uploaded for.
+     * Absent when the image was uploaded but the activity form was never saved.
+     */
+    activityId: v.optional(v.id("activities")),
+    /** Unix timestamp (ms) when the image was uploaded. */
+    uploadedAt: v.number(),
+  })
+    .index("by_activity", ["activityId"])
+    .index("by_storageId", ["storageId"]),
+
+  /**
    * Registrations linking a user to an activity they have signed up for.
    */
   activityRegistrations: defineTable({
