@@ -144,9 +144,7 @@ export const getParticipants = query({
         return {
           _id: reg._id,
           registeredAt: reg.registeredAt,
-          user: user
-            ? { _id: user._id, name: user.name, email: user.email }
-            : null,
+          user: user ? { _id: user._id, name: user.name, email: user.email } : null,
         };
       }),
     );

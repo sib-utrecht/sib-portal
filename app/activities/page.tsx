@@ -35,12 +35,14 @@ function ActivitiesContent() {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">
-              Activities
-            </h1>
+            <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">Activities</h1>
             <div className="flex gap-2">
               {isAdmin && (
-                <Button asChild size="sm" className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full">
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full"
+                >
                   <Link href="/activities/new">
                     <Plus className="h-4 w-4 mr-1" />
                     New activity
@@ -120,11 +122,7 @@ function ActivityCard({
         {activity.promotionalImage && (
           <div className="w-40 shrink-0 bg-muted flex items-center justify-center overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={activity.promotionalImage}
-              alt=""
-              className="w-full h-full object-contain"
-            />
+            <img src={activity.promotionalImage} alt="" className="w-full h-full object-contain" />
           </div>
         )}
         <div className="flex-1 p-5 space-y-2">

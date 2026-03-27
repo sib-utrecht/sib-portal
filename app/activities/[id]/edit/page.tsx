@@ -28,13 +28,7 @@ function EditActivityContent({ activityId }: { activityId: Id<"activities"> }) {
     return <p className="text-gray-500">Activity not found.</p>;
   }
 
-  return (
-    <ActivityForm
-      mode="edit"
-      activityId={activityId}
-      initial={activity}
-    />
-  );
+  return <ActivityForm mode="edit" activityId={activityId} initial={activity} />;
 }
 
 export default function EditActivityPage() {

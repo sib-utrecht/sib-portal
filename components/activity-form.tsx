@@ -270,13 +270,20 @@ export function ActivityForm({
             onClick={() => fileInputRef.current?.click()}
             disabled={saving || imageUploading}
           >
-            {imageUploading ? "Uploading…" : form.promotionalImage ? "Replace image" : "Upload image"}
+            {imageUploading
+              ? "Uploading…"
+              : form.promotionalImage
+                ? "Replace image"
+                : "Upload image"}
           </Button>
           {form.promotionalImage && (
             <Button
               type="button"
               variant="ghost"
-              onClick={() => { set("promotionalImage", ""); setImageStorageId(null); }}
+              onClick={() => {
+                set("promotionalImage", "");
+                setImageStorageId(null);
+              }}
               disabled={saving || imageUploading}
               className="text-red-600 hover:text-red-700"
             >

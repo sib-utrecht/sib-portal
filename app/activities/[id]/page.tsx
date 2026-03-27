@@ -184,7 +184,16 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
         <ReactMarkdown
           rehypePlugins={[
             rehypeRaw,
-            [rehypeSanitize, { ...defaultSchema, attributes: { ...defaultSchema.attributes, "*": ["style", "className", ...(defaultSchema.attributes?.["*"] ?? [])] } }],
+            [
+              rehypeSanitize,
+              {
+                ...defaultSchema,
+                attributes: {
+                  ...defaultSchema.attributes,
+                  "*": ["style", "className", ...(defaultSchema.attributes?.["*"] ?? [])],
+                },
+              },
+            ],
           ]}
         >
           {activity.description}
@@ -268,9 +277,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
                   key={p._id}
                   className="flex items-center justify-between px-4 py-2 bg-[#6fa8c4] rounded-full"
                 >
-                  <span className="font-semibold text-gray-900">
-                    {p.user?.name ?? "(unknown)"}
-                  </span>
+                  <span className="font-semibold text-gray-900">{p.user?.name ?? "(unknown)"}</span>
                   <span className="text-sm text-gray-700">{p.user?.email}</span>
                 </div>
               ))}
@@ -292,9 +299,7 @@ export default function ActivityPage() {
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">
-                Activity
-              </h1>
+              <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">Activity</h1>
               <Button asChild variant="outline" size="sm">
                 <Link href="/activities">Back to activities</Link>
               </Button>

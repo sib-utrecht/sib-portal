@@ -51,12 +51,8 @@ export function DateTimePicker({
   focusTime = false,
 }: DateTimePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const [dateStr, setDateStr] = React.useState(
-    value ? format(value, "dd/MM/yyyy") : "00/00/0000",
-  );
-  const [timeStr, setTimeStr] = React.useState(
-    value ? format(value, "HH:mm") : "00:00",
-  );
+  const [dateStr, setDateStr] = React.useState(value ? format(value, "dd/MM/yyyy") : "00/00/0000");
+  const [timeStr, setTimeStr] = React.useState(value ? format(value, "HH:mm") : "00:00");
   const dateFocused = React.useRef(false);
   const timeFocused = React.useRef(false);
   const dateInputRef = React.useRef<HTMLInputElement>(null);
@@ -64,14 +60,15 @@ export function DateTimePicker({
   const calendarButtonRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
-    if (!dateFocused.current)
-      setDateStr(value ? format(value, "dd/MM/yyyy") : "00/00/0000");
+    if (!dateFocused.current) setDateStr(value ? format(value, "dd/MM/yyyy") : "00/00/0000");
   }, [value]);
 
   const displayDate = React.useMemo(() => {
     const dm = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
     if (!dm) return value;
-    const day = Number(dm[1]), month = Number(dm[2]), year = Number(dm[3]);
+    const day = Number(dm[1]),
+      month = Number(dm[2]),
+      year = Number(dm[3]);
     if (day < 1 || month < 1 || year < 1000) return value;
     const d = new Date(year, month - 1, day);
     if (isValid(d) && d.getDate() === day && d.getMonth() === month - 1) return d;
@@ -79,23 +76,26 @@ export function DateTimePicker({
   }, [dateStr, value]);
 
   React.useEffect(() => {
-    if (!timeFocused.current)
-      setTimeStr(value ? format(value, "HH:mm") : "00:00");
+    if (!timeFocused.current) setTimeStr(value ? format(value, "HH:mm") : "00:00");
   }, [value]);
 
   function tryCommit(dStr: string, tStr: string) {
     const dm = dStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
     const tm = tStr.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
     if (!dm || !tm) return;
-    const day = Number(dm[1]), month = Number(dm[2]), year = Number(dm[3]);
+    const day = Number(dm[1]),
+      month = Number(dm[2]),
+      year = Number(dm[3]);
     if (day < 1 || month < 1 || year < 1000) return;
     const date = new Date(year, month - 1, day, Number(tm[1]), Number(tm[2]), 0, 0);
-    if (isValid(date) && date.getDate() === day && date.getMonth() === month - 1)
-      onChange(date);
+    if (isValid(date) && date.getDate() === day && date.getMonth() === month - 1) onChange(date);
   }
 
   function handleDaySelect(day: Date | undefined) {
-    if (!day) { onChange(undefined); return; }
+    if (!day) {
+      onChange(undefined);
+      return;
+    }
     const tm = timeStr.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
     const combined = new Date(day);
     combined.setHours(tm ? Number(tm[1]) : 0, tm ? Number(tm[2]) : 0, 0, 0);
@@ -212,7 +212,8 @@ export function DateTimePicker({
       if (p === 4) {
         // last digit — advance to next focusable element like Tab
         requestAnimationFrame(() => {
-          const selector = 'a[href]:not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
+          const selector =
+            'a[href]:not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
           const all = Array.from(document.querySelectorAll<HTMLElement>(selector));
           const idx = all.indexOf(input);
           if (idx !== -1 && all[idx + 1]) all[idx + 1].focus();
@@ -318,7 +319,9 @@ export function DateTimePicker({
           onChange={() => {}}
           onKeyDown={handleDateKeyDown}
           onClick={handleDateClick}
-          onFocus={() => { dateFocused.current = true; }}
+          onFocus={() => {
+            dateFocused.current = true;
+          }}
           onBlur={handleDateBlur}
           disabled={disabled}
           className={cn(
@@ -354,13 +357,7 @@ export function DateTimePicker({
       </div>
 
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={handleDaySelect}
-          locale={nl}
-          autoFocus
-        />
+        <Calendar mode="single" selected={value} onSelect={handleDaySelect} locale={nl} autoFocus />
       </PopoverContent>
     </Popover>
   );
