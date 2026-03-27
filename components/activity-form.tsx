@@ -137,6 +137,16 @@ const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
       return;
     }
 
+    let maxParticipants: number | undefined;
+    if (form.allowSignup && form.maxParticipants) {
+      const parsed = parseInt(form.maxParticipants, 10);
+      if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 1) {
+        setError("Maximum participants must be a whole number of at least 1.");
+        return;
+      }
+      maxParticipants = parsed;
+    }
+
     const payload = {
       title: form.title.trim(),
       startTime: form.startTime.getTime(),
@@ -149,10 +159,7 @@ const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
         form.allowSignup && form.registrationDeadline
           ? form.registrationDeadline.getTime()
           : undefined,
-      maxParticipants:
-        form.allowSignup && form.maxParticipants
-          ? parseInt(form.maxParticipants, 10)
-          : undefined,
+      maxParticipants,
     };
 
     setSaving(true);

@@ -39,6 +39,35 @@ export const getActivity = query({
   },
 });
 
+type ActivityFields = {
+  title: string;
+  startTime: number;
+  endTime: number;
+  description: string;
+  promotionalImage?: string;
+  location: string;
+  allowSignup: boolean;
+  registrationDeadline?: number;
+  maxParticipants?: number;
+};
+
+function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
+  if (fields.endTime <= fields.startTime) {
+    throw new Error("endTime must be after startTime");
+  }
+  if (!fields.allowSignup) {
+    // Strip signup-only fields so they can't be set inconsistently
+    return { ...fields, registrationDeadline: undefined, maxParticipants: undefined };
+  }
+  if (fields.registrationDeadline !== undefined && fields.registrationDeadline > fields.startTime) {
+    throw new Error("registrationDeadline must be before the activity starts");
+  }
+  if (fields.maxParticipants !== undefined && fields.maxParticipants < 1) {
+    throw new Error("maxParticipants must be at least 1");
+  }
+  return fields;
+}
+
 /** Create a new activity. Admin only. */
 export const createActivity = mutation({
   args: {
@@ -54,7 +83,7 @@ export const createActivity = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    return await ctx.db.insert("activities", args);
+    return await ctx.db.insert("activities", validateAndNormalizeActivity(args));
   },
 });
 
@@ -76,7 +105,7 @@ export const updateActivity = mutation({
     await requireAdmin(ctx);
     const activity = await ctx.db.get(id);
     if (!activity) throw new Error("Activity not found");
-    await ctx.db.patch(id, fields);
+    await ctx.db.patch(id, validateAndNormalizeActivity(fields));
   },
 });
 
@@ -210,20 +239,26 @@ export const getActivityStatus = query({
       .withIndex("by_email", (q) => q.eq("email", identity.email))
       .first();
 
-    const registrations = await ctx.db
-      .query("activityRegistrations")
-      .withIndex("by_activity", (q) => q.eq("activityId", activityId))
-      .collect();
-
-    const isRegistered = user
-      ? registrations.some((r) => r.userId === user._id)
-      : false;
-
-    const admin = await isAdmin(ctx);
+    const [participantCount, userRegistration, admin] = await Promise.all([
+      ctx.db
+        .query("activityRegistrations")
+        .withIndex("by_activity", (q) => q.eq("activityId", activityId))
+        .collect()
+        .then((r) => r.length),
+      user
+        ? ctx.db
+            .query("activityRegistrations")
+            .withIndex("by_activity_and_user", (q) =>
+              q.eq("activityId", activityId).eq("userId", user._id),
+            )
+            .first()
+        : Promise.resolve(null),
+      isAdmin(ctx),
+    ]);
 
     return {
-      isRegistered,
-      participantCount: registrations.length,
+      isRegistered: userRegistration !== null,
+      participantCount,
       isAdmin: admin,
     };
   },
