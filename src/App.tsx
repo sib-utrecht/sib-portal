@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "../dashboard";
 import { LoginForm } from "../components/login-form";
@@ -14,29 +13,11 @@ import SettingsPage from "../app/settings/page";
 import PhotoPermissionsPage from "../app/photo-permissions/page";
 import TwoFAPage from "../app/2fa/page";
 
-const Loading = () => (
-  <div className="min-h-screen flex items-center justify-center">Loading...</div>
-);
-
 export default function App() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <Suspense fallback={<Loading />}>
-            <Dashboard />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/login"
-        element={
-          <Suspense fallback={<Loading />}>
-            <LoginForm />
-          </Suspense>
-        }
-      />
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/login" element={<LoginForm />} />
       <Route path="/activities" element={<ActivitiesPage />} />
       <Route path="/activities/new" element={<NewActivityPage />} />
       <Route path="/activities/:id" element={<ActivityPage />} />
@@ -51,7 +32,16 @@ export default function App() {
           </RequireAuth>
         }
       />
-      <Route path="/admin/storage" element={<StoragePage />} />
+      <Route
+        path="/admin/storage"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <StoragePage />
+            </RequireAdmin>
+          </RequireAuth>
+        }
+      />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/photo-permissions" element={<PhotoPermissionsPage />} />
       <Route path="/2fa" element={<TwoFAPage />} />

@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 
 @font-face {
-  font-family: "Geist";
+  font-family: Geist;
   src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
@@ -18,8 +18,8 @@
 }
 
 html {
-  font-family: "Geist", sans-serif;
-  --font-sans: "Geist", sans-serif;
+  font-family: Geist, sans-serif;
+  --font-sans: Geist, sans-serif;
   --font-mono: "Geist Mono", monospace;
 }
 

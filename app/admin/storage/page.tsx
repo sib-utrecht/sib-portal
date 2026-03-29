@@ -92,7 +92,6 @@ function StorageContent() {
                 {/* Square image preview */}
                 <div className="relative aspect-square bg-muted flex items-center justify-center">
                   {img.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={img.url}
                       alt={img.activity?.title ?? "Deleted activity"}

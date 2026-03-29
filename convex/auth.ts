@@ -33,12 +33,17 @@ export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Pro
     throw new Error("Unauthorized: Identity has no email address");
   }
 
+  const conscriboId = (identity as Record<string, unknown>)["custom:conscribo-id"];
+  if (typeof conscriboId !== "string" || conscriboId === "") {
+    throw new Error("Unauthorized: Identity is missing a valid conscribo-id claim");
+  }
+
   return {
     email: identity.email,
     name: identity.name,
     givenName: identity.givenName,
     familyName: identity.familyName,
-    conscriboId: (identity as Record<string, unknown>)["custom:conscribo-id"] as string,
+    conscriboId,
   };
 }
 

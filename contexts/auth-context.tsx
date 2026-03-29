@@ -57,9 +57,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const userPoolId = import.meta.env.VITE_COGNITO_USER_POOL_ID;
+const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+if (!userPoolId) {
+  throw new Error("Missing required environment variable: VITE_COGNITO_USER_POOL_ID");
+}
+if (!clientId) {
+  throw new Error("Missing required environment variable: VITE_COGNITO_CLIENT_ID");
+}
+
 const poolData = {
-  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || "",
-  ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID || "",
+  UserPoolId: userPoolId as string,
+  ClientId: clientId as string,
 };
 const REGION = import.meta.env.VITE_AWS_REGION || "eu-central-1";
 

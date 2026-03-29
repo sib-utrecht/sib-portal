@@ -17,9 +17,10 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate(`/login?redirect_uri=${encodeURIComponent(location.pathname)}`, { replace: true });
+      const fullPath = location.pathname + location.search + location.hash;
+      navigate(`/login?redirect_uri=${encodeURIComponent(fullPath)}`, { replace: true });
     }
-  }, [isAuthenticated, location.pathname, navigate, isLoading]);
+  }, [isAuthenticated, location, navigate, isLoading]);
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">

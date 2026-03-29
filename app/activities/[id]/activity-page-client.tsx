@@ -104,7 +104,6 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
       {/* Promotional image */}
       {activity.promotionalImage && (
         <div className="rounded-3xl overflow-hidden border-2 border-[#21526f] shadow-md bg-muted flex justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={activity.promotionalImage}
             alt={activity.title}
