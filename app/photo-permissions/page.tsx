@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
 import { RequireAdmin } from "@/components/require-admin";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { PhotoPermission } from "@/types/user";
@@ -77,7 +75,7 @@ function PhotoPermissionsContent() {
               Photo permissions
             </h1>
             <Button asChild variant="outline" size="sm">
-              <Link href="/">Back to dashboard</Link>
+              <Link to="/">Back to dashboard</Link>
             </Button>
           </div>
         </div>

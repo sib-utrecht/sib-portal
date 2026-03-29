@@ -1,5 +1,3 @@
-"use client";
-
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RequireAuth } from "@/components/require-auth";
@@ -7,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { MapPin, Calendar, Users, Plus } from "lucide-react";
 
 function formatDate(ts: number) {
@@ -43,14 +41,14 @@ function ActivitiesContent() {
                   size="sm"
                   className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full"
                 >
-                  <Link href="/activities/new">
+                  <Link to="/activities/new">
                     <Plus className="h-4 w-4 mr-1" />
                     New activity
                   </Link>
                 </Button>
               )}
               <Button asChild variant="outline" size="sm">
-                <Link href="/">Back to dashboard</Link>
+                <Link to="/">Back to dashboard</Link>
               </Button>
             </div>
           </div>
@@ -113,7 +111,7 @@ function ActivityCard({
   past?: boolean;
 }) {
   return (
-    <Link href={`/activities/${activity._id}`}>
+    <Link to={`/activities/${activity._id}`}>
       <Card
         className={`flex gap-4 p-0 overflow-hidden border-2 rounded-3xl shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
           past ? "border-gray-200 opacity-70" : "border-[#21526f]"

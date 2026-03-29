@@ -27,9 +27,9 @@ import {
 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import type { PhotoPermission } from "../types/user";
 
 interface FilterCardProps {
@@ -115,7 +115,7 @@ const getPermissionBadge = (permission: PhotoPermission) => {
  */
 export function AdminDashboard() {
   const { logout, isAdmin } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
   const profileData = useQuery(api.users.getProfile);
@@ -134,7 +134,7 @@ export function AdminDashboard() {
 
   const handleLogout = () => {
     logout();
-    router.replace("/");
+    navigate("/", { replace: true });
   };
 
   const permissionStats = {
@@ -190,13 +190,13 @@ export function AdminDashboard() {
                 <Badge variant="secondary">Admin</Badge>
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link href="/admin/storage">
+                <Link to="/admin/storage">
                   <ImageIcon className="h-4 w-4 mr-2" />
                   Images
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/photo-permissions">
+                <Link to="/photo-permissions">
                   <Search className="h-4 w-4 mr-2" />
                   Photo Search
                 </Link>

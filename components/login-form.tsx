@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 
 import { useState } from "react";
@@ -10,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "../contexts/auth-context";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Mail } from "lucide-react";
 
 /**
@@ -43,8 +41,8 @@ export function LoginForm() {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const redirectUri = (() => {
     const param = searchParams.get("redirect_uri");
     if (param && param.startsWith("/") && !param.startsWith("//") && !/[\r\n]/.test(param)) {
@@ -66,7 +64,7 @@ export function LoginForm() {
     e.preventDefault();
     try {
       await login(email, password, keepLoggedIn);
-      router.replace(redirectUri);
+      navigate(redirectUri, { replace: true });
     } catch (err) {
       console.error("Login failed:", err);
     }
@@ -86,7 +84,7 @@ export function LoginForm() {
     e.preventDefault();
     try {
       await loginWithCode(email, code, keepLoggedIn);
-      router.replace(redirectUri);
+      navigate(redirectUri, { replace: true });
     } catch (err) {
       console.error("Code login failed:", err);
     }

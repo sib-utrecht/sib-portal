@@ -1,8 +1,6 @@
-"use client";
-
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Route guard that restricts access to admin users only.
@@ -13,13 +11,13 @@ import { useRouter } from "next/navigation";
  */
 export function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { isAdmin, isLoading } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
-      router.replace("/");
+      navigate("/", { replace: true });
     }
-  }, [isAdmin, isLoading, router]);
+  }, [isAdmin, isLoading, navigate]);
 
   if (isLoading) {
     return (

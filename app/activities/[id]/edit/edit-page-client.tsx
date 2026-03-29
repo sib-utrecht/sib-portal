@@ -1,6 +1,4 @@
-"use client";
-
-import { useParams } from "next/navigation";
+import { useParams } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -9,7 +7,7 @@ import { RequireAdmin } from "@/components/require-admin";
 import { ActivityForm } from "@/components/activity-form";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 function EditActivityContent({ activityId }: { activityId: Id<"activities"> }) {
   const activity = useQuery(api.activities.getActivity, { id: activityId });
@@ -46,7 +44,7 @@ export default function EditActivityPage() {
                   Edit activity
                 </h1>
                 <Button asChild variant="outline" size="sm">
-                  <Link href={`/activities/${activityId}`}>Back to activity</Link>
+                  <Link to={`/activities/${activityId}`}>Back to activity</Link>
                 </Button>
               </div>
             </div>

@@ -1,7 +1,5 @@
-"use client";
-
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -72,7 +70,7 @@ export function ActivityForm({
   activityId?: Id<"activities">;
   initial?: InitialActivity;
 }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const createActivity = useMutation(api.activities.createActivity);
   const updateActivity = useMutation(api.activities.updateActivity);
   const generateUploadUrl = useMutation(api.activities.generateUploadUrl);
@@ -164,11 +162,11 @@ export function ActivityForm({
     try {
       if (mode === "create") {
         const id = await createActivity(payload);
-        router.push(`/activities/${id}`);
+        navigate(`/activities/${id}`);
       } else {
         if (!activityId) throw new Error("Missing activity ID");
         await updateActivity({ id: activityId, ...payload });
-        router.push(`/activities/${activityId}`);
+        navigate(`/activities/${activityId}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -358,7 +356,7 @@ export function ActivityForm({
           type="button"
           variant="outline"
           disabled={saving}
-          onClick={() => router.back()}
+          onClick={() => navigate(-1)}
           className="rounded-full"
         >
           Cancel

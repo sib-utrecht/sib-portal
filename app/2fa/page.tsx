@@ -1,4 +1,3 @@
-"use client";
 import type React from "react";
 import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { api } from "@/convex/_generated/api";
 import { useAction, useQuery } from "convex/react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 const TOAST_MS = 1800;
@@ -27,7 +26,7 @@ export default function TwoFAPage() {
               <h1 className="text-2xl font-bold text-foreground">Two-Factor Authentication Codes</h1>
               <div className="flex items-center gap-2">
                 <Button asChild variant="outline" size="lg">
-                  <Link href="/">Back to dashboard</Link>
+                  <Link to="/">Back to dashboard</Link>
                 </Button>
               </div>
             </div>

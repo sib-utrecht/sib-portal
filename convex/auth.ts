@@ -1,20 +1,10 @@
+import { UserIdentity } from "convex/server";
 import type { QueryCtx, MutationCtx, ActionCtx } from "./_generated/server";
 
-/**
- * Normalised representation of a successfully authenticated Cognito identity,
- * returned by {@link requireLogin} after stripping SDK-specific fields.
- */
-export type AuthenticatedIdentity = {
-  /** Primary email address from the Cognito identity token. */
+export type AuthenticatedIdentity = UserIdentity & {
   email: string;
-  /** Full display name, if present in the identity token. */
-  name: string | undefined;
-  /** Given (first) name, if present in the identity token. */
-  givenName: string | undefined;
-  /** Family (last) name, if present in the identity token. */
-  familyName: string | undefined;
   /** The member's Conscribo ID, sourced from the `custom:conscribo-id` JWT claim. */
-  conscriboId: string;
+  get conscriboId(): string;
 };
 
 /**
@@ -28,18 +18,22 @@ export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Pro
   if (!identity) {
     throw new Error("Unauthorized: Must be logged in");
   }
-
   if (!identity.email) {
     throw new Error("Unauthorized: Identity has no email address");
   }
 
-  return {
-    email: identity.email,
-    name: identity.name,
-    givenName: identity.givenName,
-    familyName: identity.familyName,
-    conscriboId: (identity as Record<string, unknown>)["custom:conscribo-id"] as string,
-  };
+  const augmented = identity as AuthenticatedIdentity;
+  Object.defineProperty(augmented, "conscriboId", {
+    get: () => (identity as Record<string, unknown>)["custom:conscribo-id"] as string,
+    enumerable: true,
+    configurable: true,
+  });
+  return augmented;
+
+  // const groups = (identity as any)["cognito:groups"] || [];
+  // if (!groups.includes("admins")) {
+  //     throw new Error("Forbidden: Admin privileges required");
+  // }
 }
 
 /**
@@ -63,8 +57,7 @@ export async function isAdmin(ctx: QueryCtx | MutationCtx): Promise<boolean> {
       return false;
     }
 
-    const rawGroups = (identity as Record<string, unknown>)["cognito:groups"];
-    const groups = Array.isArray(rawGroups) ? rawGroups : [];
+    const groups = (identity as any)["cognito:groups"] || [];
     return groups.includes("admins");
   } catch {
     return false;

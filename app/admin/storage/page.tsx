@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -11,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 
 function formatBytes(bytes: number | undefined) {
@@ -59,7 +57,7 @@ function StorageContent() {
               Stored images
             </h1>
             <Button asChild variant="outline" size="sm">
-              <Link href="/admin">Back to admin</Link>
+              <Link to="/admin">Back to admin</Link>
             </Button>
           </div>
         </div>
@@ -146,7 +144,7 @@ function StorageContent() {
                   {img.activity ? (
                     <p className="text-xs font-semibold truncate">
                       <Link
-                        href={`/activities/${img.activity._id}`}
+                        to={`/activities/${img.activity._id}`}
                         className="hover:underline text-[#21526f]"
                       >
                         {img.activity.title}
