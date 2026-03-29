@@ -66,7 +66,11 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
   };
 
   const handleSignup = () => {
-    window.open(`https://app.sib-utrecht.nl/#/event/wp-${activity.id}`, "_blank", "noopener,noreferrer");
+    window.open(
+      `https://app.sib-utrecht.nl/#/event/wp-${activity.id}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
 
   const isSignupAvailable = activity.is_signup_open && !activity.is_full;

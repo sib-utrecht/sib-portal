@@ -13,7 +13,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LogOut, Users, Camera, Eye, EyeOff, X, Filter, Search, type LucideIcon } from "lucide-react";
+import {
+  LogOut,
+  Users,
+  Camera,
+  Eye,
+  EyeOff,
+  X,
+  Filter,
+  Search,
+  ImageIcon,
+  type LucideIcon,
+} from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
@@ -178,6 +189,12 @@ export function AdminDashboard() {
                 <span className="text-sm font-medium">{user.name}</span>
                 <Badge variant="secondary">Admin</Badge>
               </div>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/admin/storage">
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Images
+                </Link>
+              </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/photo-permissions">
                   <Search className="h-4 w-4 mr-2" />

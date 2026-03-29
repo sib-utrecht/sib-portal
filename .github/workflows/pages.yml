@@ -88,6 +88,12 @@ jobs:
             mkdir -p "publish/${{ steps.vars.outputs.subdir }}"
             rsync -a ./out/ "publish/${{ steps.vars.outputs.subdir }}/"
           fi
+          # GitHub Pages serves the root 404.html for any unmatched URL across
+          # the whole site, letting the client-side router handle dynamic routes
+          # on direct navigation / refresh. Guard in case main hasn't deployed yet.
+          if [ -f publish/index.html ]; then
+            cp publish/index.html publish/404.html
+          fi
 
       - name: Deploy to gh-pages (keeps other versions)
         uses: peaceiris/actions-gh-pages@v4

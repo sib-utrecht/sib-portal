@@ -151,10 +151,7 @@ function stripHtml(html: string): string {
   if (!html) return "";
 
   // Replace block-level tags with a space so adjacent text isn't concatenated
-  const withSpaces = html.replace(
-    /<\/?(p|br|div|li|h[1-6]|blockquote|tr|td|th)[^>]*>/gi,
-    " ",
-  );
+  const withSpaces = html.replace(/<\/?(p|br|div|li|h[1-6]|blockquote|tr|td|th)[^>]*>/gi, " ");
 
   // Remove remaining HTML tags
   const stripped = withSpaces.replace(/<[^>]*>/g, "");

@@ -49,4 +49,68 @@ export default defineSchema({
     /** List of Conscribo IDs for members who belong to this committee. */
     members: v.array(v.string()),
   }),
+
+  /**
+   * Activities (events) organised by SIB Utrecht.
+   */
+  activities: defineTable({
+    /** Activity title. */
+    title: v.string(),
+    /** Unix timestamp (ms) for when the activity starts. */
+    startTime: v.number(),
+    /** Unix timestamp (ms) for when the activity ends. */
+    endTime: v.number(),
+    /** HTML description of the activity. */
+    description: v.string(),
+    /** Convex storage ID of the promotional image. */
+    promotionalImageStorageId: v.optional(v.id("_storage")),
+    /** Location where the activity takes place. */
+    location: v.string(),
+    /** Whether members can sign up for this activity. */
+    allowSignup: v.boolean(),
+    /**
+     * Unix timestamp (ms) after which sign-ups are closed.
+     * Only present when `allowSignup` is true.
+     */
+    registrationDeadline: v.optional(v.number()),
+    /**
+     * Maximum number of participants allowed to sign up.
+     * Only present when `allowSignup` is true.
+     */
+    maxParticipants: v.optional(v.number()),
+  }).index("by_startTime", ["startTime"]),
+
+  /**
+   * Tracks every promotional image ever uploaded for an activity.
+   * Images are kept in storage even when replaced; deletion happens manually
+   * via the admin storage page.
+   */
+  activityImages: defineTable({
+    /** Convex storage ID of the image. */
+    storageId: v.id("_storage"),
+    /**
+     * The activity this image was uploaded for.
+     * Absent when the image was uploaded but the activity form was never saved.
+     */
+    activityId: v.optional(v.id("activities")),
+    /** Unix timestamp (ms) when the image was uploaded. */
+    uploadedAt: v.number(),
+  })
+    .index("by_activity", ["activityId"])
+    .index("by_storageId", ["storageId"]),
+
+  /**
+   * Registrations linking a user to an activity they have signed up for.
+   */
+  activityRegistrations: defineTable({
+    /** The activity this registration belongs to. */
+    activityId: v.id("activities"),
+    /** The user who registered. */
+    userId: v.id("users"),
+    /** Unix timestamp (ms) when the registration was created. */
+    registeredAt: v.number(),
+  })
+    .index("by_activity", ["activityId"])
+    .index("by_user", ["userId"])
+    .index("by_activity_and_user", ["activityId", "userId"]),
 });
