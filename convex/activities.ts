@@ -90,6 +90,15 @@ type ActivityFields = {
 };
 
 function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
+  const title = fields.title.trim();
+  if (title === "") {
+    throw new Error("title must not be empty or whitespace-only");
+  }
+  const location = fields.location.trim();
+  if (location === "") {
+    throw new Error("location must not be empty or whitespace-only");
+  }
+  fields = { ...fields, title, location };
   if (fields.endTime <= fields.startTime) {
     throw new Error("endTime must be after startTime");
   }
@@ -100,8 +109,11 @@ function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
   if (fields.registrationDeadline !== undefined && fields.registrationDeadline > fields.startTime) {
     throw new Error("registrationDeadline must be before the activity starts");
   }
-  if (fields.maxParticipants !== undefined && fields.maxParticipants < 1) {
-    throw new Error("maxParticipants must be at least 1");
+  if (fields.maxParticipants !== undefined) {
+    const isValid = Number.isInteger(fields.maxParticipants) && fields.maxParticipants >= 1;
+    if (!isValid) {
+      throw new Error("maxParticipants must be an integer >= 1");
+    }
   }
   return fields;
 }

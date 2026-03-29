@@ -123,6 +123,7 @@ export function ActivityForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (saving || imageUploading) return;
     setError(null);
 
     if (!form.startTime || !form.endTime) {
@@ -348,7 +349,7 @@ export function ActivityForm({
       <div className="flex gap-3">
         <Button
           type="submit"
-          disabled={saving}
+          disabled={saving || imageUploading}
           className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full px-8"
         >
           {saving ? "Saving…" : mode === "create" ? "Create activity" : "Save changes"}

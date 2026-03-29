@@ -131,8 +131,9 @@ function StorageContent() {
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-7 w-7 bg-white/80 hover:bg-red-50 text-red-600 border-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-7 w-7 bg-white/80 hover:bg-red-50 text-red-600 border-red-300 opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 transition-opacity"
                         onClick={() => setConfirmDelete(img.storageId)}
+                        aria-label="Delete image"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>

@@ -181,8 +181,27 @@ export function DateTimePicker({
 
   function handleDateBlur() {
     dateFocused.current = false;
-    tryCommit(dateStr, timeStr);
-    setDateStr(value ? format(value, "dd/MM/yyyy") : "00/00/0000");
+    let effectiveDateStr = dateStr;
+    // If year is still unset but day/month were typed, fill in a sensible year
+    const partial = dateStr.match(/^(\d{2})\/(\d{2})\/0000$/);
+    if (partial) {
+      const day = Number(partial[1]);
+      const month = Number(partial[2]);
+      if (day >= 1 && month >= 1) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const candidate = new Date(currentYear, month - 1, day);
+        const useCurrentYear =
+          isValid(candidate) &&
+          candidate.getDate() === day &&
+          candidate.getMonth() === month - 1 &&
+          candidate >= now;
+        const year = useCurrentYear ? currentYear : currentYear + 1;
+        effectiveDateStr = `${partial[1]}/${partial[2]}/${year}`;
+      }
+    }
+    tryCommit(effectiveDateStr, timeStr);
+    setDateStr(value ? format(value, "dd/MM/yyyy") : effectiveDateStr);
   }
 
   function handleDateClick(e: React.MouseEvent<HTMLInputElement>) {
@@ -335,6 +354,7 @@ export function DateTimePicker({
         <Input
           type="text"
           inputMode="numeric"
+          aria-label="Tijd"
           value={timeStr}
           onChange={() => {}}
           onKeyDown={handleTimeKeyDown}
