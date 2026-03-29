@@ -251,7 +251,6 @@ export function ActivityForm({
         />
         {imageStorageId && resolvedImageUrl && (
           <div className="rounded-lg overflow-hidden border border-input bg-muted flex justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={resolvedImageUrl}
               alt="Promotional image preview"
