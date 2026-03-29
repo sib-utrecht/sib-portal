@@ -86,7 +86,7 @@ jobs:
             echo "Branch deploy: cleaning target subdir '${{ steps.vars.outputs.subdir }}'"
             rm -rf "publish/${{ steps.vars.outputs.subdir }}"
             mkdir -p "publish/${{ steps.vars.outputs.subdir }}"
-            rsync -a ./out/ "publish/${{ steps.vars.outputs.subdir }}/"
+            rsync -a ./dist/ "publish/${{ steps.vars.outputs.subdir }}/"
           fi
           # GitHub Pages serves the root 404.html for any unmatched URL across
           # the whole site, letting the client-side router handle dynamic routes
