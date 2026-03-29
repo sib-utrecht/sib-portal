@@ -404,7 +404,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithCode = async (email: string, code: string, keepLoggedIn = false): Promise<void> => {
+  const loginWithCode = async (
+    email: string,
+    code: string,
+    keepLoggedIn = false,
+  ): Promise<void> => {
     setError(null);
     setIsLoading(true);
 

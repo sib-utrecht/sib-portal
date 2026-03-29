@@ -150,7 +150,9 @@ function StorageContent() {
                       </Link>
                     </p>
                   ) : (
-                    <p className="text-xs font-semibold text-gray-400 italic truncate">Deleted activity</p>
+                    <p className="text-xs font-semibold text-gray-400 italic truncate">
+                      Deleted activity
+                    </p>
                   )}
                   <div className="flex items-center gap-1">
                     {img.isCurrentImage ? (
@@ -158,7 +160,10 @@ function StorageContent() {
                         Current
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-gray-400 border-gray-300">
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] px-1.5 py-0 h-4 text-gray-400 border-gray-300"
+                      >
                         Replaced
                       </Badge>
                     )}

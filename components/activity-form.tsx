@@ -266,11 +266,7 @@ export function ActivityForm({
             onClick={() => fileInputRef.current?.click()}
             disabled={saving || imageUploading}
           >
-            {imageUploading
-              ? "Uploading…"
-              : imageStorageId
-                ? "Replace image"
-                : "Upload image"}
+            {imageUploading ? "Uploading…" : imageStorageId ? "Replace image" : "Upload image"}
           </Button>
           {imageStorageId && (
             <Button

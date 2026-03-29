@@ -27,9 +27,7 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
   const convex = useMemo(() => {
     const url = import.meta.env.VITE_CONVEX_SELF_HOSTED_URL;
     if (!url) {
-      throw new Error(
-        "Missing required environment variable: VITE_CONVEX_SELF_HOSTED_URL"
-      );
+      throw new Error("Missing required environment variable: VITE_CONVEX_SELF_HOSTED_URL");
     }
     return new ConvexReactClient(url);
   }, []);

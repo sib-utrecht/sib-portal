@@ -22,7 +22,9 @@ export type AuthenticatedIdentity = {
  * Throws an error if the user is not authenticated.
  * Returns the user's identity if authenticated.
  */
-export async function requireLogin(ctx: QueryCtx | MutationCtx | ActionCtx): Promise<AuthenticatedIdentity> {
+export async function requireLogin(
+  ctx: QueryCtx | MutationCtx | ActionCtx,
+): Promise<AuthenticatedIdentity> {
   const identity = await ctx.auth.getUserIdentity();
 
   if (!identity) {

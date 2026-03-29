@@ -49,7 +49,11 @@ export const getActivities = query({
   args: {},
   handler: async (ctx) => {
     await requireLogin(ctx);
-    const activities = await ctx.db.query("activities").withIndex("by_startTime").order("asc").collect();
+    const activities = await ctx.db
+      .query("activities")
+      .withIndex("by_startTime")
+      .order("asc")
+      .collect();
     return await Promise.all(
       activities.map(async (a) => ({
         ...a,
@@ -212,7 +216,10 @@ export const deleteActivity = mutation({
       await ctx.db.delete(record._id);
     }
     // Also clean up the current image if it predates the tracking table
-    if (activity?.promotionalImageStorageId && !trackedStorageIds.has(activity.promotionalImageStorageId)) {
+    if (
+      activity?.promotionalImageStorageId &&
+      !trackedStorageIds.has(activity.promotionalImageStorageId)
+    ) {
       await ctx.storage.delete(activity.promotionalImageStorageId);
     }
     const registrations = await ctx.db

@@ -23,7 +23,9 @@ export default function TwoFAPage() {
         <header className="bg-background shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              <h1 className="text-2xl font-bold text-foreground">Two-Factor Authentication Codes</h1>
+              <h1 className="text-2xl font-bold text-foreground">
+                Two-Factor Authentication Codes
+              </h1>
               <div className="flex items-center gap-2">
                 <Button asChild variant="outline" size="lg">
                   <Link to="/">Back to dashboard</Link>

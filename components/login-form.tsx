@@ -295,10 +295,7 @@ export function LoginForm() {
                   onCheckedChange={(checked) => setKeepLoggedIn(checked === true)}
                   disabled={isLoading}
                 />
-                <Label
-                  htmlFor="keep-logged-in-code"
-                  className="text-sm font-normal cursor-pointer"
-                >
+                <Label htmlFor="keep-logged-in-code" className="text-sm font-normal cursor-pointer">
                   Keep me logged in
                 </Label>
               </div>
@@ -443,4 +440,3 @@ export function LoginForm() {
     </div>
   );
 }
-
