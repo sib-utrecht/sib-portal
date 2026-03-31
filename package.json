@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "lint:next": "next lint",
-    "lint": "eslint .",
-    "start": "next start"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.975.0",
@@ -54,13 +53,13 @@
     "input-otp": "1.4.1",
     "isomorphic-dompurify": "^3.5.1",
     "lucide-react": "^0.454.0",
-    "next": "15.2.4",
     "next-themes": "latest",
     "otplib": "^12.0.1",
     "react": "^19",
     "react-day-picker": "9.8.0",
     "react-dom": "^19",
     "react-hook-form": "^7.60.0",
+    "react-router-dom": "^7.5.0",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.4",
@@ -81,12 +80,13 @@
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^10.0.0",
-    "eslint-config-next": "^16.1.6",
     "postcss": "^8.5",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^6.0.0"
   }
 }

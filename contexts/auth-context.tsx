@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import {
@@ -59,11 +57,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const userPoolId = import.meta.env.VITE_COGNITO_USER_POOL_ID;
+const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+if (!userPoolId) {
+  throw new Error("Missing required environment variable: VITE_COGNITO_USER_POOL_ID");
+}
+if (!clientId) {
+  throw new Error("Missing required environment variable: VITE_COGNITO_CLIENT_ID");
+}
+
 const poolData = {
-  UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || "",
-  ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "",
+  UserPoolId: userPoolId as string,
+  ClientId: clientId as string,
 };
-const REGION = process.env.NEXT_PUBLIC_AWS_REGION || "eu-central-1";
+const REGION = import.meta.env.VITE_AWS_REGION || "eu-central-1";
 
 // Returns a new CognitoUserPool instance configured to use the given storage, so the
 // SDK's own CognitoIdentityServiceProvider.* keys are written to the same location
@@ -397,7 +404,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithCode = async (email: string, code: string, keepLoggedIn = false): Promise<void> => {
+  const loginWithCode = async (
+    email: string,
+    code: string,
+    keepLoggedIn = false,
+  ): Promise<void> => {
     setError(null);
     setIsLoading(true);
 

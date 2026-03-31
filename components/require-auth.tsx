@@ -1,8 +1,6 @@
-"use client";
-
 import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { usePathname, useRouter } from "next/navigation";
+import { useNavigate, useLocation } from "react-router-dom";
 
 /**
  * Route guard that redirects unauthenticated users to the login page.
@@ -14,16 +12,15 @@ import { usePathname, useRouter } from "next/navigation";
  */
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      const url = new URL("/login", window.location.origin);
-      url.searchParams.set("redirect_uri", pathname || "/");
-      router.replace(url.pathname + url.search);
+      const fullPath = location.pathname + location.search + location.hash;
+      navigate(`/login?redirect_uri=${encodeURIComponent(fullPath)}`, { replace: true });
     }
-  }, [isAuthenticated, pathname, router, isLoading]);
+  }, [isAuthenticated, location, navigate, isLoading]);
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">

@@ -1,11 +1,7 @@
 # dependencies
 node_modules/
 
-# next build output
-.next/
-out/
-
-# other build artifacts
+# build artifacts
 build/
 dist/
 coverage/

@@ -1,7 +1,5 @@
-"use client";
-
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,7 +47,7 @@ export default function SettingsPage() {
               <h1 className="text-2xl font-bold text-gray-900">Preferences</h1>
               <div className="flex items-center gap-2">
                 <Button asChild variant="outline" size="sm">
-                  <Link href="/">Back to dashboard</Link>
+                  <Link to="/">Back to dashboard</Link>
                 </Button>
               </div>
             </div>

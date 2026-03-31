@@ -1,6 +1,4 @@
-"use client";
-
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -10,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { MapPin, Calendar, Clock, Users, Pencil, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -28,7 +26,7 @@ function formatDate(ts: number) {
 }
 
 function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const activity = useQuery(api.activities.getActivity, { id: activityId });
   const status = useQuery(api.activities.getActivityStatus, { activityId });
   const participants = useQuery(
@@ -73,7 +71,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
     setActionError(null);
     try {
       await deleteActivity({ id: activityId });
-      router.push("/activities");
+      navigate("/activities");
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Something went wrong.");
       setBusy(false);
@@ -106,7 +104,6 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
       {/* Promotional image */}
       {activity.promotionalImage && (
         <div className="rounded-3xl overflow-hidden border-2 border-[#21526f] shadow-md bg-muted flex justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={activity.promotionalImage}
             alt={activity.title}
@@ -122,7 +119,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
           {status.isAdmin && (
             <div className="flex gap-2 shrink-0">
               <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link href={`/activities/${activityId}/edit`}>
+                <Link to={`/activities/${activityId}/edit`}>
                   <Pencil className="h-4 w-4 mr-1" />
                   Edit
                 </Link>
@@ -301,7 +298,7 @@ export default function ActivityPage() {
             <div className="flex justify-between items-center py-4">
               <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">Activity</h1>
               <Button asChild variant="outline" size="sm">
-                <Link href="/activities">Back to activities</Link>
+                <Link to="/activities">Back to activities</Link>
               </Button>
             </div>
           </div>

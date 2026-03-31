@@ -15,14 +15,14 @@ concurrency:
 
 env:
   # default, overridden per-branch in the "Compute basePath" step
-  NEXT_PUBLIC_BASE_PATH: "/"
+  VITE_BASE_PATH: "/"
 
 jobs:
   build-and-deploy:
     name: Build and deploy (gh-pages)
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL: ${{ vars.NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL }}
+      VITE_CONVEX_SELF_HOSTED_URL: ${{ vars.VITE_CONVEX_SELF_HOSTED_URL }}
     # Do not run on gh-pages itself to avoid loops
     if: github.ref != 'refs/heads/gh-pages'
     steps:
@@ -60,12 +60,12 @@ jobs:
           echo "subdir=$SUBDIR" >> $GITHUB_OUTPUT
           echo "Branch=$BRANCH slug=$SLUG base=$BASE subdir=$SUBDIR"
 
-      # For GitHub Pages we export a static site to ./out
-      - name: Build (Next.js static export)
+      # For GitHub Pages we export a static site to ./dist
+      - name: Build (Vite)
         env:
-          NEXT_PUBLIC_BASE_PATH: ${{ steps.vars.outputs.base_path }}
+          VITE_BASE_PATH: ${{ steps.vars.outputs.base_path }}
         run: |
-          echo "Using basePath=${NEXT_PUBLIC_BASE_PATH}"
+          echo "Using basePath=${VITE_BASE_PATH}"
           pnpm build
 
       - name: Checkout existing gh-pages into publish (if exists)
@@ -81,12 +81,12 @@ jobs:
           if [ "${{ steps.vars.outputs.subdir }}" = "." ]; then
             echo "Main branch: cleaning publish root except 'versions/'"
             find publish -mindepth 1 -maxdepth 1 ! -name versions -exec rm -rf {} +
-            rsync -a ./out/ publish/
+            rsync -a ./dist/ publish/
           else
             echo "Branch deploy: cleaning target subdir '${{ steps.vars.outputs.subdir }}'"
             rm -rf "publish/${{ steps.vars.outputs.subdir }}"
             mkdir -p "publish/${{ steps.vars.outputs.subdir }}"
-            rsync -a ./out/ "publish/${{ steps.vars.outputs.subdir }}/"
+            rsync -a ./dist/ "publish/${{ steps.vars.outputs.subdir }}/"
           fi
           # GitHub Pages serves the root 404.html for any unmatched URL across
           # the whole site, letting the client-side router handle dynamic routes

@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessagePreview } from "@/components/quick-actions/message-preview";
@@ -39,7 +45,9 @@ export function ChangeEmailDialog() {
         </DialogHeader>
         <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
         <DialogFooter>
-          <DialogClose asChild><Button variant="secondary">Close</Button></DialogClose>
+          <DialogClose asChild>
+            <Button variant="secondary">Close</Button>
+          </DialogClose>
           <Button disabled>Send request</Button>
         </DialogFooter>
       </>
@@ -69,7 +77,10 @@ export function ChangeEmailDialog() {
             id="newEmail"
             type="email"
             value={emailDraft}
-            onChange={(e) => { setEmailDraft(e.target.value); setIsDirty(true); }}
+            onChange={(e) => {
+              setEmailDraft(e.target.value);
+              setIsDirty(true);
+            }}
             placeholder="new.address@example.com"
           />
         </div>
@@ -82,7 +93,9 @@ export function ChangeEmailDialog() {
         </div>
       </MessagePreview>
       <DialogFooter>
-        <DialogClose asChild><Button variant="secondary">Close</Button></DialogClose>
+        <DialogClose asChild>
+          <Button variant="secondary">Close</Button>
+        </DialogClose>
         <Button>Send request</Button>
       </DialogFooter>
     </>

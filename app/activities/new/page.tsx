@@ -1,10 +1,8 @@
-"use client";
-
 import { RequireAuth } from "@/components/require-auth";
 import { RequireAdmin } from "@/components/require-admin";
 import { ActivityForm } from "@/components/activity-form";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 function NewActivityContent() {
   return (
@@ -16,7 +14,7 @@ function NewActivityContent() {
               New activity
             </h1>
             <Button asChild variant="outline" size="sm">
-              <Link href="/activities">Back to activities</Link>
+              <Link to="/activities">Back to activities</Link>
             </Button>
           </div>
         </div>

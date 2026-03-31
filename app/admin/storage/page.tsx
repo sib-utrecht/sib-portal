@@ -1,17 +1,13 @@
-"use client";
-
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { RequireAuth } from "@/components/require-auth";
-import { RequireAdmin } from "@/components/require-admin";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 
 function formatBytes(bytes: number | undefined) {
@@ -59,7 +55,7 @@ function StorageContent() {
               Stored images
             </h1>
             <Button asChild variant="outline" size="sm">
-              <Link href="/admin">Back to admin</Link>
+              <Link to="/admin">Back to admin</Link>
             </Button>
           </div>
         </div>
@@ -94,7 +90,6 @@ function StorageContent() {
                 {/* Square image preview */}
                 <div className="relative aspect-square bg-muted flex items-center justify-center">
                   {img.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={img.url}
                       alt={img.activity?.title ?? "Deleted activity"}
@@ -146,14 +141,16 @@ function StorageContent() {
                   {img.activity ? (
                     <p className="text-xs font-semibold truncate">
                       <Link
-                        href={`/activities/${img.activity._id}`}
+                        to={`/activities/${img.activity._id}`}
                         className="hover:underline text-[#21526f]"
                       >
                         {img.activity.title}
                       </Link>
                     </p>
                   ) : (
-                    <p className="text-xs font-semibold text-gray-400 italic truncate">Deleted activity</p>
+                    <p className="text-xs font-semibold text-gray-400 italic truncate">
+                      Deleted activity
+                    </p>
                   )}
                   <div className="flex items-center gap-1">
                     {img.isCurrentImage ? (
@@ -161,7 +158,10 @@ function StorageContent() {
                         Current
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-gray-400 border-gray-300">
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] px-1.5 py-0 h-4 text-gray-400 border-gray-300"
+                      >
                         Replaced
                       </Badge>
                     )}
@@ -179,11 +179,5 @@ function StorageContent() {
 }
 
 export default function StoragePage() {
-  return (
-    <RequireAuth>
-      <RequireAdmin>
-        <StorageContent />
-      </RequireAdmin>
-    </RequireAuth>
-  );
+  return <StorageContent />;
 }

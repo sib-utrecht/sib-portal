@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
 import { RequireAdmin } from "@/components/require-admin";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { PhotoPermission } from "@/types/user";
@@ -23,9 +21,17 @@ const permissionColors: Record<PhotoPermission, { bg: string; label: string }> =
 
 const FILTER_OPTIONS = [
   { value: "all" as const, label: "All", className: "bg-[#81b9d5] hover:bg-[#71a9c5]" },
-  { value: "internal+external" as const, label: "Internally & Externally", className: "bg-[#8dd4b8] hover:bg-[#7ac4a8]" },
+  {
+    value: "internal+external" as const,
+    label: "Internally & Externally",
+    className: "bg-[#8dd4b8] hover:bg-[#7ac4a8]",
+  },
   { value: "internal" as const, label: "Internally", className: "bg-[#e57373] hover:bg-[#d66363]" },
-  { value: "nowhere" as const, label: "No permissions", className: "bg-[#f4a896] hover:bg-[#e39886]" },
+  {
+    value: "nowhere" as const,
+    label: "No permissions",
+    className: "bg-[#f4a896] hover:bg-[#e39886]",
+  },
 ] satisfies { value: FilterType; label: string; className: string }[];
 
 function PermissionDot({ permission }: { permission: PhotoPermission }) {
@@ -77,7 +83,7 @@ function PhotoPermissionsContent() {
               Photo permissions
             </h1>
             <Button asChild variant="outline" size="sm">
-              <Link href="/">Back to dashboard</Link>
+              <Link to="/">Back to dashboard</Link>
             </Button>
           </div>
         </div>
@@ -128,7 +134,9 @@ function PhotoPermissionsContent() {
                 key={value}
                 onClick={() => setActiveFilter(value)}
                 className={`w-full h-20 text-xl font-bold rounded-3xl transition-all text-gray-900 ${className} ${
-                  activeFilter === value ? "border-4 border-gray-900" : "border-2 border-transparent"
+                  activeFilter === value
+                    ? "border-4 border-gray-900"
+                    : "border-2 border-transparent"
                 }`}
               >
                 {label}

@@ -1,5 +1,3 @@
-"use client";
-
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ReactNode, useMemo, useEffect } from "react";
 import { useAuth } from "../contexts/auth-context";
@@ -27,11 +25,9 @@ function ConvexAuthWrapper({
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
   const convex = useMemo(() => {
-    const url = process.env.NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL;
+    const url = import.meta.env.VITE_CONVEX_SELF_HOSTED_URL;
     if (!url) {
-      throw new Error(
-        "Missing required environment variable: NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL"
-      );
+      throw new Error("Missing required environment variable: VITE_CONVEX_SELF_HOSTED_URL");
     }
     return new ConvexReactClient(url);
   }, []);

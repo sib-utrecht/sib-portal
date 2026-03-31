@@ -27,9 +27,9 @@ import {
 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import type { PhotoPermission } from "../types/user";
 
 interface FilterCardProps {
@@ -43,7 +43,16 @@ interface FilterCardProps {
   onToggle: () => void;
 }
 
-function FilterCard({ label, Icon, colorClass, ringClass, bgClass, count, isSelected, onToggle }: FilterCardProps) {
+function FilterCard({
+  label,
+  Icon,
+  colorClass,
+  ringClass,
+  bgClass,
+  count,
+  isSelected,
+  onToggle,
+}: FilterCardProps) {
   return (
     <Card
       className={`cursor-pointer transition-all hover:shadow-md relative ${
@@ -53,7 +62,12 @@ function FilterCard({ label, Icon, colorClass, ringClass, bgClass, count, isSele
       tabIndex={0}
       aria-pressed={isSelected}
       onClick={onToggle}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
     >
       <CardContent className="p-6">
         <div className="flex items-center gap-2">
@@ -115,14 +129,18 @@ const getPermissionBadge = (permission: PhotoPermission) => {
  */
 export function AdminDashboard() {
   const { logout, isAdmin } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
   const profileData = useQuery(api.users.getProfile);
   const usersData = useQuery(api.users.getUsers, isAdmin ? {} : "skip");
 
   if (profileData === undefined || (isAdmin && usersData === undefined)) {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+        Loading…
+      </div>
+    );
   }
 
   if (!isAdmin) {
@@ -134,7 +152,7 @@ export function AdminDashboard() {
 
   const handleLogout = () => {
     logout();
-    router.replace("/");
+    navigate("/", { replace: true });
   };
 
   const permissionStats = {
@@ -190,13 +208,13 @@ export function AdminDashboard() {
                 <Badge variant="secondary">Admin</Badge>
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link href="/admin/storage">
+                <Link to="/admin/storage">
                   <ImageIcon className="h-4 w-4 mr-2" />
                   Images
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/photo-permissions">
+                <Link to="/photo-permissions">
                   <Search className="h-4 w-4 mr-2" />
                   Photo Search
                 </Link>

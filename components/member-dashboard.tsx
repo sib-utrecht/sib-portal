@@ -1,7 +1,5 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +9,7 @@ import { api } from "@/convex/_generated/api";
 import { useAuth } from "../contexts/auth-context";
 import { PhotoPermissionSettings } from "./photo-permission-settings";
 import { ActivitiesList } from "./activities-list";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Main dashboard for authenticated members.
@@ -23,7 +21,7 @@ import { useRouter } from "next/navigation";
  */
 export function MemberDashboard() {
   const { logout } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const profileData = useQuery(api.users.getProfile);
   const isLoading = profileData === undefined;
@@ -35,7 +33,7 @@ export function MemberDashboard() {
 
   const handleLogout = () => {
     logout();
-    router.replace("/");
+    navigate("/", { replace: true });
   };
 
   return (
@@ -62,7 +60,7 @@ export function MemberDashboard() {
                 )}
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link href="/settings">Preferences</Link>
+                <Link to="/settings">Preferences</Link>
               </Button>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
