@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "."),
       },
     },
+    define: {
+      global: "globalThis",
+    },
     build: {
       outDir: "dist",
     },

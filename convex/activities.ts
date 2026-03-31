@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalAction, internalMutation, mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { requireLogin, requireAdmin, isAdmin } from "./auth";
 import { Id } from "./_generated/dataModel";
 
@@ -59,7 +60,7 @@ export const getActivities = query({
         ...a,
         promotionalImage: a.promotionalImageStorageId
           ? ((await ctx.storage.getUrl(a.promotionalImageStorageId)) ?? undefined)
-          : undefined,
+          : a.promotionalImageUrl,
       })),
     );
   },
@@ -76,7 +77,7 @@ export const getActivity = query({
       ...activity,
       promotionalImage: activity.promotionalImageStorageId
         ? ((await ctx.storage.getUrl(activity.promotionalImageStorageId)) ?? undefined)
-        : undefined,
+        : activity.promotionalImageUrl,
     };
   },
 });
@@ -87,7 +88,7 @@ type ActivityFields = {
   endTime: number;
   description: string;
   promotionalImageStorageId?: Id<"_storage">;
-  location: string;
+  location?: string;
   allowSignup: boolean;
   registrationDeadline?: number;
   maxParticipants?: number;
@@ -98,10 +99,7 @@ function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
   if (title === "") {
     throw new Error("title must not be empty or whitespace-only");
   }
-  const location = fields.location.trim();
-  if (location === "") {
-    throw new Error("location must not be empty or whitespace-only");
-  }
+  const location = fields.location?.trim() || undefined;
   fields = { ...fields, title, location };
   if (fields.endTime <= fields.startTime) {
     throw new Error("endTime must be after startTime");
@@ -130,7 +128,7 @@ export const createActivity = mutation({
     endTime: v.number(),
     description: v.string(),
     promotionalImageStorageId: v.optional(v.id("_storage")),
-    location: v.string(),
+    location: v.optional(v.string()),
     allowSignup: v.boolean(),
     registrationDeadline: v.optional(v.number()),
     maxParticipants: v.optional(v.number()),
@@ -167,7 +165,7 @@ export const updateActivity = mutation({
     endTime: v.number(),
     description: v.string(),
     promotionalImageStorageId: v.optional(v.id("_storage")),
-    location: v.string(),
+    location: v.optional(v.string()),
     allowSignup: v.boolean(),
     registrationDeadline: v.optional(v.number()),
     maxParticipants: v.optional(v.number()),
@@ -424,5 +422,122 @@ export const getActivityStatus = query({
       participantCount,
       isAdmin: admin,
     };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Backfill from external SIB API
+// ---------------------------------------------------------------------------
+
+type ApiEventSignup =
+  | "none"
+  | {
+      method: string;
+      url?: string;
+      end?: string;
+      spaces?: number;
+      occupied?: number;
+      available?: boolean;
+      ticket_id?: number | null;
+    };
+
+type ApiEvent = {
+  id: string;
+  name: { long: string };
+  date: { start: string; end: string };
+  location: string | null;
+  body: {
+    description: { html: string };
+    image?: string | null;
+  };
+  participate: { signup: ApiEventSignup };
+};
+
+/**
+ * Insert or update a single activity record imported from the external SIB API.
+ * Matches on `externalId`; skips if already present (no overwrite of manual edits).
+ * Internal only — called by `backfillFromApi`.
+ */
+export const upsertFromExternalApi = internalMutation({
+  args: {
+    externalId: v.string(),
+    title: v.string(),
+    startTime: v.number(),
+    endTime: v.number(),
+    description: v.string(),
+    promotionalImageUrl: v.optional(v.string()),
+    location: v.optional(v.string()),
+    externalSignupUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("activities")
+      .withIndex("by_externalId", (q) => q.eq("externalId", args.externalId))
+      .first();
+    if (existing) return { id: existing._id, inserted: false };
+
+    const id = await ctx.db.insert("activities", {
+      externalId: args.externalId,
+      title: args.title,
+      startTime: args.startTime,
+      // Ensure endTime is always strictly after startTime
+      endTime: args.endTime > args.startTime ? args.endTime : args.startTime + 60_000,
+      description: args.description,
+      promotionalImageUrl: args.promotionalImageUrl ?? undefined,
+      location: args.location ?? undefined,
+      allowSignup: false,
+      externalSignupUrl: args.externalSignupUrl ?? undefined,
+    });
+    return { id, inserted: true };
+  },
+});
+
+/**
+ * Fetch events from the external SIB API and insert any that are not yet in
+ * the database.  Runs as an internal action so it can use `fetch`.
+ *
+ * Call from the Convex dashboard or a cron job — not exposed to clients.
+ */
+export const backfillFromApi = internalAction({
+  args: {
+    limit: v.optional(v.number()),
+    offset: v.optional(v.number()),
+  },
+  handler: async (ctx, { limit = 50, offset = 0 }) => {
+    const url = `https://api2.sib-utrecht.nl/v2/events?limit=${limit}&offset=${offset}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+    const json = (await response.json()) as { data: { events: ApiEvent[] } };
+    const events = json.data.events;
+
+    let inserted = 0;
+    let skipped = 0;
+
+    for (const event of events) {
+      const signup = event.participate.signup;
+      const externalSignupUrl =
+        signup !== "none" && typeof signup === "object" && signup.url ? signup.url : undefined;
+
+      const result = await ctx.runMutation(internal.activities.upsertFromExternalApi, {
+        externalId: event.id,
+        title: event.name.long,
+        startTime: new Date(event.date.start).getTime(),
+        endTime: new Date(event.date.end).getTime(),
+        description: event.body.description.html,
+        promotionalImageUrl: event.body.image ?? undefined,
+        location: event.location ?? undefined,
+        externalSignupUrl,
+      });
+
+      if (result.inserted) {
+        inserted++;
+      } else {
+        skipped++;
+      }
+    }
+
+    return { fetched: events.length, inserted, skipped };
   },
 });

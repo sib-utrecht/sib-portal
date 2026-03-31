@@ -130,8 +130,11 @@ export function ActivitiesList() {
                         <span className="truncate">{formatDate(startDate)}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        <span className="truncate">{activity.location ?? "TBD"}</span>
+                        {activity.location &&
+                          <>
+                            <MapPin className="h-3 w-3" />
+                            <span className="truncate">{activity.location}</span>
+                          </>}
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />

@@ -9,10 +9,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Clock, Users, Pencil, Trash2 } from "lucide-react";
+import { MapPin, Calendar, Clock, Users, Pencil, Trash2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+
+function safeHttpUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? url : null;
+  } catch {
+    return null;
+  }
+}
 
 function formatDate(ts: number) {
   return new Date(ts).toLocaleDateString("nl-NL", {
@@ -169,10 +178,12 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
             <Clock className="h-4 w-4 shrink-0 text-[#21526f]" />
             Ends {formatDate(activity.endTime)}
           </span>
-          <span className="flex items-center gap-1.5">
-            <MapPin className="h-4 w-4 shrink-0 text-[#21526f]" />
-            {activity.location}
-          </span>
+          {activity.location && (
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 shrink-0 text-[#21526f]" />
+              {activity.location}
+            </span>
+          )}
         </div>
       </div>
 
@@ -197,8 +208,35 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
         </ReactMarkdown>
       </Card>
 
-      {/* Sign-up section */}
-      {activity.allowSignup && (
+      {/* External sign-up section */}
+      {activity.externalSignupUrl && (() => {
+        const safeUrl = safeHttpUrl(activity.externalSignupUrl);
+        return (
+          <Card className="p-6 border-2 border-[#21526f] rounded-3xl shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-[#21526f]" />
+              <h3 className="text-lg font-semibold">Sign up</h3>
+            </div>
+            <p className="text-sm text-gray-600">Sign-ups for this activity are managed externally.</p>
+            {safeUrl ? (
+              <Button
+                asChild
+                className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full"
+              >
+                <a href={safeUrl} target="_blank" rel="noopener noreferrer">
+                  Sign up
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </a>
+              </Button>
+            ) : (
+              <p className="text-sm text-gray-500">Sign-up link is unavailable.</p>
+            )}
+          </Card>
+        );
+      })()}
+
+      {/* Sign-up section — hidden when external sign-up URL takes precedence */}
+      {activity.allowSignup && !activity.externalSignupUrl && (
         <Card className="p-6 border-2 border-[#21526f] rounded-3xl shadow-sm space-y-4">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-[#21526f]" />
@@ -254,7 +292,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
       )}
 
       {/* Participants list (admin only) */}
-      {status.isAdmin && activity.allowSignup && (
+      {status.isAdmin && activity.allowSignup && !activity.externalSignupUrl && (
         <Card className="p-6 border-2 border-gray-300 rounded-3xl shadow-sm space-y-4">
           <h3 className="text-lg font-semibold text-gray-700">
             Participants ({status.participantCount})
