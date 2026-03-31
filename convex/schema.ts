@@ -64,9 +64,14 @@ export default defineSchema({
     description: v.string(),
     /** Convex storage ID of the promotional image. */
     promotionalImageStorageId: v.optional(v.id("_storage")),
+    /**
+     * External URL of the promotional image (e.g. from the SIB API).
+     * Used when the image is not stored in Convex storage.
+     */
+    promotionalImageUrl: v.optional(v.string()),
     /** Location where the activity takes place. */
     location: v.optional(v.string()),
-    /** Whether members can sign up for this activity. */
+    /** Whether members can sign up for this activity via this portal. */
     allowSignup: v.boolean(),
     /**
      * Unix timestamp (ms) after which sign-ups are closed.
@@ -78,7 +83,18 @@ export default defineSchema({
      * Only present when `allowSignup` is true.
      */
     maxParticipants: v.optional(v.number()),
-  }).index("by_startTime", ["startTime"]),
+    /**
+     * External URL for signing up (e.g. an external ticket/registration page).
+     * When present, clicking "Sign up" opens this URL instead of using this portal's registration.
+     */
+    externalSignupUrl: v.optional(v.string()),
+    /**
+     * External ID from the source system (e.g. "wp-237" from the SIB API).
+     * Used to prevent duplicate imports when backfilling.
+     */
+    externalId: v.optional(v.string()),
+  }).index("by_startTime", ["startTime"])
+    .index("by_externalId", ["externalId"]),
 
   /**
    * Tracks every promotional image ever uploaded for an activity.

@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Clock, Users, Pencil, Trash2 } from "lucide-react";
+import { MapPin, Calendar, Clock, Users, Pencil, Trash2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
@@ -198,6 +198,26 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
           {activity.description}
         </ReactMarkdown>
       </Card>
+
+      {/* External sign-up section */}
+      {activity.externalSignupUrl && (
+        <Card className="p-6 border-2 border-[#21526f] rounded-3xl shadow-sm space-y-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-[#21526f]" />
+            <h3 className="text-lg font-semibold">Sign up</h3>
+          </div>
+          <p className="text-sm text-gray-600">Sign-ups for this activity are managed externally.</p>
+          <Button
+            asChild
+            className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full"
+          >
+            <a href={activity.externalSignupUrl} target="_blank" rel="noopener noreferrer">
+              Sign up
+              <ExternalLink className="h-4 w-4 ml-2" />
+            </a>
+          </Button>
+        </Card>
+      )}
 
       {/* Sign-up section */}
       {activity.allowSignup && (
