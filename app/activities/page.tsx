@@ -103,7 +103,7 @@ function ActivityCard({
     title: string;
     startTime: number;
     endTime: number;
-    location: string;
+    location?: string;
     allowSignup: boolean;
     maxParticipants?: number;
     promotionalImage?: string;
@@ -113,9 +113,8 @@ function ActivityCard({
   return (
     <Link to={`/activities/${activity._id}`}>
       <Card
-        className={`flex gap-4 p-0 overflow-hidden border-2 rounded-3xl shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
-          past ? "border-gray-200 opacity-70" : "border-[#21526f]"
-        }`}
+        className={`flex gap-4 p-0 overflow-hidden border-2 rounded-3xl shadow-sm hover:shadow-md transition-shadow cursor-pointer ${past ? "border-gray-200 opacity-70" : "border-[#21526f]"
+          }`}
       >
         {activity.promotionalImage && (
           <div className="w-40 shrink-0 bg-muted flex items-center justify-center overflow-hidden">
@@ -129,10 +128,10 @@ function ActivityCard({
               <Calendar className="h-4 w-4 shrink-0" />
               {formatDate(activity.startTime)}
             </span>
-            <span className="flex items-center gap-1">
+            {activity.location && (<span className="flex items-center gap-1">
               <MapPin className="h-4 w-4 shrink-0" />
               {activity.location}
-            </span>
+            </span>)}
             {activity.allowSignup && (
               <span className="flex items-center gap-1">
                 <Users className="h-4 w-4 shrink-0" />
