@@ -18,7 +18,7 @@ For the old portal, go to [app.sib-utrecht.nl](https://app.sib-utrecht.nl).
 
 ## Tech stack
 
-- [Next.js](https://nextjs.org) — React 19, TypeScript
+- [Vite](https://vite.dev) + [React Router](https://reactrouter.com) — React 19, TypeScript
 - [Convex](https://convex.dev) — backend / database
 - [AWS Cognito](https://aws.amazon.com/cognito/) — authentication
 - [Tailwind CSS](https://tailwindcss.com) v4 + [Radix UI](https://www.radix-ui.com) — styling & components

@@ -3,28 +3,33 @@
 ## convex/users.ts
 
 ### `getProfile` — missing fields in return value
+
 The migration dropped `_id` and `photoPermission` from the returned object. Multiple
 consumers depend on these fields at runtime and in the type system (e.g.
 `photo-permission-settings.tsx` uses both `profile._id` and `profile.photoPermission`).
 
 ### `getProfile` — changed error semantics
+
 The original gracefully returned `null` when the caller was unauthenticated or had no
 matching DB record. The migration changed it to call `requireLogin`, which throws instead
 of returning `null`, breaking any code that checks `if (!profile)`.
 
 ### `updateUserPhotoPermission` — weakened `id` argument type
+
 `id` was changed from `v.id("users")` (a typed Convex document ID) to `v.string()`, and
 the lookup was changed from `ctx.db.get(id)` to a `.filter()` query on the `_id` field.
 Filtering by `_id` as a plain string does not work in Convex — `_id` is not a filterable
 string field in that way. Restored to `v.id("users")` and `ctx.db.get(id)`.
 
 ### `login` query — added insecure, extraneous endpoint
+
 A new `login` query was added that retrieves a user and compares passwords in plaintext
 inside a Convex query. This is both architecturally wrong (authentication belongs outside
 Convex) and a security concern (exposes password comparison logic as a public query
 endpoint). Removed entirely.
 
 ### Leftover debug code
+
 An unused `action` import and a commented-out login action were added. Removed.
 
 ---
@@ -32,23 +37,27 @@ An unused `action` import and a commented-out login action were added. Removed.
 ## convex/auth.ts
 
 ### `AuthenticatedIdentity` type — replaced with an extending interface
+
 The original was a clean plain-object type with explicit fields. The migration replaced it
 with `UserIdentity & { get conscriboId(): string }`, turning `conscriboId` into a
 non-enumerable getter and losing the explicit `name`, `givenName`, `familyName` fields
 from the type (relying on `UserIdentity` instead). Restored to the original shape.
 
 ### `requireLogin` — mutated the identity object instead of constructing a plain object
+
 Instead of returning a plain `AuthenticatedIdentity` object, the migration used
 `Object.defineProperty` to attach a getter to the live `UserIdentity` object and returned
 that. This is fragile and deviates from the original intent. Restored to return a plain
 constructed object.
 
 ### `isAdmin` — weakened type safety
+
 `(identity as Record<string, unknown>)["cognito:groups"]` with an explicit `Array.isArray`
 guard was replaced with `(identity as any)["cognito:groups"] || []`. Restored to the
 original typed access.
 
 ### Commented-out code added
+
 A block of dead commented-out code was added. Removed.
 
 ---

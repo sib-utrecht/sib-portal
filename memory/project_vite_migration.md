@@ -9,6 +9,7 @@ Migrated from Next.js 15 (output: export) to Vite 6 + React Router 7 in March 20
 **Why:** Next.js `generateStaticParams` kept breaking for dynamic routes on GitHub Pages; the app is a pure SPA with no SSR so Next.js added no value.
 
 **Key facts:**
+
 - Build output dir changed from `./out` to `./dist`
 - Env vars renamed: `NEXT_PUBLIC_*` → `VITE_*` (accessed via `import.meta.env.VITE_*`)
 - GitHub Actions repo variable must be renamed from `NEXT_PUBLIC_CONVEX_SELF_HOSTED_URL` to `VITE_CONVEX_SELF_HOSTED_URL` in repo Settings → Variables → Actions
