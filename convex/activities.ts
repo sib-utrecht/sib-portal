@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { action, internalMutation, mutation, query } from "./_generated/server";
+import { internalAction, internalMutation, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { requireLogin, requireAdmin, isAdmin } from "./auth";
 import { Id } from "./_generated/dataModel";
@@ -474,9 +474,9 @@ export const upsertFromExternalApi = internalMutation({
       .query("activities")
       .withIndex("by_externalId", (q) => q.eq("externalId", args.externalId))
       .first();
-    if (existing) return existing._id;
+    if (existing) return { id: existing._id, inserted: false };
 
-    return await ctx.db.insert("activities", {
+    const id = await ctx.db.insert("activities", {
       externalId: args.externalId,
       title: args.title,
       startTime: args.startTime,
@@ -488,6 +488,7 @@ export const upsertFromExternalApi = internalMutation({
       allowSignup: false,
       externalSignupUrl: args.externalSignupUrl ?? undefined,
     });
+    return { id, inserted: true };
   },
 });
 
@@ -497,7 +498,7 @@ export const upsertFromExternalApi = internalMutation({
  *
  * Call from the Convex dashboard or a cron job — not exposed to clients.
  */
-export const backfillFromApi = action({
+export const backfillFromApi = internalAction({
   args: {
     limit: v.optional(v.number()),
     offset: v.optional(v.number()),
@@ -530,15 +531,11 @@ export const backfillFromApi = action({
         externalSignupUrl,
       });
 
-      // upsertFromExternalApi returns the _id in both cases; we detect
-      // inserts by checking whether a matching record already existed
-      // (the mutation returns early for existing records too, so we can't
-      // easily distinguish — just count based on whether we would insert).
-      // For simplicity: re-query after to check creation time vs now is
-      // unnecessary; track via a sentinel return value isn't worth it here.
-      // Log counts are best-effort.
-      void result;
-      inserted++;
+      if (result.inserted) {
+        inserted++;
+      } else {
+        skipped++;
+      }
     }
 
     return { fetched: events.length, inserted, skipped };
