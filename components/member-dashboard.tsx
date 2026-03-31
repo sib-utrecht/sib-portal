@@ -37,12 +37,12 @@ export function MemberDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen portal-bg">
+      <header className="portal-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">Member Dashboard</h1>
-            <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold portal-title">Member Dashboard</h1>
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 {isLoading ? (
                   <>
@@ -51,18 +51,18 @@ export function MemberDashboard() {
                   </>
                 ) : (
                   <>
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-8 w-8 ring-2 ring-[#21526f]/20">
                       <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
-                      <AvatarFallback>{initials}</AvatarFallback>
+                      <AvatarFallback className="bg-[#eaf3f7] text-[#21526f] font-semibold">{initials}</AvatarFallback>
                     </Avatar>
-                    <span className="text-sm font-medium">{user.name}</span>
+                    <span className="text-sm font-medium text-[#21526f]">{user.name}</span>
                   </>
                 )}
               </div>
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
                 <Link to="/settings">Preferences</Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
@@ -75,10 +75,12 @@ export function MemberDashboard() {
         <div className="grid gap-6 lg:grid-cols-5">
           {/* Profile and Photo Permissions */}
           <div className="lg:col-span-3 space-y-6">
-            <Card>
+            <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-[#21526f]">
+                  <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
+                    <User className="h-4 w-4 text-[#21526f]" />
+                  </div>
                   Profile Information
                 </CardTitle>
                 <CardDescription>Your account details</CardDescription>
@@ -96,14 +98,14 @@ export function MemberDashboard() {
                     </>
                   ) : (
                     <>
-                      <Avatar className="h-16 w-16">
+                      <Avatar className="h-16 w-16 ring-2 ring-[#21526f]/20">
                         <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
-                        <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                        <AvatarFallback className="text-lg bg-[#eaf3f7] text-[#21526f] font-bold">{initials}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-semibold text-lg">{user.name}</h3>
-                        <p className="text-gray-600">{user.email}</p>
-                        <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+                        <h3 className="font-semibold text-lg text-gray-900">{user.name}</h3>
+                        <p className="text-gray-500 text-sm">{user.email}</p>
+                        <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-[#eaf3f7] text-[#21526f] capitalize">{user.role}</span>
                       </div>
                     </>
                   )}
@@ -111,10 +113,12 @@ export function MemberDashboard() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Camera className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-[#21526f]">
+                  <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
+                    <Camera className="h-4 w-4 text-[#21526f]" />
+                  </div>
                   Photo Permissions
                 </CardTitle>
                 <CardDescription>

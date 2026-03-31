@@ -112,7 +112,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
     <div className="space-y-8 max-w-3xl">
       {/* Promotional image */}
       {activity.promotionalImage && (
-        <div className="rounded-3xl overflow-hidden border-2 border-[#21526f] shadow-md bg-muted flex justify-center">
+        <div className="rounded-2xl overflow-hidden ring-1 ring-[#21526f]/20 shadow-md shadow-[#21526f]/10 bg-[#eaf3f7] flex justify-center">
           <img
             src={activity.promotionalImage}
             alt={activity.title}
@@ -124,7 +124,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
       {/* Title & meta */}
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-4">
-          <h2 className="text-3xl font-bold text-gray-900">{activity.title}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{activity.title}</h2>
           {status.isAdmin && (
             <div className="flex gap-2 shrink-0">
               <Button asChild variant="outline" size="sm" className="rounded-full">
@@ -188,7 +188,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
       </div>
 
       {/* Description */}
-      <Card className="p-6 border-2 border-[#21526f] rounded-3xl shadow-sm prose max-w-none">
+      <Card className="p-6 border-t-4 border-t-[#21526f] rounded-2xl shadow-sm shadow-[#21526f]/5 prose max-w-none">
         <ReactMarkdown
           rehypePlugins={[
             rehypeRaw,
@@ -212,7 +212,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
       {activity.externalSignupUrl && (() => {
         const safeUrl = safeHttpUrl(activity.externalSignupUrl);
         return (
-          <Card className="p-6 border-2 border-[#21526f] rounded-3xl shadow-sm space-y-4">
+          <Card className="p-6 border-t-4 border-t-[#6fb0cd] rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-[#21526f]" />
               <h3 className="text-lg font-semibold">Sign up</h3>
@@ -237,7 +237,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
 
       {/* Sign-up section — hidden when external sign-up URL takes precedence */}
       {activity.allowSignup && !activity.externalSignupUrl && (
-        <Card className="p-6 border-2 border-[#21526f] rounded-3xl shadow-sm space-y-4">
+        <Card className="p-6 border-t-4 border-t-[#6fb0cd] rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-[#21526f]" />
             <h3 className="text-lg font-semibold">Sign up</h3>
@@ -293,7 +293,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
 
       {/* Participants list (admin only) */}
       {status.isAdmin && activity.allowSignup && !activity.externalSignupUrl && (
-        <Card className="p-6 border-2 border-gray-300 rounded-3xl shadow-sm space-y-4">
+        <Card className="p-6 border-t-4 border-t-[#21526f]/30 rounded-2xl shadow-sm space-y-4">
           <h3 className="text-lg font-semibold text-gray-700">
             Participants ({status.participantCount})
           </h3>
@@ -330,12 +330,12 @@ export default function ActivityPage() {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-        <header className="bg-white shadow-sm border-b">
+      <div className="min-h-screen portal-bg">
+        <header className="portal-header">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">Activity</h1>
-              <Button asChild variant="outline" size="sm">
+              <h1 className="text-2xl font-bold portal-title">Activity</h1>
+              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
                 <Link to="/activities">Back to activities</Link>
               </Button>
             </div>

@@ -75,14 +75,12 @@ function PhotoPermissionsContent() {
   }, [users, searchQuery, activeFilter]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen portal-bg">
+      <header className="portal-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-4xl font-bold text-gray-900 underline decoration-4">
-              Photo permissions
-            </h1>
-            <Button asChild variant="outline" size="sm">
+            <h1 className="text-2xl font-bold portal-title">Photo permissions</h1>
+            <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
               <Link to="/">Back to dashboard</Link>
             </Button>
           </div>
