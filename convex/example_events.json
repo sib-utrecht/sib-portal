@@ -1,0 +1,1343 @@
+{
+  "data": {
+    "events": [
+      {
+        "headerline": null,
+        "$.created": "2026-03-10T15:53:27.000+0100",
+        "$.modified": "2026-03-11T16:14:49.000+0100",
+        "id": "wp-237",
+        "name": {
+          "long": "Lecture on Euthanasia"
+        },
+        "date": {
+          "start": "2026-03-24T20:00:00.000+0100",
+          "end": "2026-03-24T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Lecture on Euthanasia</strong>\n<br><i>Tue 24 March | Kargadoor | 20:00</i>\n<br>\n<br>Who should decide when a life ends? For some, euthanasia represents compassion and care in the face of unbearable suffering. For others, it symbolizes the downfall of society and our obsession with autonomy. \n\nEuthanasia is a topic that often inspires people to speak from emotion rather than reality and has become a frequent target of misinformation. This talk will provide you with the facts, figures, and forum  you need to navigate this complex issue.\n\nAfter this evening you'll have the answers to the questions you've always wanted to ask on medically assisted dying. How did the Netherlands become the first country to legalize euthanasia? What are the rules and regulations? Are there death panels? Do people with psychological problems qualify? And how exactly is it performed? Ask Miriam Saridi, a lawyer specializing in health law who works for the Euthanasia Review Committee, anything!"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/03/promo_fa87f802_IMG-20260310-WA0002.jpg"
+        },
+        "post_id": 11655,
+        "event_id": 237,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/lecture-on-euthanasia-495/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-02-23T23:45:17.000+0100",
+        "$.modified": "2026-03-11T16:13:28.000+0100",
+        "id": "wp-233",
+        "name": {
+          "long": "Half-Year GMA"
+        },
+        "date": {
+          "start": "2026-03-18T18:00:00.000+0100",
+          "end": "2026-03-18T18:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Half-Year GMA</strong>\n<br><i>March 18th | 18:00  | Ruppert, Room C</i>\n<br>\n<br>❗Join this years second GMA❗\n<br>\n<br>In this GMA the 45th board will be giving an update on the past half year and how their policy promises are going so far. Besides that you will hear how SIB had spent their money the last half year, you can again vote on SIB matters and much more!!\n<br>\n<br><i>If you are unable to come, you can authorise another member to vote for you during the GMA. You can do this by sending Susanne, our secretary, an email on secretaris@sib-utrecht.nl. Be sure to do this before the GMA starts.</i>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/02/promo_6d503118_Half-YearGMA45ste.png"
+        },
+        "post_id": 11651,
+        "event_id": 233,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/half-year-gma-458/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-03-03T12:50:11.000+0100",
+        "$.modified": "2026-03-16T18:02:29.000+0100",
+        "id": "wp-236",
+        "name": {
+          "long": "Iftar dinner"
+        },
+        "date": {
+          "start": "2026-03-17T18:45:00.000+0100",
+          "end": "2026-03-17T18:45:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Iftar dinner</strong>\n<br><i>Tue 17 March | 18:45 | Livingstonelaan 609</i>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/03/promo_da0913b1_Iftardinner.png"
+        },
+        "post_id": 11654,
+        "event_id": 236,
+        "ticket_id": 173,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2026-03-17T18:45:00.000+0100",
+            "available": false,
+            "spaces": 35,
+            "occupied": 34,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-236",
+            "ticket_id": 173
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/iftar-dinner-445/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-02-23T23:42:51.000+0100",
+        "$.modified": "2026-02-23T23:48:34.000+0100",
+        "id": "wp-232",
+        "name": {
+          "long": "DIES Cantus"
+        },
+        "date": {
+          "start": "2026-03-13T20:00:00.000+0100",
+          "end": "2026-03-13T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>DIES cantus</strong>\n<br><i>Fri 13 Mar | 20:00 | Back and Fourth</i>\n<br>\n<br>Get ready Feuten for the KMT of your life\n<br>A star was born in the shape of Manuel Broekman⭐️ and he brought us the incredible tv series: Feuten. In honour of this series, a true Feuten cantus will be brought to you by A. Noordzij and M. de Ruyter as the closing piece of an incredible DIES week! \n<br>\n<br>🗓️ Friday the 13th of March\n<br>🕰️ 20u00 sharp\n<br>💰€7,50 pp for members\n<br>👴🏻€10 pp for alumni/externals\n<br>💧€5 pp for watercantus (limited spots)\n<br>\n<br>Sign up here: <a href=\"https://forms.gle/yRUYxei5eETxCC4x8\">https://forms.gle/yRUYxei5eETxCC4x8</a>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/02/promo_cf510e8b_cantus.png"
+        },
+        "post_id": 11650,
+        "event_id": 232,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/dies-cantus-230/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-02-16T17:56:14.000+0100",
+        "$.modified": "2026-03-04T15:07:10.000+0100",
+        "id": "wp-231",
+        "name": {
+          "long": "DIES Lecture"
+        },
+        "date": {
+          "start": "2026-03-10T20:00:00.000+0100",
+          "end": "2026-03-10T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>DIES Lecture</strong>\n<br><i>Tue 10 March | 20:00 | Instituto Cervantes</i>\n<br>\n<br>We’re reaching for the stars! But what if we are obstructed from reaching them? In this DIES-Talk, Dr. Claudia Wieners explores geo-engineering as a potential tool to address climate change, focusing on Stratospheric Aerosol Injection. This method proposes creating a thin, reflective layer in the stratosphere to reflect part of the sun’s radiation back into space, thereby slowing global warming.\n<br>Dr. Wieners stresses, however, that geo-engineering treats the symptoms rather than the root causes of the climate crisis. How effective is SAI? What risks does it involve? And who should have the authority to decide whether, and how, such technology is used?"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/03/promo_b0420b4e_lezing3.png"
+        },
+        "post_id": 11649,
+        "event_id": 231,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/dies-lecture-879/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-02-16T17:55:01.000+0100",
+        "$.modified": "2026-02-28T21:06:18.000+0100",
+        "id": "wp-230",
+        "name": {
+          "long": "DIES Bowling"
+        },
+        "date": {
+          "start": "2026-03-09T19:00:00.000+0100",
+          "end": "2026-03-09T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>DIES Bowling</strong>\n<br><i>Mon 9 March | 19:00-20:00 | Mitland Bowling</i>\n\nMaximum price: €3,50"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/02/promo_929c9170_IMG_4007.jpeg"
+        },
+        "post_id": 11648,
+        "event_id": 230,
+        "ticket_id": 172,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2026-03-09T19:00:00.000+0100",
+            "available": false,
+            "spaces": 50,
+            "occupied": 39,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-230",
+            "ticket_id": 172
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/dies-bowling-923/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-03-03T12:47:21.000+0100",
+        "$.modified": "2026-03-03T12:47:21.000+0100",
+        "id": "wp-235",
+        "name": {
+          "long": "BFF Symposium"
+        },
+        "date": {
+          "start": "2026-03-07T11:00:00.000+0100",
+          "end": "2026-03-07T16:30:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>BFF Symposium</strong>\n<br><i>Saturday 7 March | 11:00-16:30 | Parnassos</i>\n<br>Can you be friends with your ex? What is the role of personal friendship in geopolitics? How do I write my friend a love letter? These questions and more will be answered during our very own symposium! For this event where we've invited many speakers, who all have their own view on friendship. It's a combination of all the best parts of the SIB intellectual program: lectures, workshops and drinks afterwards! You can get a <strong>FREE</strong> book and there will also be <strong>LUNCH AND HOMEMADE SNACKS INCLUDED</strong> in your ticket, provided by our lovely cooking committee. The drinks will last until 18:00! \n<br>\n<br>Bring all your besties and buy your ticket now for the low low price of €4,50. And yes, you can bring ALL your friends, since non-SIB-members are welcome too (€5,50 for students; €8,00 for non-students). Find your tickets here: sib-utrecht.nl/symposium"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/03/promo_8960fc89_WhatsAppImage2026-03-03at12.39.40.jpeg"
+        },
+        "post_id": 11653,
+        "event_id": 235,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/bff-symposium-209/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-02-16T17:49:05.000+0100",
+        "$.modified": "2026-02-23T23:48:07.000+0100",
+        "id": "wp-229",
+        "name": {
+          "long": "Werewolf and Blood on the Clocktower"
+        },
+        "date": {
+          "start": "2026-03-03T20:00:00.000+0100",
+          "end": "2026-03-03T21:30:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Werewolves vs Blood on the Clocktower</strong>\n<br><i>Tue 03 Mar | 20:00-21:30 | Buurthuis de Uithoek</i>\n<br>\n<br>Earlier this year we played Blood on the Clocktower and we compared it to Werewolves. But which one do you like better? At the activity you will get to choose which one to play, or play both if you feel like it! There will also be some simple cardgames for people who don't feel like spending the evening figuring out if their neighbours are secretly evil 💙\n<br>\n<br>What will you choose?"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/02/promo_23b91d31_gameonweerwolvenbloodontheclocktower.png"
+        },
+        "post_id": 11647,
+        "event_id": 229,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/werewolf-and-blood-on-the-clocktower-198/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-02-16T17:45:25.000+0100",
+        "$.modified": "2026-02-16T17:45:25.000+0100",
+        "id": "wp-228",
+        "name": {
+          "long": "Linocutting: maken your own stamp!"
+        },
+        "date": {
+          "start": "2026-02-24T20:00:00.000+0100",
+          "end": "2026-02-24T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Linocutting: maken your own stamp!</strong>\n<br> <i>Tue 24 Feb | 20:00 | Ruppert 002</i>\n<br>\n<br>Join us as we explore the exciting world of linocutting! Make your own personal stamp by gouging through linoleum (floor material) to create your unique picture. Get those creative juices flowing and come for a chill evening of chatting and stamping ;)"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/02/promo_31629d1c_Tangledverenigingsbreedzonderpassie.png"
+        },
+        "post_id": 11646,
+        "event_id": 228,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/linocutting-maken-your-own-stamp-587/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-02-16T17:42:01.000+0100",
+        "$.modified": "2026-02-16T17:42:01.000+0100",
+        "id": "wp-227",
+        "name": {
+          "long": "Politieke Tafeltjes: Gemeenteraadsverkiezingen"
+        },
+        "date": {
+          "start": "2026-02-17T20:00:00.000+0100",
+          "end": "2026-02-17T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Politieke Tafeltjes: Gemeenteraadsverkiezingen</strong>\n<br><i>Tue 17 Feb</i> | <i>Buurthuis De Jager</i> | <i>20:00</i>\n<br>\n<br><strong>!!This event will be in Dutch!!</strong>\n<br>Over iets meer dan een maand is het weer zover: we mogen gaan stemmen voor de gemeenteraadsverkiezingen. Wel zo handig om dan te weten wat er speelt! Tijdens deze Politieke Tafeltjes Avond ga je aan tafel met verschillende lokale politici en bespreek je stellingen en actuele problematiek. Deze vijf partijen zijn alvast aanwezig, die hun kennis maar al te graag met jullie delen en uiteraard jullie meningen ook willen horen! 🗳️"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/02/promo_f92dc3eb_CopyofPoliticalTablesEvening.png"
+        },
+        "post_id": 11645,
+        "event_id": 227,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/politieke-tafeltjes-gemeenteraadsverkiezingen-654/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-02-05T18:43:28.000+0100",
+        "$.modified": "2026-02-05T18:43:28.000+0100",
+        "id": "wp-226",
+        "name": {
+          "long": "Talk by Dr. Eleni Braat about Secret Services"
+        },
+        "date": {
+          "start": "2026-02-12T20:00:00.000+0100",
+          "end": "2026-02-12T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Talk by Dr. Eleni Braat about Secret Services</strong>\n<br><i>Thu 12 Feb | Kargadoor | 20:00</i>\n<br>\n<br>Eleni Braat, former historian of the Algemene Inlichtingen- en Veiligheidsdienst (AIVD)🤫, offers a rare look inside the Dutch secret service during the Cold War. How did strict secrecy shape the organisation, its culture, and the conditions under which its employees worked? Hear more about it in this interesting talk during which the old board 4️⃣4️⃣ will come back during the HEIMweek!"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/02/promo_c7619cf5_ebed2adb-8365-4499-91df-a805411e246e.jpeg"
+        },
+        "post_id": 11644,
+        "event_id": 226,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/talk-by-dr-eleni-braat-about-secret-services-141/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-01-23T16:04:46.000+0100",
+        "$.modified": "2026-01-23T16:04:46.000+0100",
+        "id": "wp-223",
+        "name": {
+          "long": "Decorate own flower pot with the 44th Board🍀"
+        },
+        "date": {
+          "start": "2026-02-10T20:00:00.000+0100",
+          "end": "2026-02-10T21:30:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Decorate own flower pot with the 44th Board🍀</strong>\n<br><i>Tue 10 Feb | Hart van Hoograven | 20:00-21:30</i>\n<br>\n<br>Come paint your flower pot with the 4️⃣4️⃣th Board while the current board is away.🪴 Are you Picasso, Mondriaan or Van Gogh? Show us your skills or lack thereof 👩‍🎨 We will provide the paint and pots, and even bring some herbal plants (like basil, mint etc) for you to take home💐\n<br>\n<br>Costs <strong>max €2.</strong>\n<br>\n<br>Maximum <strong>capacity of 45 people</strong> . Sign up in the webapp. <strong>Full = full!</strong>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/01/promo_a9e7eb76_a751bffa-7965-4712-9fcd-fc6a25ff6404.jpeg"
+        },
+        "post_id": 11641,
+        "event_id": 223,
+        "ticket_id": 170,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2026-02-10T20:00:00.000+0100",
+            "available": false,
+            "spaces": 45,
+            "occupied": 41,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-223",
+            "ticket_id": 170
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/decorate-own-flower-pot-with-the-44th-board-105/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-01-23T16:07:57.000+0100",
+        "$.modified": "2026-01-23T16:07:57.000+0100",
+        "id": "wp-224",
+        "name": {
+          "long": "Books vs Movies: The Ultimate Showdown!"
+        },
+        "date": {
+          "start": "2026-02-03T20:15:00.000+0100",
+          "end": "2026-02-03T20:15:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Books vs Movies: The Ultimate Showdown!</strong> \n<br><i>Tue 3 Feb | 20:15  | Buurthuis de Leeuw</i>\n<br>Are you team books or team movies, the choice is yours! This upcoming interactive discussion we will see which team will come out on top?! Are you a true bookworm, or a diehard cinema geek (or maybe even both)? Then in this showdown you will be able to see if your fellow SIB members are allies or foes. We will be discussing some movie and book adaptations, and wish to know which one you think is better. \n<br>\n<br>Be sure to read up on your favourite book-to-movie adaptations and watch those cinematic masterpieces—you’re going to need it. 🙂\n<br>We hope to see you there &lt;3"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/01/promo_ae382d52_CopyofProseBeforeHoes-Activityfeb2026.png"
+        },
+        "post_id": 11642,
+        "event_id": 224,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/books-vs-movies-the-ultimate-showdown-789/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-12-15T13:48:54.000+0100",
+        "$.modified": "2025-12-15T13:48:54.000+0100",
+        "id": "wp-219",
+        "name": {
+          "long": "Winter Wonderland Cantus"
+        },
+        "date": {
+          "start": "2026-01-30T20:30:00.000+0100",
+          "end": "2026-01-30T22:30:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Winter Wonderland Cantus </strong>\n<br><i>Fri 30 Jan | 20:30-22:30 | De Vrienden</i>\n<br>\n<br>January 30th we will have a real ❄Winter Wonderland Cantus❄ With Daphne and mystery guest as our cantoren we will see the last sparkle of winter and christmas go 🎄\n<br>\n<br>Together we will sing the cosiest christmas songs with the delight of a good beer 🍻\n<br>\n<br>Will we see you there? Sign up here: <a href=\"https://forms.gle/WHtKcmvZ32d857nz6\">https://forms.gle/WHtKcmvZ32d857nz6</a>\n<br>\n<br>PS. This activity starts at 20:30 and will end at 22:30, after that we have some time to party at De Vrienden and maybe move on to&nbsp;other&nbsp;clubs😉"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/12/promo_39b43089_Savethedate3001.png"
+        },
+        "post_id": 11637,
+        "event_id": 219,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/winter-wonderland-cantus-214/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-12-15T13:50:43.000+0100",
+        "$.modified": "2026-01-21T14:32:08.000+0100",
+        "id": "wp-220",
+        "name": {
+          "long": "Open Mic"
+        },
+        "date": {
+          "start": "2026-01-27T18:00:00.000+0100",
+          "end": "2026-01-27T18:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Open Mic Night</strong>\n<br><i>Tue 27 Jan | 18:00 | Café Domkop</i>\n<br>\n<br>Have you always wanted to know what keeps an average SIBber up at night? Do you like long (but not too long) rants on random subjects? Then you should absolutely join our Open Mic night! \n<br>We've got a great lineup of passionate SIBbers who'll each give a short presentation on their favorite subject. What could make this better? I'LL TELL YOU: FOOD! For a maximum of €10, you can dine with us in the café itself!!\n<br>Please put your dietary restrictions in the comments (a vegan option is available ;))!\n\n<br>Signing up means you have to pay, even if you&nbsp;do&nbsp;not&nbsp;show&nbsp;up!! \n<br>❗This activity has a max of 45 persons!!❗\n"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/12/promo_7f5f0092_OpenMicnighttt.png"
+        },
+        "post_id": 11638,
+        "event_id": 220,
+        "ticket_id": 169,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2026-01-27T18:00:00.000+0100",
+            "available": false,
+            "spaces": 27,
+            "occupied": 26,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-220",
+            "ticket_id": 169
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/open-mic-293/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2026-01-08T14:32:04.000+0100",
+        "$.modified": "2026-01-14T17:48:52.000+0100",
+        "id": "wp-222",
+        "name": {
+          "long": "Ice Skating: Second Try"
+        },
+        "date": {
+          "start": "2026-01-20T20:00:00.000+0100",
+          "end": "2026-01-20T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Ice Skating: Second Try</strong>\n<br><i>Tue 20 Jan | 20:00 | De Vechtsebanen</i>\n<br>\n<br>The weather may have stopped us from going ice skating last Tuesday, but on 20 January we're trying again⛸! \n<br>\n<br>Grab some skates and twirl on the ice, race your friends or drink a hot cocoa while watching from the sidelines, for a max of €8. \n<br>\n<br>You can bring your own ice skates or rent them at De Vechtsebanen at your own expense (the rent is €8). You must bring gloves, otherwise you won’t be allowed to go skating💙 \n<br>\n<br>Signing up means you have to pay, even if you&nbsp;do&nbsp;not&nbsp;show&nbsp;up!! \n<br>❗This activity as a max of 30 persons!!❗"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/01/promo_c6e4c4be_Iceskatingversion21.png"
+        },
+        "post_id": 11640,
+        "event_id": 222,
+        "ticket_id": 168,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2026-01-20T20:00:00.000+0100",
+            "available": false,
+            "spaces": 30,
+            "occupied": 29,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-222",
+            "ticket_id": 168
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/ice-skating-second-try-190/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-12-15T13:46:19.000+0100",
+        "$.modified": "2025-12-15T13:46:19.000+0100",
+        "id": "wp-218",
+        "name": {
+          "long": "Lecture: Trouble on the European electricity grids"
+        },
+        "date": {
+          "start": "2026-01-13T20:00:00.000+0100",
+          "end": "2026-01-13T21:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Lecture: Trouble on the European electricity grids</strong>\n<br><i>Tue 13 Jan | 20:00-21:00 | De Kargadoor</i>\n<br>\n<br>European electricity grids have been facing a big challenge over the past years: grid congestion. This forms a major setback in the energy transition which requires more and more electrification.\n<br>In this lecture, Maarten Staats will dive into the history, how this problem came to be and analyse the current situation on European grids. How can we unlock the European electricity grids, so they support the energy transition instead of&nbsp;obstructing&nbsp;it?"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/12/promo_3c09bf19_Effectofenergytransitionongrids.png"
+        },
+        "post_id": 11636,
+        "event_id": 218,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/lecture-trouble-on-the-european-electricity-grids-829/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-12-15T13:52:34.000+0100",
+        "$.modified": "2025-12-18T12:37:26.000+0100",
+        "id": "wp-221",
+        "name": {
+          "long": "Ome Willem Karaoke"
+        },
+        "date": {
+          "start": "2026-01-08T21:00:00.000+0100",
+          "end": "2026-01-08T21:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Ome Willem Karaoke</strong>\n<br><i>Tue 08 Jan | 21:00 | Ome Willem</i>\n<br>\n<br><strong>Save the date!</strong>\n<br>Want to be as happy as the people in the picture? Join the GalaCo to Café Ome Willem on January 8th! 🎤\n<br>\n<br>We give a little preview for the Gala itself (on May 8th!) with beers, dancing and screaming along to (the best) music🍺🎵🎶\n<br>\n<br>See you there‼\n<br>\n<br>PS Ome Willem opens 21:00, so we will start the activity later than usual!\n<br>PPS Sign up will be on the&nbsp;website&nbsp;soon!"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/12/promo_52cadb96_Omewillie.png"
+        },
+        "post_id": 11639,
+        "event_id": 221,
+        "ticket_id": 167,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2026-01-08T21:00:00.000+0100",
+            "available": false,
+            "spaces": 40,
+            "occupied": 27,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-221",
+            "ticket_id": 167
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/ome-willem-karaoke-709/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-12-13T13:29:13.000+0100",
+        "$.modified": "2025-12-13T13:32:59.000+0100",
+        "id": "wp-217",
+        "name": {
+          "long": "Ice Skating"
+        },
+        "date": {
+          "start": "2026-01-06T20:00:00.000+0100",
+          "end": "2026-01-06T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Ice Skating</strong>\n<br><i>Tue 06 Jan | 20:00 | De Vechtsebanen</i>\n<br>\n<br>The time has come again for our yearly ice skating⛸! Grab some skates and twirl on the ice, race your friends or drink a hot cocoa while watching from the sidelines, for a max of <strong>€8</strong>.\n<br>\n<br>You can bring your own ice skates or rent them at De Vechtsebanen at your own expense (the rent is €8). You must bring gloves, otherwise you won’t be allowed to go skating💙\n<br>\n<br>Signing up means you have to pay, even when you&nbsp;do&nbsp;not&nbsp;show&nbsp;up!!\n<br>❗This activity as a max of 30 persons!!❗"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/12/promo_ceefb3fe_IceSkatingvoordeinstaa.png"
+        },
+        "post_id": 11635,
+        "event_id": 217,
+        "ticket_id": 166,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2026-01-06T20:00:00.000+0100",
+            "available": false,
+            "spaces": 30,
+            "occupied": 28,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-217",
+            "ticket_id": 166
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/ice-skating-260/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-11-13T13:59:36.000+0100",
+        "$.modified": "2025-12-11T09:35:09.000+0100",
+        "id": "wp-215",
+        "name": {
+          "long": "Holiday Dinner"
+        },
+        "date": {
+          "start": "2025-12-16T17:30:00.000+0100",
+          "end": "2025-12-16T23:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Holiday Dinner</strong>\n<br><i>Tue 16 Dec | 17:30-23:00 | Buurtcentrum de Musketon</i>\n<br>\n<br>Are you excited for this holiday season? We are too! We want to celebrate with you with our very own holiday dinner! Sign up to get a three course meal, good conversation and maybe we'll even play some holiday games."
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/11/promo_89873971_Feestdagendinner.png"
+        },
+        "post_id": 11633,
+        "event_id": 215,
+        "ticket_id": 165,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2025-12-16T17:30:00.000+0100",
+            "available": false,
+            "spaces": 60,
+            "occupied": 56,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-215",
+            "ticket_id": 165
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/holiday-dinner-436/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-11-27T10:31:43.000+0100",
+        "$.modified": "2025-11-27T10:31:43.000+0100",
+        "id": "wp-216",
+        "name": {
+          "long": "Boomer Bingo"
+        },
+        "date": {
+          "start": "2025-12-09T20:00:00.000+0100",
+          "end": "2025-12-09T21:30:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Boomer Bingo!!</strong>\n<br><i>Tue 9 Dec | 20:00-21:30 | Buurthuis Rosa</i>\n<br>\n<br>Join us for the Boomer Bingo Night — Saint Nicholas Edition!\n<br>On December 9, we’re bringing back the cozy old-school vibes with festive Saint Nicholas flair.\n<br>Expect fun bingo rounds, good company, lots of laughs, and of course: pepernoten on us!\n<br>\n<br>Bring your friends, grab a card, and get ready for a cheerful night full of nostalgia and holiday spirit.\n<br>\n<br>See&nbsp;you&nbsp;there!&nbsp;🎉🧡\n<br>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/11/promo_7254e8e2_CopyofCopyofStandaardtemplatealleactiviteiten.png"
+        },
+        "post_id": 11634,
+        "event_id": 216,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/boomer-bingo-423/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-11-12T21:46:37.000+0100",
+        "$.modified": "2025-11-12T21:46:37.000+0100",
+        "id": "wp-214",
+        "name": {
+          "long": "Pauw en de Wit Talkshow"
+        },
+        "date": {
+          "start": "2025-12-02T20:45:00.000+0100",
+          "end": "2025-12-02T20:45:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Pauw en de Wit Talkshow</strong>\n<br><i>Tue 2 Dec | 20:45 | Hilversum Mediapark - Studio 3</i>\n<br>\n<br>❗<strong>This activity will be in Dutch</strong>❗\n<br>Heb jij altijd al op TV willen shinen? Of houd je van een goede discussie? Kom dan mee naar de Pauw en de Wit opnames! Je krijgt eerst een exclusieve rondleiding (met gratis drankje!) en mag daarna plaatsnemen in het publiek, waar Jeroen en Tim in gesprek gaan met belangrijke gasten uit het nieuws en politiek over actuele thema’s. Voor een lage lage prijs van helemaal niets heb jij een avond voor inhoud en gezelligheid én kan je moeder trots vertellen dat haar kind op nationale televisie was.\n<br>\n<br>Schrijf je op tijd in, er zijn beperkte plekken: <a href=\"https://forms.gle/JzVsvvtrUT8xHvQWA\">https://forms.gle/JzVsvvtrUT8xHvQWA</a>\n<br>(de inschrijvingen gaan 17 november dicht!!)\n<br>\n<br>Let op: deze activiteit begint&nbsp;om&nbsp;20:45!"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/11/promo_ac377943_PauwendeWit.png"
+        },
+        "post_id": 11632,
+        "event_id": 214,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/pauw-en-de-wit-talkshow-157/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-31T12:14:35.000+0100",
+        "$.modified": "2025-11-23T20:01:50.000+0100",
+        "id": "wp-213",
+        "name": {
+          "long": "Chip&Dip"
+        },
+        "date": {
+          "start": "2025-11-25T20:45:00.000+0100",
+          "end": "2025-11-25T21:30:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Chip&amp;Dip</strong>\n<br><i>Tue 25 Nov | 20:45-21:30 | Café Domkop</i>\n<br>\n<br> <b>!!THIS ACTIVITY WILL BE ON A DIFFERENT TIME THAN USUAL!!\n<br>\n<br>Come and join us for nacho's, dips and great conversation. Do a blind taste test of our favorite crisps, choose the best dips, and help us decide when something can be called a nacho and when it is just a crisp and a dip.</b>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_a43ddd31_novemberslider-2.png"
+        },
+        "post_id": 11631,
+        "event_id": 213,
+        "ticket_id": 164,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2025-11-25T20:45:00.000+0100",
+            "available": false,
+            "spaces": 45,
+            "occupied": 43,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-213",
+            "ticket_id": 164
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/chip-dip-579/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-27T11:15:59.000+0100",
+        "$.modified": "2025-10-27T11:15:59.000+0100",
+        "id": "wp-212",
+        "name": {
+          "long": "Mr. World Wide Vimibo"
+        },
+        "date": {
+          "start": "2025-11-21T18:00:00.000+0100",
+          "end": "2025-11-21T23:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Mr. World Wide Vimibo</strong>\n<br><i>Fri 21 Nov | 18:00-23:00 | Dana's House</i>\n<br>\n<br>🌎 Mr WORLDWIDE is coming to SIB!! Join us for a bold and bald 🧑🏻‍🦲 evening during the Pitbull Vrimibo on November 21st at DanavU's house (Livingstonelaan)! Make sure to come so you can also say: been there, done that 💁🏻‍♂🍻 We will enjoy some drinks, some tunes, and party in Pitbull-spirit! Because life is not a waste of time, and time is not a waste&nbsp;of&nbsp;life&nbsp;"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_2b7f33e6_AfbeeldingvanWhatsAppop2025-10-23om14.14.35_6888ed06.jpg"
+        },
+        "post_id": 11630,
+        "event_id": 212,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/mr-world-wide-vimibo-458/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-18T11:41:47.000+0200",
+        "$.modified": "2025-10-18T11:43:08.000+0200",
+        "id": "wp-209",
+        "name": {
+          "long": "Film lecture inside out 2"
+        },
+        "date": {
+          "start": "2025-11-18T17:30:00.000+0100",
+          "end": "2025-11-18T21:30:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Film lecture inside out 2</strong>\n<br><i>Tuesday 18 November | 17:30-21:30 | USP Ruppert 116</i>\n<br>\n<br>Watching a movie and learning about mental health? Who knew it was possible? Dr. de Leeuw, researcher at Radboud University, did! She researched how Inside Out can improve social intelligence and how it can inspire perseverance. \n<br>\n<br>On the 18th of November, we will watch the movie Inside Out 2 together, and Dr. de Leeuw will give us some pointers on what this movie can teach us. Come join us for free food, film and fun!"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_691c0142_IMG_3038.png"
+        },
+        "post_id": 11627,
+        "event_id": 209,
+        "ticket_id": 163,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2025-11-18T17:30:00.000+0100",
+            "available": false,
+            "spaces": 40,
+            "occupied": 40,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-209",
+            "ticket_id": 163
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/film-lecture-inside-out-2-676/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-27T11:13:58.000+0100",
+        "$.modified": "2025-10-27T11:13:58.000+0100",
+        "id": "wp-211",
+        "name": {
+          "long": "ParTee: Feestdag-dag"
+        },
+        "date": {
+          "start": "2025-11-11T20:00:00.000+0100",
+          "end": "2025-11-11T20:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>ParTee: Feestdag-dag</strong>\n<br><i>Tue 11 Nov | 20:00 | Café t'Pandje</i>\n<br>\n<br>The ParTee presents: Our first activity of the year is a ‼Feestdag-dag‼We will play Music bingo and in true ParTee style the winning team can win a pitcher of 🍺🍺🍺🍺🍺  \n<br>\n<br>Join us November 11th at 20:00 in ‘t Pandje to have the most&nbsp;fun&nbsp;night!&nbsp;"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_8f33c4a2_AfbeeldingvanWhatsAppop2025-10-26om19.46.22_5936c0b1.jpg"
+        },
+        "post_id": 11629,
+        "event_id": 211,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/partee-feestdag-dag-504/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-21T12:03:28.000+0200",
+        "$.modified": "2025-10-21T12:03:28.000+0200",
+        "id": "wp-210",
+        "name": {
+          "long": "Hack 'n Leak: the world of cybercrime and cyberwar"
+        },
+        "date": {
+          "start": "2025-11-04T20:00:00.000+0100",
+          "end": "2025-11-04T21:30:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Hack 'n Leak: the world of cybercrime and cyberwar</strong>\n<br><i>Tue 04 Nov | 20:00-21:30 | De Kargadoor</i>\n<br>\n<br>Major hacks now make headlines regularly, targeting schools, hospitals and power grids. Millions of people have their personal data leaked. Cyberattacks are not just a lucrative business model for organised crime; they are also part of the toolkit of militaries and intelligence services.\n<br>\n<br>In this duo-lecture, Tom Tervoort and Martijn Knapen will talk about how hacking works, and how it is related to medical laboratories, war and espionage. They will show what a typical cyberattack looks like — from the perspective of both the hacker and the victim — and give insight into the ecosystem of criminals and state actors&nbsp;behind&nbsp;it."
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_2176ce46_AfbeeldingvanWhatsAppop2025-10-21om10.53.13_adbc9da4.jpg"
+        },
+        "post_id": 11628,
+        "event_id": 210,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/hack-n-leak-the-world-of-cybercrime-and-cyberwar-108/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-10T13:00:13.000+0200",
+        "$.modified": "2025-10-23T12:41:10.000+0200",
+        "id": "wp-207",
+        "name": {
+          "long": "Election Debate"
+        },
+        "date": {
+          "start": "2025-10-28T20:00:00.000+0100",
+          "end": "2025-10-28T22:00:00.000+0100"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Election Debate</strong>\n<br><i>Tue 28 Oct | 20:00-22:00 | Singelkerk (Wittevrouwensingel 28, 3581 GC Utrecht) </i>\n<br>\n<br><strong>⚠Location change! The debate will now be at the Singelkerk! ⚠</strong>\n<br>\n<br><strong>❗⚠This actvity will be in Dutch! ⚠❗</strong>\n<br>\n<br>Weet jij nog niet wat je gaat doen bij de verkiezingen of wil je graag leren wat de politieke partijen vinden van grote vraagstukken? 🤔 Kom dan naar het verkiezingsdebat! Speciaal voor de aankomende verkiezingen heeft SIB-Utrecht verschillende politieke partijen uitgenodigd voor een debat. 🧠 Zo gaan we goed geïnformeerd de verkiezingen in! 🗳\n<br>\n<br>⚠ Let op: Dit is op een andere locatie dan&nbsp;gebruikelijk!"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_d48944a7_Promotekst1.png"
+        },
+        "post_id": 11625,
+        "event_id": 207,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/election-debate-547/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-10T13:47:44.000+0200",
+        "$.modified": "2025-10-16T17:20:46.000+0200",
+        "id": "wp-208",
+        "name": {
+          "long": "Policy GMA"
+        },
+        "date": {
+          "start": "2025-10-22T17:30:00.000+0200",
+          "end": "2025-10-22T22:00:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Policy GMA</strong>\n<br><i>Wed 22 Oct | 17:30 - 22:00 | Ruppert, Room D</i>\n<br>\n<br>‼The first GMA of the year: the policy GMA‼ \n<br>\n<br>In this GMA the 45th board will be presenting their policy for the comming year. During the GMA you will be able to give your opinion and you can vote on the policy and other things within SIB. \n<br>\n<br><i>If you are unable to come, you can authorise another member to vote for you by sending Susanne, our secretary, an email on <strong>secretaris@sib-utrecht.nl</strong>. Be sure to do this before the start&nbsp;of&nbsp;the&nbsp;GMA&nbsp;:)</i>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_c3e59d06_PolicyGMA45ste.png"
+        },
+        "post_id": 11626,
+        "event_id": 208,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/policy-gma-181/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-09T13:13:15.000+0200",
+        "$.modified": "2025-10-16T21:13:29.000+0200",
+        "id": "wp-205",
+        "name": {
+          "long": "Trivial Pursuit in Real Life"
+        },
+        "date": {
+          "start": "2025-10-21T20:00:00.000+0200",
+          "end": "2025-10-21T20:00:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Trivial Pursuit in Real Life</strong>\n<br><i>Tue 21 Oct | 20:00 | Buurthuis de Jager</i>\n<br>\n<br>Are you the smartest in the room? Let’s put it to the test! Join us in Buurthuis de Jager for Real Life Trivial Pursuit! Complete questions and challenges to earn points and rise to the top. Come in a nerd, leave a champion."
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_0f7b9f82_TrivialPursuitinRealLife.png"
+        },
+        "post_id": 11623,
+        "event_id": 205,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/trivial-pursuit-in-real-life-517/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-10-09T13:16:48.000+0200",
+        "$.modified": "2025-10-09T13:16:48.000+0200",
+        "id": "wp-206",
+        "name": {
+          "long": "SIB-NL Drinks & Karaoke 🎤"
+        },
+        "date": {
+          "start": "2025-10-15T20:30:00.000+0200",
+          "end": "2025-10-15T20:30:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>SIB-NL Drinks &amp; Karaoke 🎤</strong>\n<br><i>Wed 15 Oct | 20:30| The Krater, Prinsengracht&nbsp;181, Amsterdam </i>\n<br>\n<br>Come join us for a fun evening with our fellow SIB chapters across the Netherlands! Start the night with drinks and then sing your heart out at karaoke. A great chance to meet new people and connect with SIBlings from other cities. 💙"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/10/promo_459d03b9_AfbeeldingvanWhatsAppop2025-10-09om09.43.32_3ff63ff1.jpg"
+        },
+        "post_id": 11624,
+        "event_id": 206,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/sib-nl-drinks-karaoke-771/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-09-28T13:21:25.000+0200",
+        "$.modified": "2025-09-28T13:21:25.000+0200",
+        "id": "wp-204",
+        "name": {
+          "long": "Self-Defence Workshop"
+        },
+        "date": {
+          "start": "2025-10-14T19:45:00.000+0200",
+          "end": "2025-10-14T19:45:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Self-Defence Workshop</strong>\n<br>\n<br><i>Tuesday October 14th | 19:45 | Sportcentrum Galgenwaard Zaal 3</i>\n<br>\n<br>Want to feel stronger, calmer, and more confident? Join our self-defense workshop and empower both body and mind! 🧠🏋️\n<br><i>This activity was funded by the European Union</i>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/09/promo_c0a94ed2_ad336a5e-f24f-4ef6-81ac-9914d29dbc2d.jpeg"
+        },
+        "post_id": 11622,
+        "event_id": 204,
+        "ticket_id": 162,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2025-10-14T19:45:00.000+0200",
+            "available": false,
+            "spaces": 30,
+            "occupied": 29,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-204",
+            "ticket_id": 162
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/self-defence-workshop-209/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-08-23T14:22:45.000+0200",
+        "$.modified": "2025-09-24T18:50:07.000+0200",
+        "id": "wp-194",
+        "name": {
+          "long": "Pooling + Inauguration"
+        },
+        "date": {
+          "start": "2025-10-07T20:00:00.000+0200",
+          "end": "2025-10-07T20:00:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Pooling + Inauguration</strong>\n<br><i>Tue 7 October | 19:45 - 21:00 | Poolcafé Hart van Utrecht</i>\n<br>\n<br>On Tuesday October 7th, we’re going to play pool. Please be on time, pooling starts at 19:45. It will be followed by the inauguration. This is a small celebratory ceremony where the first years will officially become a member of the association! \n\n<br>\n<strong>Please note!! The inauguration starts at 21:00 at Bar Walden</strong>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/09/promo_52efa2a4_PromoPoolen07102025.png"
+        },
+        "post_id": 11612,
+        "event_id": 194,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/pooling-inauguration-906/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-08-23T14:21:26.000+0200",
+        "$.modified": "2025-09-26T18:13:20.000+0200",
+        "id": "wp-193",
+        "name": {
+          "long": "Committee market"
+        },
+        "date": {
+          "start": "2025-09-30T20:00:00.000+0200",
+          "end": "2025-09-30T20:00:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Committee market</strong>\n<br><i>Tue 30 September | 20:00 | Buurthuis De Uithoek</i>\n<br>\n<br>How can SIB organize such cool activities? Because of committees of course! Get some insight into what makes SIB tick, who are responsible for the activities, photos, money, etc. You might even want to join one yourself!\n\nAfter the market there'll be drinks at de Domkop, where we'll find out the location of the first trip of the year!\n<br>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/09/promo_f70b15fb_1000134512.png"
+        },
+        "post_id": 11611,
+        "event_id": 193,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/committee-and-society-market-852/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-08-23T14:20:28.000+0200",
+        "$.modified": "2025-09-21T19:35:34.000+0200",
+        "id": "wp-192",
+        "name": {
+          "long": "Lecture: Why is there no peace in the Democratic Republic of Congo?"
+        },
+        "date": {
+          "start": "2025-09-23T20:00:00.000+0200",
+          "end": "2025-09-23T20:00:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Intro Talk: Why is there no peace in the Democratic Republic of Congo?</strong>\n<br><i>Tuesday 23rd of September | 20:00 | Instituto Cervantes (Domplein 3)</i>\n<br>\n<br>In his lecture, dr. François Lenfant will take the audience to the Democratic Republic of Congo and explore the question: why is there no peace in Congo, despite (or because of) the presence of so many UN agencies, NGOs and other civil society organizations? Are NGOs part of the problem, or part of the solution?\n<br>\n<br>Dr. François Lenfant is lecturer at UU and project associate/principal consultant for International Alert. His areas of expertise are the ‘resource curse’, conflict sensitivity, sustainable development, and the economic dimensions of peace&nbsp;processes."
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/09/promo_34a39431_48168.jpg"
+        },
+        "post_id": 11610,
+        "event_id": 192,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/lezing-756/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-08-23T14:18:02.000+0200",
+        "$.modified": "2026-03-16T10:29:27.000+0100",
+        "id": "wp-190",
+        "name": {
+          "long": "September camp"
+        },
+        "date": {
+          "start": "2025-09-19T00:00:00.000+0200",
+          "end": "2025-09-21T23:59:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>September camp</strong>\n<br><i>Fri 19 - Sun 21 September</i>\n<br>\n<br>Join us on September camp! Meet other new members and older members, get a chance to experience your first real SIB party, play games and of course… Fight the other teams in an ultimate battle to the throne! The camp does not include any hazing (ontgroening). We encourage you to join because this is the fastest way to get to know new members and the association. See you there? \n<br>\n<br>The maximum price is €60. This price may reduce once more people sign up. Already signed up to be a member? Sign up for the camp right here."
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/03/promo_b27afa4f_Septemberkampexternepromo.png"
+        },
+        "post_id": 11608,
+        "event_id": 190,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/september-camp-762/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-08-23T14:19:28.000+0200",
+        "$.modified": "2026-02-27T19:52:14.000+0100",
+        "id": "wp-191",
+        "name": {
+          "long": "Crazy hats drinks"
+        },
+        "date": {
+          "start": "2025-09-16T20:00:00.000+0200",
+          "end": "2025-09-16T20:00:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Crazy hats drinks (kenningsmakingsborrel)</strong>\n<br><i>Tue 16 September | 20:00 | Café de Beuntjes</i>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2026/02/promo_e21934c0_GekkeHoedjesBorrel.png"
+        },
+        "post_id": 11609,
+        "event_id": 191,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/kennismakingsborrel-235/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-09-01T15:40:50.000+0200",
+        "$.modified": "2025-09-10T19:33:20.000+0200",
+        "id": "wp-203",
+        "name": {
+          "long": "Canoeing with SIB"
+        },
+        "date": {
+          "start": "2025-09-11T19:45:00.000+0200",
+          "end": "2025-09-11T19:45:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Canoeing with SIB</strong>\n<br><i>Thu 11 sept | 19:45 | Oudegracht aan de werf 275</i>\n<br>Always wanted to see Utrecht from the water? This is your chance to do it for FREE. Get to know each other a bit better by rowing your way to a lovely evening✨ Afterwards you are welcome to join us for drinks at the Beuntjes at 21:30."
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/09/promo_342b391a_IMG_2688.png"
+        },
+        "post_id": 11621,
+        "event_id": 203,
+        "ticket_id": 161,
+        "prominence": "default",
+        "participate": {
+          "signup": {
+            "method": "api",
+            "end": "2025-09-11T19:45:00.000+0200",
+            "available": false,
+            "spaces": 22,
+            "occupied": 21,
+            "url": "https://app.sib-utrecht.nl/#/event/wp-203",
+            "ticket_id": 161
+          }
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/canoeing-with-sib-780/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-08-27T16:49:42.000+0200",
+        "$.modified": "2025-09-08T18:31:21.000+0200",
+        "id": "wp-202",
+        "name": {
+          "long": "Film-lecture: Seaspiracy"
+        },
+        "date": {
+          "start": "2025-09-09T19:00:00.000+0200",
+          "end": "2025-09-09T19:00:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Film-lecture: Seaspiracy</strong>\n<br><i>Tue 9 Sept | 19:00 | Library Neude</i>\n<br>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/09/promo_901d1d44_Filmlezing9septaangepastwantanderswordtinstaboos.png"
+        },
+        "post_id": 11620,
+        "event_id": 202,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/film-lecture-seaspiracy-954/"
+      },
+      {
+        "headerline": null,
+        "$.created": "2025-08-27T16:47:41.000+0200",
+        "$.modified": "2025-09-01T11:38:08.000+0200",
+        "id": "wp-201",
+        "name": {
+          "long": "Game night"
+        },
+        "date": {
+          "start": "2025-09-04T20:00:00.000+0200",
+          "end": "2025-09-04T20:00:00.000+0200"
+        },
+        "location": null,
+        "organizer": null,
+        "body": {
+          "description": {
+            "html": "<strong>Game night</strong>\n<br><i>Thu 4 Sept | 20:00 | Café de Beuntjes</i>\n<br>\n<br>"
+          },
+          "image": "https://sib-utrecht.nl/promo-images/2025/09/promo_964c4ab6_PromoGameNight04092025.png"
+        },
+        "post_id": 11619,
+        "event_id": 201,
+        "ticket_id": null,
+        "prominence": "default",
+        "participate": {
+          "signup": "none"
+        },
+        "organisation": null,
+        "$.controller": "wordpress",
+        "wp-permalink": "https://old.sib-utrecht.nl/en/events/game-night-732/"
+      }
+    ],
+    "earliest_complete_date": "2025-09-04T20:00:00.000+0200"
+  }
+}
