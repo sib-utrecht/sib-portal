@@ -169,10 +169,12 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
             <Clock className="h-4 w-4 shrink-0 text-[#21526f]" />
             Ends {formatDate(activity.endTime)}
           </span>
-          <span className="flex items-center gap-1.5">
-            <MapPin className="h-4 w-4 shrink-0 text-[#21526f]" />
-            {activity.location}
-          </span>
+          {activity.location && (
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 shrink-0 text-[#21526f]" />
+              {activity.location}
+            </span>
+          )}
         </div>
       </div>
 

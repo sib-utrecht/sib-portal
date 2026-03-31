@@ -87,7 +87,7 @@ type ActivityFields = {
   endTime: number;
   description: string;
   promotionalImageStorageId?: Id<"_storage">;
-  location: string;
+  location?: string;
   allowSignup: boolean;
   registrationDeadline?: number;
   maxParticipants?: number;
@@ -98,10 +98,7 @@ function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
   if (title === "") {
     throw new Error("title must not be empty or whitespace-only");
   }
-  const location = fields.location.trim();
-  if (location === "") {
-    throw new Error("location must not be empty or whitespace-only");
-  }
+  const location = fields.location?.trim() || undefined;
   fields = { ...fields, title, location };
   if (fields.endTime <= fields.startTime) {
     throw new Error("endTime must be after startTime");
@@ -130,7 +127,7 @@ export const createActivity = mutation({
     endTime: v.number(),
     description: v.string(),
     promotionalImageStorageId: v.optional(v.id("_storage")),
-    location: v.string(),
+    location: v.optional(v.string()),
     allowSignup: v.boolean(),
     registrationDeadline: v.optional(v.number()),
     maxParticipants: v.optional(v.number()),
@@ -167,7 +164,7 @@ export const updateActivity = mutation({
     endTime: v.number(),
     description: v.string(),
     promotionalImageStorageId: v.optional(v.id("_storage")),
-    location: v.string(),
+    location: v.optional(v.string()),
     allowSignup: v.boolean(),
     registrationDeadline: v.optional(v.number()),
     maxParticipants: v.optional(v.number()),

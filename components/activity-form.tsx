@@ -15,7 +15,7 @@ type ActivityFormData = {
   startTime: Date | undefined;
   endTime: Date | undefined;
   description: string;
-  location: string;
+  location: string; // empty string means no location
   allowSignup: boolean;
   registrationDeadline: Date | undefined;
   maxParticipants: string;
@@ -40,7 +40,7 @@ type InitialActivity = {
   endTime: number;
   description: string;
   promotionalImageStorageId?: Id<"_storage">;
-  location: string;
+  location?: string;
   allowSignup: boolean;
   registrationDeadline?: number;
   maxParticipants?: number;
@@ -52,7 +52,7 @@ function activityToForm(activity: InitialActivity): ActivityFormData {
     startTime: new Date(activity.startTime),
     endTime: new Date(activity.endTime),
     description: activity.description,
-    location: activity.location,
+    location: activity.location ?? "",
     allowSignup: activity.allowSignup,
     registrationDeadline: activity.registrationDeadline
       ? new Date(activity.registrationDeadline)
@@ -149,7 +149,7 @@ export function ActivityForm({
       endTime: form.endTime.getTime(),
       description: form.description,
       promotionalImageStorageId: imageStorageId ?? undefined,
-      location: form.location.trim(),
+      location: form.location.trim() || undefined,
       allowSignup: form.allowSignup,
       registrationDeadline:
         form.allowSignup && form.registrationDeadline
@@ -227,10 +227,9 @@ export function ActivityForm({
 
       {/* Location */}
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
+        <Label htmlFor="location">Location (optional)</Label>
         <Input
           id="location"
-          required
           value={form.location}
           onChange={(e) => set("location", e.target.value)}
           placeholder="e.g. Utrecht city centre"

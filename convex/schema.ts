@@ -65,7 +65,7 @@ export default defineSchema({
     /** Convex storage ID of the promotional image. */
     promotionalImageStorageId: v.optional(v.id("_storage")),
     /** Location where the activity takes place. */
-    location: v.string(),
+    location: v.optional(v.string()),
     /** Whether members can sign up for this activity. */
     allowSignup: v.boolean(),
     /**
