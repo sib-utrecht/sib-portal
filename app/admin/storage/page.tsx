@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "react-router-dom";
-import { Trash2, ImageOff } from "lucide-react";
+import { Trash2, ImageOff, Download } from "lucide-react";
 
 function formatBytes(bytes: number | undefined) {
   if (bytes === undefined) return "unknown size";
@@ -104,6 +104,17 @@ function StorageContent() {
   );
 }
 
+async function downloadImage(url: string, filename: string) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(objectUrl);
+}
+
 function ImageTile({
   img,
   isConfirming,
@@ -126,6 +137,7 @@ function ImageTile({
   onConfirmDelete: () => void;
   onCancelDelete: () => void;
 }) {
+  const downloadFilename = `${img.activity?.title ?? "image"}-${img.storageId.slice(-6)}.jpg`;
   return (
     <div
       className={`group rounded-2xl overflow-hidden bg-white shadow-sm transition-all duration-300
@@ -159,7 +171,7 @@ function ImageTile({
           )}
         </div>
 
-        {/* Delete controls */}
+        {/* Delete / download controls */}
         <div className="absolute top-2 right-2">
           {isConfirming ? (
             <div className="flex flex-col gap-1">
@@ -183,15 +195,28 @@ function ImageTile({
               </Button>
             </div>
           ) : (
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7 bg-white/80 hover:bg-red-50 text-red-500 border-red-200 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity shadow-sm"
-              onClick={onRequestDelete}
-              aria-label="Delete image"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              {img.url && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7 bg-white/80 hover:bg-[#eaf3f7] text-[#21526f] border-[#21526f]/20 shadow-sm"
+                  onClick={() => downloadImage(img.url!, downloadFilename)}
+                  aria-label="Download image"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7 bg-white/80 hover:bg-red-50 text-red-500 border-red-200 shadow-sm"
+                onClick={onRequestDelete}
+                aria-label="Delete image"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           )}
         </div>
       </div>
