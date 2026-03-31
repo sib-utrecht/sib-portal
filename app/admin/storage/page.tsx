@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { RequireAuth } from "@/components/require-auth";
-import { RequireAdmin } from "@/components/require-admin";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -181,11 +179,5 @@ function StorageContent() {
 }
 
 export default function StoragePage() {
-  return (
-    <RequireAuth>
-      <RequireAdmin>
-        <StorageContent />
-      </RequireAdmin>
-    </RequireAuth>
-  );
+  return <StorageContent />;
 }

@@ -19,7 +19,7 @@
 
 html {
   font-family: Geist, sans-serif;
-  --font-sans: Geist, sans-serif;
+  --font-sans: "Geist", sans-serif;
   --font-mono: "Geist Mono", monospace;
 }
 
