@@ -496,7 +496,7 @@ export const getParticipants = query({
       .collect();
 
     return await Promise.all(
-      registrations.map(async (reg) => {
+      registrations.filter((reg) => reg.active !== false).map(async (reg) => {
         const user = await ctx.db.get(reg.userId);
         return {
           _id: reg._id,
@@ -539,11 +539,16 @@ export const registerForActivity = mutation({
 
     // Enforce max participants
     if (activity.maxParticipants !== undefined) {
-      const count = await ctx.db
+      const occupiedSpaces = await ctx.db
         .query("activityRegistrations")
         .withIndex("by_activity", (q) => q.eq("activityId", activityId))
-        .collect();
-      if (count.length >= activity.maxParticipants) {
+        .collect()
+        .then((registrations) =>
+          registrations
+            .filter((registration) => registration.active !== false)
+            .reduce((total, registration) => total + (registration.spaces ?? 1), 0),
+        );
+      if (occupiedSpaces >= activity.maxParticipants) {
         throw new Error("Activity is full");
       }
     }
@@ -599,7 +604,11 @@ export const getActivityStatus = query({
         .query("activityRegistrations")
         .withIndex("by_activity", (q) => q.eq("activityId", activityId))
         .collect()
-        .then((r) => r.length),
+        .then((registrations) =>
+          registrations
+            .filter((registration) => registration.active !== false)
+            .reduce((total, registration) => total + (registration.spaces ?? 1), 0),
+        ),
       user
         ? ctx.db
             .query("activityRegistrations")
@@ -607,6 +616,7 @@ export const getActivityStatus = query({
               q.eq("activityId", activityId).eq("userId", user._id),
             )
             .first()
+            .then((registration) => (registration?.active === false ? null : registration))
         : Promise.resolve(null),
       isAdmin(ctx),
     ]);

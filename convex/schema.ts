@@ -34,7 +34,16 @@ export default defineSchema({
     ),
     /** URL of the member's profile avatar image. */
     avatar: v.string(),
-  }).index("by_email", ["email"]),
+    /** Stable user identifier used by the legacy API (for example `wp-user-123`). */
+    legacyEntityName: v.optional(v.string()),
+    /** WordPress user ID used by the legacy booking API. */
+    legacyWordpressUserId: v.optional(v.number()),
+    /** Last-modified value reported by the legacy API. */
+    legacyModifiedAt: v.optional(v.string()),
+  })
+    .index("by_email", ["email"])
+    .index("by_legacyEntityName", ["legacyEntityName"])
+    .index("by_legacyWordpressUserId", ["legacyWordpressUserId"]),
   /**
    * Committee records used to generate TOTP 2FA codes for logging in to each
    * committee's Google account.
@@ -130,6 +139,16 @@ export default defineSchema({
     userId: v.id("users"),
     /** Unix timestamp (ms) when the registration was created. */
     registeredAt: v.number(),
+    /** Where this registration originated. Absent on pre-existing portal registrations. */
+    source: v.optional(v.union(v.literal("legacy"), v.literal("portal"))),
+    /** Booking state reported by the legacy API. */
+    legacyStatus: v.optional(v.string()),
+    /** Number of places covered by the legacy booking. */
+    spaces: v.optional(v.number()),
+    /** Member comment attached to the legacy booking. */
+    comment: v.optional(v.string()),
+    /** Whether the booking currently counts as an active registration. */
+    active: v.optional(v.boolean()),
   })
     .index("by_activity", ["activityId"])
     .index("by_user", ["userId"])

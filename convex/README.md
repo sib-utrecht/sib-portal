@@ -88,3 +88,16 @@ function handleButtonPress() {
 Use the Convex CLI to push your functions to a deployment. See everything
 the Convex CLI can do by running `npx convex -h` in your project root
 directory. To learn more, launch the docs with `npx convex docs`.
+
+## Legacy API backfill
+
+The nightly user and activity-booking backfill reads privileged endpoints on
+`api2.sib-utrecht.nl`. Configure a full-read legacy API key on each Convex
+deployment before enabling the cron:
+
+```sh
+npx convex env set LEGACY_API_KEY '<prefix>.<secret>'
+```
+
+The value is sent only as the `X-Api-Key` request header and is never stored in
+the database or returned by a Convex function.

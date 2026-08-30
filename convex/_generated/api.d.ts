@@ -14,6 +14,7 @@ import type * as committees from "../committees.js";
 import type * as crons from "../crons.js";
 import type * as generateToken from "../generateToken.js";
 import type * as http from "../http.js";
+import type * as legacyBackfill from "../legacyBackfill.js";
 import type * as users from "../users.js";
 
 import type {
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   generateToken: typeof generateToken;
   http: typeof http;
+  legacyBackfill: typeof legacyBackfill;
   users: typeof users;
 }>;
 

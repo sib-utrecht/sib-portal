@@ -12,4 +12,13 @@ crons.daily(
   { limit: 50, offset: 0 },
 );
 
+// Keep member profiles and their legacy activity bookings synchronized. The
+// action imports a bounded batch and schedules continuations until complete.
+crons.daily(
+  "backfill users and bookings from legacy API",
+  { hourUTC: 3, minuteUTC: 15 },
+  internal.legacyBackfill.backfillUsersAndBookings,
+  { limit: 20 },
+);
+
 export default crons;
