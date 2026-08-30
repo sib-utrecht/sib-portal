@@ -684,7 +684,8 @@ type ApiEvent = {
 
 /**
  * Insert or update a single activity record imported from the external SIB API.
- * Matches on `externalId`; skips if already present (no overwrite of manual edits).
+ * Matches on `externalId`; existing records only receive imported values for
+ * fields that are still missing, so manual edits are preserved.
  * Internal only — called by `backfillFromApi`.
  */
 export const upsertFromExternalApi = internalMutation({
@@ -696,6 +697,8 @@ export const upsertFromExternalApi = internalMutation({
     description: v.string(),
     promotionalImageUrl: v.optional(v.string()),
     location: v.optional(v.string()),
+    registrationDeadline: v.optional(v.number()),
+    maxParticipants: v.optional(v.number()),
     externalSignupUrl: v.optional(v.string()),
   },
   returns: v.object({ id: v.id("activities"), inserted: v.boolean() }),
@@ -704,7 +707,14 @@ export const upsertFromExternalApi = internalMutation({
       .query("activities")
       .withIndex("by_externalId", (q) => q.eq("externalId", args.externalId))
       .first();
-    if (existing) return { id: existing._id, inserted: false };
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        location: existing.location ?? args.location,
+        registrationDeadline: existing.registrationDeadline ?? args.registrationDeadline,
+        maxParticipants: existing.maxParticipants ?? args.maxParticipants,
+      });
+      return { id: existing._id, inserted: false };
+    }
 
     const id = await ctx.db.insert("activities", {
       externalId: args.externalId,
@@ -717,6 +727,8 @@ export const upsertFromExternalApi = internalMutation({
       promotionalImageUrl: args.promotionalImageUrl ?? undefined,
       location: args.location ?? undefined,
       allowSignup: false,
+      registrationDeadline: args.registrationDeadline ?? undefined,
+      maxParticipants: args.maxParticipants ?? undefined,
       externalSignupUrl: args.externalSignupUrl ?? undefined,
     });
     return { id, inserted: true };
@@ -750,6 +762,12 @@ export const backfillFromApi = internalAction({
       const signup = event.participate.signup;
       const externalSignupUrl =
         signup !== "none" && typeof signup === "object" && signup.url ? signup.url : undefined;
+      const registrationDeadline =
+        signup !== "none" && typeof signup === "object" && signup.end
+          ? new Date(signup.end).getTime()
+          : undefined;
+      const maxParticipants =
+        signup !== "none" && typeof signup === "object" ? signup.spaces : undefined;
 
       const result = await ctx.runMutation(internal.activities.upsertFromExternalApi, {
         externalId: event.id,
@@ -759,6 +777,8 @@ export const backfillFromApi = internalAction({
         description: event.body.description.html,
         promotionalImageUrl: event.body.image ?? undefined,
         location: event.location ?? undefined,
+        registrationDeadline,
+        maxParticipants,
         externalSignupUrl,
       });
 

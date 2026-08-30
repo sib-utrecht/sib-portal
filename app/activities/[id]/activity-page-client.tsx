@@ -318,6 +318,22 @@ function ActivityDetailContent({ slug }: { slug: string }) {
               </p>
             )}
           </div>
+          <dl className="grid gap-3 rounded-2xl bg-[#f4f8fa] p-4 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="font-medium text-gray-500">Registration deadline</dt>
+              <dd className="mt-1 text-gray-900">
+                {activity.registrationDeadline
+                  ? formatDate(activity.registrationDeadline)
+                  : "Not specified"}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium text-gray-500">Maximum participants</dt>
+              <dd className="mt-1 text-gray-900">
+                {activity.maxParticipants !== undefined ? activity.maxParticipants : "No limit"}
+              </dd>
+            </div>
+          </dl>
           {participants === undefined ? (
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
