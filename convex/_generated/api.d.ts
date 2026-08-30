@@ -11,6 +11,7 @@
 import type * as activities from "../activities.js";
 import type * as auth from "../auth.js";
 import type * as committees from "../committees.js";
+import type * as crons from "../crons.js";
 import type * as generateToken from "../generateToken.js";
 import type * as http from "../http.js";
 import type * as users from "../users.js";
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   activities: typeof activities;
   auth: typeof auth;
   committees: typeof committees;
+  crons: typeof crons;
   generateToken: typeof generateToken;
   http: typeof http;
   users: typeof users;
