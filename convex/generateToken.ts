@@ -1,5 +1,5 @@
 "use node";
-import { authenticator } from "otplib";
+import { generate } from "otplib";
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 import type { FunctionReturnType } from "convex/server";
@@ -34,18 +34,21 @@ export const generateTokens = action({
       secrets.push(await ctx.runQuery(internal.committees.querySecret, { id: val }));
     }
 
-    const end = Date.now() + authenticator.timeRemaining() * 1000; // date.now is in milliseconds and authenticator is in second
+    const periodSeconds = 30;
+    const end = (Math.floor(Date.now() / 1000 / periodSeconds) + 1) * periodSeconds * 1000;
 
     return {
-      codes: secrets.map((s) => {
-        if (s == null) {
-          throw new Error("Invalid committee ID");
-        }
-        if (!s.members.includes(identity.conscriboId)) {
-          throw new Error("Unauthorized: Not a member of committee " + s.name);
-        }
-        return authenticator.generate(s.secret);
-      }),
+      codes: await Promise.all(
+        secrets.map(async (s) => {
+          if (s == null) {
+            throw new Error("Invalid committee ID");
+          }
+          if (!s.members.includes(identity.conscriboId)) {
+            throw new Error("Unauthorized: Not a member of committee " + s.name);
+          }
+          return await generate({ secret: s.secret });
+        }),
+      ),
       endTime: end,
     };
   },

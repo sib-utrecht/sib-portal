@@ -22,3 +22,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+/.agents/skills/convex
+/.agents/skills/convex-*
+/.claude/skills
