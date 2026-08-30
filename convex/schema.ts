@@ -93,7 +93,9 @@ export default defineSchema({
      * Used to prevent duplicate imports when backfilling.
      */
     externalId: v.optional(v.string()),
-  }).index("by_startTime", ["startTime"])
+  })
+    .index("by_startTime", ["startTime"])
+    .index("by_endTime", ["endTime"])
     .index("by_externalId", ["externalId"]),
 
   /**

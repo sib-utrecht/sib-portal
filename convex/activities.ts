@@ -1,5 +1,11 @@
 import { v } from "convex/values";
-import { internalAction, internalMutation, mutation, query } from "./_generated/server";
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+  mutation,
+  query,
+} from "./_generated/server";
 import { internal } from "./_generated/api";
 import { requireLogin, requireAdmin, isAdmin } from "./auth";
 import { Id } from "./_generated/dataModel";
@@ -78,6 +84,98 @@ export const getActivity = query({
       promotionalImage: activity.promotionalImageStorageId
         ? ((await ctx.storage.getUrl(activity.promotionalImageStorageId)) ?? undefined)
         : activity.promotionalImageUrl,
+    };
+  },
+});
+
+const publicActivityValidator = v.object({
+  id: v.string(),
+  convexId: v.id("activities"),
+  externalId: v.optional(v.string()),
+  title: v.string(),
+  startTime: v.number(),
+  endTime: v.number(),
+  description: v.string(),
+  promotionalImage: v.optional(v.string()),
+  location: v.optional(v.string()),
+  allowSignup: v.boolean(),
+  registrationDeadline: v.optional(v.number()),
+  maxParticipants: v.optional(v.number()),
+  externalSignupUrl: v.optional(v.string()),
+});
+
+/** Bounded, unauthenticated read model used exclusively by the public HTTP API. */
+export const listForPublicApi = internalQuery({
+  args: {
+    after: v.optional(v.number()),
+    before: v.optional(v.number()),
+    descending: v.boolean(),
+    offset: v.number(),
+    limit: v.number(),
+  },
+  returns: v.array(publicActivityValidator),
+  handler: async (ctx, args) => {
+    const query = ctx.db.query("activities").withIndex("by_endTime", (q) => {
+      if (args.after !== undefined && args.before !== undefined) {
+        return q.gte("endTime", args.after).lt("endTime", args.before);
+      }
+      if (args.after !== undefined) return q.gte("endTime", args.after);
+      if (args.before !== undefined) return q.lt("endTime", args.before);
+      return q;
+    });
+    const activities = await query
+      .order(args.descending ? "desc" : "asc")
+      .take(args.offset + args.limit);
+    return await Promise.all(
+      activities.slice(args.offset).map(async (activity) => ({
+        id: activity.externalId ?? activity._id,
+        convexId: activity._id,
+        externalId: activity.externalId,
+        title: activity.title,
+        startTime: activity.startTime,
+        endTime: activity.endTime,
+        description: activity.description,
+        promotionalImage: activity.promotionalImageStorageId
+          ? ((await ctx.storage.getUrl(activity.promotionalImageStorageId)) ?? undefined)
+          : activity.promotionalImageUrl,
+        location: activity.location,
+        allowSignup: activity.allowSignup,
+        registrationDeadline: activity.registrationDeadline,
+        maxParticipants: activity.maxParticipants,
+        externalSignupUrl: activity.externalSignupUrl,
+      })),
+    );
+  },
+});
+
+/** Look up either a legacy external ID or a native Convex activity ID. */
+export const getForPublicApi = internalQuery({
+  args: { id: v.string() },
+  returns: v.union(publicActivityValidator, v.null()),
+  handler: async (ctx, { id }) => {
+    let activity = await ctx.db
+      .query("activities")
+      .withIndex("by_externalId", (q) => q.eq("externalId", id))
+      .first();
+    const convexId = ctx.db.normalizeId("activities", id);
+    if (!activity && convexId) activity = await ctx.db.get(convexId);
+    if (!activity) return null;
+    return {
+      id: activity.externalId ?? activity._id,
+      convexId: activity._id,
+      externalId: activity.externalId,
+      title: activity.title,
+      startTime: activity.startTime,
+      endTime: activity.endTime,
+      description: activity.description,
+      promotionalImage: activity.promotionalImageStorageId
+        ? ((await ctx.storage.getUrl(activity.promotionalImageStorageId)) ?? undefined)
+        : activity.promotionalImageUrl,
+      location: activity.location,
+      allowSignup: activity.allowSignup,
+      registrationDeadline: activity.registrationDeadline,
+      maxParticipants: activity.maxParticipants,
+      externalSignupUrl: activity.externalSignupUrl,
     };
   },
 });
