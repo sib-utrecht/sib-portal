@@ -8,10 +8,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Clock, Users, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { MapPin, Calendar, Users, Pencil, Trash2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import {
+  activityDateTimeZone,
+  shouldShowActivityEnd,
+  shouldShowActivityTime,
+} from "@/utils/activity-date";
 
 function safeHttpUrl(url: string): string | null {
   try {
@@ -22,20 +27,21 @@ function safeHttpUrl(url: string): string | null {
   }
 }
 
-function formatDate(ts: number) {
-  return new Date(ts).toLocaleDateString("nl-NL", {
-    weekday: "long",
+function formatDate(ts: number, includeTime = true) {
+  return new Date(ts).toLocaleDateString("en-GB", {
+    timeZone: activityDateTimeZone,
+    weekday: "short",
     day: "numeric",
-    month: "long",
+    month: "short",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    ...(includeTime ? { hour: "2-digit", minute: "2-digit" } : {}),
   });
 }
 
 function formatBookingDate(ts: number) {
   if (ts <= 0) return "Date unavailable";
-  return new Date(ts).toLocaleString("nl-NL", {
+  return new Date(ts).toLocaleString("en-GB", {
+    timeZone: activityDateTimeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -121,6 +127,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   const isFull =
     activity.maxParticipants !== undefined &&
     (status.participantCount ?? 0) >= activity.maxParticipants;
+  const showStartTime = shouldShowActivityTime(activity.startTime, activity.externalId);
+  const showEnd = shouldShowActivityEnd(activity.startTime, activity.endTime, activity.externalId);
+  const showEndTime = shouldShowActivityTime(activity.endTime, activity.externalId);
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -186,11 +195,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-gray-600">
           <span className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4 shrink-0 text-[#21526f]" />
-            {formatDate(activity.startTime)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4 shrink-0 text-[#21526f]" />
-            Ends {formatDate(activity.endTime)}
+            {showEnd && "From "}
+            {formatDate(activity.startTime, showStartTime)}
+            {showEnd && <> until {formatDate(activity.endTime, showEndTime)}</>}
           </span>
           {activity.location && (
             <span className="flex items-center gap-1.5">

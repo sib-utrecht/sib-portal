@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { format, isValid } from "date-fns";
-import { nl } from "date-fns/locale";
+import { enGB } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -324,7 +324,9 @@ export function DateTimePicker({
         </PopoverTrigger>
 
         <span className="mr-2 text-muted-foreground shrink-0 select-none inline-block w-[2ch] text-center">
-          {displayDate && isValid(displayDate) ? format(displayDate, "EEEEEE", { locale: nl }) : ""}
+          {displayDate && isValid(displayDate)
+            ? format(displayDate, "EEEEEE", { locale: enGB })
+            : ""}
         </span>
 
         <Input
@@ -377,7 +379,13 @@ export function DateTimePicker({
       </div>
 
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={value} onSelect={handleDaySelect} locale={nl} autoFocus />
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={handleDaySelect}
+          locale={enGB}
+          autoFocus
+        />
       </PopoverContent>
     </Popover>
   );

@@ -6,9 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { Link } from "react-router-dom";
 import { MapPin, Users, Plus, ChevronRight } from "lucide-react";
+import { activityDateTimeZone, shouldShowActivityTime } from "@/utils/activity-date";
 
 function formatDateShort(ts: number) {
-  return new Date(ts).toLocaleDateString("nl-NL", {
+  return new Date(ts).toLocaleDateString("en-GB", {
+    timeZone: activityDateTimeZone,
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -17,18 +19,25 @@ function formatDateShort(ts: number) {
 }
 
 function formatTime(ts: number) {
-  return new Date(ts).toLocaleTimeString("nl-NL", {
+  return new Date(ts).toLocaleTimeString("en-GB", {
+    timeZone: activityDateTimeZone,
     hour: "2-digit",
     minute: "2-digit",
   });
 }
 
 function formatDayNum(ts: number) {
-  return new Date(ts).toLocaleDateString("nl-NL", { day: "numeric" });
+  return new Date(ts).toLocaleDateString("en-GB", {
+    timeZone: activityDateTimeZone,
+    day: "numeric",
+  });
 }
 
 function formatMonthAbbr(ts: number) {
-  return new Date(ts).toLocaleDateString("nl-NL", { month: "short" });
+  return new Date(ts).toLocaleDateString("en-GB", {
+    timeZone: activityDateTimeZone,
+    month: "short",
+  });
 }
 
 function ActivitiesContent() {
@@ -136,6 +145,7 @@ function ActivityTile({
     title: string;
     startTime: number;
     endTime: number;
+    externalId?: string;
     location?: string;
     allowSignup: boolean;
     maxParticipants?: number;
@@ -190,7 +200,9 @@ function ActivityTile({
               </div>
               <div className="text-[11px] text-gray-500 font-medium leading-snug border-l border-gray-200 pl-2">
                 <div>{formatDateShort(activity.startTime).split(",")[0]}</div>
-                <div>{formatTime(activity.startTime)}</div>
+                {shouldShowActivityTime(activity.startTime, activity.externalId) && (
+                  <div>{formatTime(activity.startTime)}</div>
+                )}
               </div>
             </div>
           </div>
