@@ -33,6 +33,17 @@ function formatDate(ts: number) {
   });
 }
 
+function formatBookingDate(ts: number) {
+  if (ts <= 0) return "Date unavailable";
+  return new Date(ts).toLocaleString("nl-NL", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function ActivityDetailContent({ slug }: { slug: string }) {
   const navigate = useNavigate();
   const activity = useQuery(api.activities.getActivity, { slug });
@@ -294,12 +305,19 @@ function ActivityDetailContent({ slug }: { slug: string }) {
         </Card>
       )}
 
-      {/* Participants list (admin only) */}
-      {status.isAdmin && activity.allowSignup && !activity.externalSignupUrl && (
+      {/* Sign-up list (admin only, including externally managed activities) */}
+      {status.isAdmin && (
         <Card className="p-6 border-t-4 border-t-[#21526f]/30 rounded-2xl shadow-sm space-y-4">
-          <h3 className="text-lg font-semibold text-gray-700">
-            Participants ({status.participantCount})
-          </h3>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700">
+              Sign-ups{participants ? ` (${participants.length})` : ""}
+            </h3>
+            {activity.externalSignupUrl && (
+              <p className="text-sm text-gray-500">
+                Imported from the externally managed sign-up system.
+              </p>
+            )}
+          </div>
           {participants === undefined ? (
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -313,10 +331,39 @@ function ActivityDetailContent({ slug }: { slug: string }) {
               {participants.map((p) => (
                 <div
                   key={p._id}
-                  className="flex items-center justify-between px-4 py-2 bg-[#6fa8c4] rounded-full"
+                  className="px-4 py-3 bg-[#eaf3f7] border border-[#6fa8c4]/40 rounded-2xl space-y-2"
                 >
-                  <span className="font-semibold text-gray-900">{p.user?.name ?? "(unknown)"}</span>
-                  <span className="text-sm text-gray-700">{p.user?.email}</span>
+                  <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {p.user?.name ?? "(unknown user)"}
+                      </p>
+                      <p className="text-sm text-gray-600">{p.user?.email || "No email address"}</p>
+                    </div>
+                    <div className="flex flex-wrap justify-end gap-2 text-xs">
+                      {p.source === "legacy" && (
+                        <span className="rounded-full bg-[#21526f] px-2 py-1 font-medium text-white">
+                          Imported
+                        </span>
+                      )}
+                      {p.legacyStatus && (
+                        <span className="rounded-full bg-white px-2 py-1 text-gray-700 ring-1 ring-gray-300">
+                          {p.legacyStatus}
+                        </span>
+                      )}
+                      {(p.spaces ?? 1) > 1 && (
+                        <span className="rounded-full bg-white px-2 py-1 text-gray-700 ring-1 ring-gray-300">
+                          {p.spaces} spots
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500">{formatBookingDate(p.registeredAt)}</div>
+                  {p.comment && (
+                    <p className="border-t border-[#6fa8c4]/30 pt-2 text-sm text-gray-700">
+                      {p.comment}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

@@ -488,6 +488,24 @@ export const deleteStorageImage = mutation({
  */
 export const getParticipants = query({
   args: { activityId: v.id("activities") },
+  returns: v.array(
+    v.object({
+      _id: v.id("activityRegistrations"),
+      registeredAt: v.number(),
+      source: v.optional(v.union(v.literal("legacy"), v.literal("portal"))),
+      legacyStatus: v.optional(v.string()),
+      spaces: v.optional(v.number()),
+      comment: v.optional(v.string()),
+      user: v.union(
+        v.object({
+          _id: v.id("users"),
+          name: v.string(),
+          email: v.string(),
+        }),
+        v.null(),
+      ),
+    }),
+  ),
   handler: async (ctx, { activityId }) => {
     await requireAdmin(ctx);
     const registrations = await ctx.db
@@ -496,14 +514,21 @@ export const getParticipants = query({
       .collect();
 
     return await Promise.all(
-      registrations.filter((reg) => reg.active !== false).map(async (reg) => {
-        const user = await ctx.db.get(reg.userId);
-        return {
-          _id: reg._id,
-          registeredAt: reg.registeredAt,
-          user: user ? { _id: user._id, name: user.name, email: user.email } : null,
-        };
-      }),
+      registrations
+        .filter((reg) => reg.active !== false)
+        .sort((left, right) => right.registeredAt - left.registeredAt)
+        .map(async (reg) => {
+          const user = await ctx.db.get(reg.userId);
+          return {
+            _id: reg._id,
+            registeredAt: reg.registeredAt,
+            source: reg.source,
+            legacyStatus: reg.legacyStatus,
+            spaces: reg.spaces,
+            comment: reg.comment,
+            user: user ? { _id: user._id, name: user.name, email: user.email } : null,
+          };
+        }),
     );
   },
 });
