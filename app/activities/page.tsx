@@ -59,7 +59,12 @@ function ActivitiesContent() {
                   </Link>
                 </Button>
               )}
-              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+              >
                 <Link to="/">Back to dashboard</Link>
               </Button>
             </div>
@@ -127,6 +132,7 @@ function ActivityTile({
 }: {
   activity: {
     _id: string;
+    slug: string;
     title: string;
     startTime: number;
     endTime: number;
@@ -138,12 +144,13 @@ function ActivityTile({
   past?: boolean;
 }) {
   return (
-    <Link to={`/activities/${activity._id}`} className="block group">
+    <Link to={`/activities/${activity.slug}`} className="block group">
       <div
         className={`rounded-2xl overflow-hidden bg-white shadow-sm transition-all duration-300
-          ${past
-            ? "opacity-55 hover:opacity-75 hover:shadow-md"
-            : "hover:-translate-y-1 hover:shadow-xl hover:shadow-[#21526f]/12 ring-1 ring-[#21526f]/10 hover:ring-[#21526f]/25"
+          ${
+            past
+              ? "opacity-55 hover:opacity-75 hover:shadow-md"
+              : "hover:-translate-y-1 hover:shadow-xl hover:shadow-[#21526f]/12 ring-1 ring-[#21526f]/10 hover:ring-[#21526f]/25"
           }`}
       >
         {/* Image area */}
@@ -158,7 +165,7 @@ function ActivityTile({
             /* Placeholder pattern when no image */
             <div className="w-full h-full flex items-center justify-center">
               <svg className="w-16 h-16 text-[#21526f]/15" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
               </svg>
             </div>
           )}
@@ -169,7 +176,9 @@ function ActivityTile({
           )}
 
           {/* Date badge */}
-          <div className={`absolute bottom-3 left-3 flex items-center gap-2 ${past ? "opacity-70" : ""}`}>
+          <div
+            className={`absolute bottom-3 left-3 flex items-center gap-2 ${past ? "opacity-70" : ""}`}
+          >
             <div className="bg-white/95 backdrop-blur-sm rounded-xl px-2.5 py-1.5 shadow-sm flex items-center gap-2">
               <div className="text-center leading-none">
                 <div className="text-[11px] font-semibold text-[#21526f]/70 uppercase tracking-wide">
@@ -199,8 +208,10 @@ function ActivityTile({
         {/* Content */}
         <div className="p-4">
           <div className="flex items-start justify-between gap-2">
-            <h3 className={`text-sm font-semibold leading-snug line-clamp-2 flex-1
-              ${past ? "text-gray-500" : "text-gray-900 group-hover:text-[#21526f] transition-colors duration-200"}`}>
+            <h3
+              className={`text-sm font-semibold leading-snug line-clamp-2 flex-1
+              ${past ? "text-gray-500" : "text-gray-900 group-hover:text-[#21526f] transition-colors duration-200"}`}
+            >
               {activity.title}
             </h3>
             {!past && (

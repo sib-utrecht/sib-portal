@@ -4,11 +4,18 @@ import {
   internalMutation,
   internalQuery,
   mutation,
+  MutationCtx,
   query,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { requireLogin, requireAdmin, isAdmin } from "./auth";
 import { Id } from "./_generated/dataModel";
+import schema from "./schema";
+
+const activityWithImageValidator = schema.doc("activities").extend({
+  slug: v.string(),
+  promotionalImage: v.optional(v.string()),
+});
 
 /** Generate a short-lived upload URL for storing a promotional image. Admin only. */
 export const generateUploadUrl = mutation({
@@ -54,6 +61,7 @@ export const getImageUrl = query({
 /** Return all activities ordered by start time (ascending). */
 export const getActivities = query({
   args: {},
+  returns: v.array(activityWithImageValidator),
   handler: async (ctx) => {
     await requireLogin(ctx);
     const activities = await ctx.db
@@ -62,25 +70,36 @@ export const getActivities = query({
       .order("asc")
       .collect();
     return await Promise.all(
-      activities.map(async (a) => ({
-        ...a,
-        promotionalImage: a.promotionalImageStorageId
-          ? ((await ctx.storage.getUrl(a.promotionalImageStorageId)) ?? undefined)
-          : a.promotionalImageUrl,
-      })),
+      activities.map(async (a) => {
+        if (!a.slug) {
+          throw new Error("Activity slugs have not been backfilled yet");
+        }
+        return {
+          ...a,
+          slug: a.slug,
+          promotionalImage: a.promotionalImageStorageId
+            ? ((await ctx.storage.getUrl(a.promotionalImageStorageId)) ?? undefined)
+            : a.promotionalImageUrl,
+        };
+      }),
     );
   },
 });
 
-/** Return a single activity by ID. */
+/** Return a single activity by its public URL slug. */
 export const getActivity = query({
-  args: { id: v.id("activities") },
-  handler: async (ctx, { id }) => {
+  args: { slug: v.string() },
+  returns: v.union(activityWithImageValidator, v.null()),
+  handler: async (ctx, { slug }) => {
     await requireLogin(ctx);
-    const activity = await ctx.db.get(id);
-    if (!activity) return null;
+    const activity = await ctx.db
+      .query("activities")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique();
+    if (!activity?.slug) return null;
     return {
       ...activity,
+      slug: activity.slug,
       promotionalImage: activity.promotionalImageStorageId
         ? ((await ctx.storage.getUrl(activity.promotionalImageStorageId)) ?? undefined)
         : activity.promotionalImageUrl,
@@ -192,6 +211,48 @@ type ActivityFields = {
   maxParticipants?: number;
 };
 
+const AMSTERDAM_TIME_ZONE = "Europe/Amsterdam";
+
+/** Build the WordPress-style base slug, using the local date in Utrecht. */
+export function activitySlugBase(title: string, startTime: number): string {
+  const dateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: AMSTERDAM_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date(startTime));
+  const year = dateParts.find((part) => part.type === "year")?.value;
+  const month = dateParts.find((part) => part.type === "month")?.value;
+  if (!year || !month) throw new Error("Could not determine the activity start month");
+
+  const titleSlug = title
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80)
+    .replace(/-+$/g, "");
+
+  return `${year}-${month}-${titleSlug || "activity"}`;
+}
+
+async function uniqueActivitySlug(
+  ctx: MutationCtx,
+  title: string,
+  startTime: number,
+  excludeId?: Id<"activities">,
+): Promise<string> {
+  const base = activitySlugBase(title, startTime);
+  for (let suffix = 1; ; suffix++) {
+    const slug = suffix === 1 ? base : `${base}-${suffix}`;
+    const existing = await ctx.db
+      .query("activities")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique();
+    if (!existing || existing._id === excludeId) return slug;
+  }
+}
+
 function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
   const title = fields.title.trim();
   if (title === "") {
@@ -231,9 +292,12 @@ export const createActivity = mutation({
     registrationDeadline: v.optional(v.number()),
     maxParticipants: v.optional(v.number()),
   },
+  returns: v.object({ id: v.id("activities"), slug: v.string() }),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const id = await ctx.db.insert("activities", validateAndNormalizeActivity(args));
+    const fields = validateAndNormalizeActivity(args);
+    const slug = await uniqueActivitySlug(ctx, fields.title, fields.startTime);
+    const id = await ctx.db.insert("activities", { ...fields, slug });
     if (args.promotionalImageStorageId) {
       // Link the tracking record created at upload time, or create one for pre-existing images
       const existing = await ctx.db
@@ -250,7 +314,7 @@ export const createActivity = mutation({
         });
       }
     }
-    return id;
+    return { id, slug };
   },
 });
 
@@ -268,6 +332,7 @@ export const updateActivity = mutation({
     registrationDeadline: v.optional(v.number()),
     maxParticipants: v.optional(v.number()),
   },
+  returns: v.object({ slug: v.string() }),
   handler: async (ctx, { id, ...fields }) => {
     await requireAdmin(ctx);
     const activity = await ctx.db.get(id);
@@ -291,7 +356,36 @@ export const updateActivity = mutation({
         });
       }
     }
-    await ctx.db.patch(id, validateAndNormalizeActivity(fields));
+    const normalized = validateAndNormalizeActivity(fields);
+    const slug = await uniqueActivitySlug(ctx, normalized.title, normalized.startTime, id);
+    await ctx.db.patch(id, { ...normalized, slug });
+    return { slug };
+  },
+});
+
+/**
+ * Populate slugs for records created before the slug field was introduced.
+ * Runs in bounded batches and schedules itself until every record is migrated.
+ */
+export const backfillActivitySlugs = internalMutation({
+  args: {},
+  returns: v.object({ updated: v.number(), complete: v.boolean() }),
+  handler: async (ctx): Promise<{ updated: number; complete: boolean }> => {
+    const activities = await ctx.db
+      .query("activities")
+      .withIndex("by_slug", (q) => q.eq("slug", undefined))
+      .take(100);
+
+    for (const activity of activities) {
+      const slug = await uniqueActivitySlug(ctx, activity.title, activity.startTime, activity._id);
+      await ctx.db.patch(activity._id, { slug });
+    }
+
+    const complete = activities.length < 100;
+    if (!complete) {
+      await ctx.scheduler.runAfter(0, internal.activities.backfillActivitySlugs, {});
+    }
+    return { updated: activities.length, complete };
   },
 });
 
@@ -352,7 +446,9 @@ export const listActivityImages = query({
           contentType: metadata?.contentType,
           uploadedAt: record.uploadedAt,
           isCurrentImage: activity?.promotionalImageStorageId === record.storageId,
-          activity: activity ? { _id: activity._id, title: activity.title } : null,
+          activity: activity
+            ? { _id: activity._id, title: activity.title, slug: activity.slug }
+            : null,
         };
       }),
     );
@@ -567,6 +663,7 @@ export const upsertFromExternalApi = internalMutation({
     location: v.optional(v.string()),
     externalSignupUrl: v.optional(v.string()),
   },
+  returns: v.object({ id: v.id("activities"), inserted: v.boolean() }),
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("activities")
@@ -577,6 +674,7 @@ export const upsertFromExternalApi = internalMutation({
     const id = await ctx.db.insert("activities", {
       externalId: args.externalId,
       title: args.title,
+      slug: await uniqueActivitySlug(ctx, args.title, args.startTime),
       startTime: args.startTime,
       // Ensure endTime is always strictly after startTime
       endTime: args.endTime > args.startTime ? args.endTime : args.startTime + 60_000,

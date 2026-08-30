@@ -50,7 +50,12 @@ function StorageContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold portal-title">Stored images</h1>
-            <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+            >
               <Link to="/admin">Back to admin</Link>
             </Button>
           </div>
@@ -129,7 +134,7 @@ function ImageTile({
     size?: number;
     uploadedAt: number;
     isCurrentImage: boolean;
-    activity?: { _id: string; title: string } | null;
+    activity?: { _id: string; title: string; slug?: string } | null;
   };
   isConfirming: boolean;
   deleting: boolean;
@@ -223,13 +228,17 @@ function ImageTile({
 
       {/* Metadata */}
       <div className="px-3 py-2.5 space-y-0.5">
-        {img.activity ? (
+        {img.activity?.slug ? (
           <Link
-            to={`/activities/${img.activity._id}`}
+            to={`/activities/${img.activity.slug}`}
             className="block text-xs font-semibold text-[#21526f] truncate hover:underline leading-snug"
           >
             {img.activity.title}
           </Link>
+        ) : img.activity ? (
+          <p className="text-xs font-semibold text-[#21526f] truncate leading-snug">
+            {img.activity.title}
+          </p>
         ) : (
           <p className="text-xs font-medium text-gray-400 italic truncate leading-snug">
             Deleted activity

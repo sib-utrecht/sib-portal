@@ -20,8 +20,8 @@ export default function App() {
       <Route path="/login" element={<LoginForm />} />
       <Route path="/activities" element={<ActivitiesPage />} />
       <Route path="/activities/new" element={<NewActivityPage />} />
-      <Route path="/activities/:id" element={<ActivityPage />} />
-      <Route path="/activities/:id/edit" element={<EditActivityPage />} />
+      <Route path="/activities/:slug" element={<ActivityPage />} />
+      <Route path="/activities/:slug/edit" element={<EditActivityPage />} />
       <Route
         path="/admin"
         element={

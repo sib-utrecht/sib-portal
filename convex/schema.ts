@@ -56,6 +56,8 @@ export default defineSchema({
   activities: defineTable({
     /** Activity title. */
     title: v.string(),
+    /** Unique URL slug, prefixed with the activity's start year and month. */
+    slug: v.optional(v.string()),
     /** Unix timestamp (ms) for when the activity starts. */
     startTime: v.number(),
     /** Unix timestamp (ms) for when the activity ends. */
@@ -94,6 +96,7 @@ export default defineSchema({
      */
     externalId: v.optional(v.string()),
   })
+    .index("by_slug", ["slug"])
     .index("by_startTime", ["startTime"])
     .index("by_endTime", ["endTime"])
     .index("by_externalId", ["externalId"]),

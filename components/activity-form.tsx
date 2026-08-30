@@ -161,12 +161,12 @@ export function ActivityForm({
     setSaving(true);
     try {
       if (mode === "create") {
-        const id = await createActivity(payload);
-        navigate(`/activities/${id}`);
+        const activity = await createActivity(payload);
+        navigate(`/activities/${activity.slug}`);
       } else {
         if (!activityId) throw new Error("Missing activity ID");
-        await updateActivity({ id: activityId, ...payload });
-        navigate(`/activities/${activityId}`);
+        const activity = await updateActivity({ id: activityId, ...payload });
+        navigate(`/activities/${activity.slug}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

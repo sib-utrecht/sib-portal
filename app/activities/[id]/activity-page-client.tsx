@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,13 +33,14 @@ function formatDate(ts: number) {
   });
 }
 
-function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> }) {
+function ActivityDetailContent({ slug }: { slug: string }) {
   const navigate = useNavigate();
-  const activity = useQuery(api.activities.getActivity, { id: activityId });
-  const status = useQuery(api.activities.getActivityStatus, { activityId });
+  const activity = useQuery(api.activities.getActivity, { slug });
+  const activityId = activity?._id;
+  const status = useQuery(api.activities.getActivityStatus, activityId ? { activityId } : "skip");
   const participants = useQuery(
     api.activities.getParticipants,
-    status?.isAdmin ? { activityId } : "skip",
+    status?.isAdmin && activityId ? { activityId } : "skip",
   );
 
   const register = useMutation(api.activities.registerForActivity);
@@ -52,6 +52,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function handleRegister() {
+    if (!activityId) return;
     setBusy(true);
     setActionError(null);
     try {
@@ -64,6 +65,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
   }
 
   async function handleUnregister() {
+    if (!activityId) return;
     setBusy(true);
     setActionError(null);
     try {
@@ -76,6 +78,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
   }
 
   async function handleDelete() {
+    if (!activityId) return;
     setBusy(true);
     setActionError(null);
     try {
@@ -128,7 +131,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
           {status.isAdmin && (
             <div className="flex gap-2 shrink-0">
               <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link to={`/activities/${activityId}/edit`}>
+                <Link to={`/activities/${activity.slug}/edit`}>
                   <Pencil className="h-4 w-4 mr-1" />
                   Edit
                 </Link>
@@ -209,31 +212,31 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
       </Card>
 
       {/* External sign-up section */}
-      {activity.externalSignupUrl && (() => {
-        const safeUrl = safeHttpUrl(activity.externalSignupUrl);
-        return (
-          <Card className="p-6 border-t-4 border-t-[#6fb0cd] rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-[#21526f]" />
-              <h3 className="text-lg font-semibold">Sign up</h3>
-            </div>
-            <p className="text-sm text-gray-600">Sign-ups for this activity are managed externally.</p>
-            {safeUrl ? (
-              <Button
-                asChild
-                className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full"
-              >
-                <a href={safeUrl} target="_blank" rel="noopener noreferrer">
-                  Sign up
-                  <ExternalLink className="h-4 w-4 ml-2" />
-                </a>
-              </Button>
-            ) : (
-              <p className="text-sm text-gray-500">Sign-up link is unavailable.</p>
-            )}
-          </Card>
-        );
-      })()}
+      {activity.externalSignupUrl &&
+        (() => {
+          const safeUrl = safeHttpUrl(activity.externalSignupUrl);
+          return (
+            <Card className="p-6 border-t-4 border-t-[#6fb0cd] rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-[#21526f]" />
+                <h3 className="text-lg font-semibold">Sign up</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                Sign-ups for this activity are managed externally.
+              </p>
+              {safeUrl ? (
+                <Button asChild className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full">
+                  <a href={safeUrl} target="_blank" rel="noopener noreferrer">
+                    Sign up
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </a>
+                </Button>
+              ) : (
+                <p className="text-sm text-gray-500">Sign-up link is unavailable.</p>
+              )}
+            </Card>
+          );
+        })()}
 
       {/* Sign-up section — hidden when external sign-up URL takes precedence */}
       {activity.allowSignup && !activity.externalSignupUrl && (
@@ -326,7 +329,7 @@ function ActivityDetailContent({ activityId }: { activityId: Id<"activities"> })
 
 export default function ActivityPage() {
   const params = useParams();
-  const activityId = params.id as Id<"activities">;
+  const slug = params.slug ?? "";
 
   return (
     <RequireAuth>
@@ -335,7 +338,12 @@ export default function ActivityPage() {
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
               <h1 className="text-2xl font-bold portal-title">Activity</h1>
-              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+              >
                 <Link to="/activities">Back to activities</Link>
               </Button>
             </div>
@@ -343,7 +351,7 @@ export default function ActivityPage() {
         </header>
 
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ActivityDetailContent activityId={activityId} />
+          <ActivityDetailContent slug={slug} />
         </main>
       </div>
     </RequireAuth>
