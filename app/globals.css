@@ -162,3 +162,34 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Shared portal background — mirrors the login page gradient energy */
+  .portal-bg {
+    background:
+      radial-gradient(ellipse 900px 450px at 5% -8%, rgba(111, 176, 205, 0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 600px 400px at 96% 110%, rgba(33, 82, 111, 0.13) 0%, transparent 55%),
+      linear-gradient(162deg, #eaf5fb 0%, #dff0f8 22%, #f3f9fd 52%, #ffffff 100%);
+  }
+
+  /* Frosted-glass sticky header */
+  .portal-header {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(33, 82, 111, 0.1);
+    box-shadow: 0 1px 0 rgba(33, 82, 111, 0.05), 0 4px 20px rgba(33, 82, 111, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  /* Gradient text in brand colors */
+  .portal-title {
+    background: linear-gradient(135deg, #21526f 0%, #2a6a88 55%, #58a6c7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}

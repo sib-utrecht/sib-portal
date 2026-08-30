@@ -19,15 +19,15 @@ const TOAST_MS = 1800;
 export default function TwoFAPage() {
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-[linear-gradient(180deg,var(--color-accent)_0%,var(--color-background)_60%)]">
-        <header className="bg-background shadow-sm border-b">
+      <div className="min-h-screen portal-bg">
+        <header className="portal-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-2xl font-bold portal-title">
                 Two-Factor Authentication Codes
               </h1>
               <div className="flex items-center gap-2">
-                <Button asChild variant="outline" size="lg">
+                <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
                   <Link to="/">Back to dashboard</Link>
                 </Button>
               </div>

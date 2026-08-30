@@ -40,13 +40,13 @@ export default function SettingsPage() {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-        <header className="bg-white shadow-sm border-b">
+      <div className="min-h-screen portal-bg">
+        <header className="portal-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              <h1 className="text-2xl font-bold text-gray-900">Preferences</h1>
+              <h1 className="text-2xl font-bold portal-title">Preferences</h1>
               <div className="flex items-center gap-2">
-                <Button asChild variant="outline" size="sm">
+                <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
                   <Link to="/">Back to dashboard</Link>
                 </Button>
               </div>
@@ -57,9 +57,14 @@ export default function SettingsPage() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid gap-6">
             <div className="space-y-6">
-              <Card>
+              <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
                 <CardHeader>
-                  <CardTitle className="text-lg">Photo permission</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-[#21526f]">
+                    <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
+                      <svg className="h-4 w-4 text-[#21526f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>
+                    Photo permission
+                  </CardTitle>
                   <CardDescription>Control where your photos may be used</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -68,9 +73,14 @@ export default function SettingsPage() {
               </Card>
 
               <div className="grid gap-6 md:grid-cols-2">
-                <Card>
+                <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
                   <CardHeader>
-                    <CardTitle>Communication</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-[#21526f]">
+                      <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
+                        <Mail className="h-4 w-4 text-[#21526f]" />
+                      </div>
+                      Communication
+                    </CardTitle>
                     <CardDescription>Choose how we may contact you</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -109,9 +119,9 @@ export default function SettingsPage() {
                 </Card>
 
                 <div className="space-y-6">
-                  <Card>
+                  <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
                     <CardHeader>
-                      <CardTitle>Pronouns</CardTitle>
+                      <CardTitle className="text-[#21526f]">Pronouns</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <Input
@@ -129,9 +139,9 @@ export default function SettingsPage() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
                     <CardHeader>
-                      <CardTitle>I study at</CardTitle>
+                      <CardTitle className="text-[#21526f]">I study at</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <Input
@@ -155,9 +165,9 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <Card>
+              <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
                 <CardHeader>
-                  <CardTitle>Your membership</CardTitle>
+                  <CardTitle className="text-[#21526f]">Your membership</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-4">
@@ -201,10 +211,12 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserRoundCog className="h-4 w-4" />
+                  <CardTitle className="flex items-center gap-2 text-[#21526f]">
+                    <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
+                      <UserRoundCog className="h-4 w-4 text-[#21526f]" />
+                    </div>
                     Quick actions
                   </CardTitle>
                 </CardHeader>

@@ -188,38 +188,40 @@ export function AdminDashboard() {
   const hasActiveFilters = selectedPermissions.size > 0;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f0f7fb_0%,#ffffff_60%)]">
-      <header className="bg-white shadow-sm border-b border-t-4 border-[#21526f]">
+    <div className="min-h-screen portal-bg">
+      <header className="portal-header border-t-4 border-t-[#21526f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold portal-title">Admin Dashboard</h1>
+              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#21526f] text-white">Admin</span>
+            </div>
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 ring-2 ring-[#21526f]/20">
                   <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-[#eaf3f7] text-[#21526f] font-semibold">
                     {user.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium">{user.name}</span>
-                <Badge variant="secondary">Admin</Badge>
+                <span className="text-sm font-medium text-[#21526f]">{user.name}</span>
               </div>
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
                 <Link to="/admin/storage">
                   <ImageIcon className="h-4 w-4 mr-2" />
                   Images
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
                 <Link to="/photo-permissions">
                   <Search className="h-4 w-4 mr-2" />
                   Photo Search
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
@@ -232,15 +234,17 @@ export function AdminDashboard() {
         <div className="space-y-6">
           {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-4">
-            <Card className="relative">
+            <Card className="relative border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
+                  <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
+                    <Users className="h-4 w-4 text-[#21526f]" />
+                  </div>
                   <span className="text-sm font-medium text-gray-600">Total Members</span>
                 </div>
-                <p className="text-2xl font-bold">{users.length}</p>
+                <p className="text-2xl font-bold text-[#21526f] mt-1">{users.length}</p>
                 {!hasActiveFilters && (
-                  <p className="text-xs text-primary mt-1">Showing all members</p>
+                  <p className="text-xs text-[#21526f]/60 mt-1">Showing all members</p>
                 )}
               </CardContent>
             </Card>
@@ -306,9 +310,9 @@ export function AdminDashboard() {
           )}
 
           {/* Members Table */}
-          <Card>
+          <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
             <CardHeader>
-              <CardTitle>
+              <CardTitle className="text-[#21526f]">
                 Member Photo Permissions
                 {hasActiveFilters && (
                   <span className="text-base font-normal text-gray-600 ml-2">
