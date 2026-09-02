@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
-import { internalAction, internalMutation } from "./_generated/server";
+import { internal } from "../_generated/api";
+import { internalAction, internalMutation } from "../_generated/server";
 
 const LEGACY_API_URL = "https://api2.sib-utrecht.nl/v2";
 const DEFAULT_BATCH_SIZE = 20;
@@ -96,7 +96,9 @@ function legacyHeaders(): HeadersInit {
 async function fetchLegacyJson(path: string, headers: HeadersInit): Promise<unknown> {
   const response = await fetch(`${LEGACY_API_URL}${path}`, { headers });
   if (!response.ok) {
-    throw new Error(`Legacy API request failed for ${path}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Legacy API request failed for ${path}: ${response.status} ${response.statusText}`,
+    );
   }
   return await response.json();
 }
@@ -139,14 +141,15 @@ export const upsertUserAndBookings = internalMutation({
     activitiesMissing: v.number(),
   }),
   handler: async (ctx, { user, bookings }) => {
-    const byWordpressId = user.wordpressUserId !== undefined
-      ? await ctx.db
-          .query("users")
-          .withIndex("by_legacyWordpressUserId", (q) =>
-            q.eq("legacyWordpressUserId", user.wordpressUserId),
-          )
-          .first()
-      : null;
+    const byWordpressId =
+      user.wordpressUserId !== undefined
+        ? await ctx.db
+            .query("users")
+            .withIndex("by_legacyWordpressUserId", (q) =>
+              q.eq("legacyWordpressUserId", user.wordpressUserId),
+            )
+            .first()
+        : null;
     const byEntityName = byWordpressId
       ? null
       : await ctx.db
@@ -216,6 +219,9 @@ export const upsertUserAndBookings = internalMutation({
       };
 
       if (existingRegistration) {
+        // Once a booking is changed through the portal, the portal is its
+        // source of truth. In particular, do not resurrect cancellation tombstones.
+        if (existingRegistration.source === "portal") continue;
         await ctx.db.patch(existingRegistration._id, fields);
         bookingsUpdated++;
       } else {
@@ -261,8 +267,7 @@ export const backfillUsersAndBookings = internalAction({
   handler: async (ctx, { minWordpressUserId, limit = DEFAULT_BATCH_SIZE }) => {
     const batchSize = Math.max(1, Math.min(Math.floor(limit), MAX_BATCH_SIZE));
     const headers = legacyHeaders();
-    const query =
-      minWordpressUserId === undefined ? "" : `?min_wp_user_id=${minWordpressUserId}`;
+    const query = minWordpressUserId === undefined ? "" : `?min_wp_user_id=${minWordpressUserId}`;
     const json = await fetchLegacyJson(`/users${query}`, headers);
     const rawUsers = extractArray(json, "users");
     const parsedUsers = rawUsers.map(parseLegacyUser);
@@ -288,15 +293,16 @@ export const backfillUsersAndBookings = internalAction({
     let invalidBookings = 0;
 
     for (const user of users) {
-      const parsedBookings = user.wordpressUserId !== undefined
-        ? extractArray(
-            await fetchLegacyJson(
-              `/users/${encodeURIComponent(user.entityName)}/bookings`,
-              headers,
-            ),
-            "bookings",
-          ).map(parseLegacyBooking)
-        : [];
+      const parsedBookings =
+        user.wordpressUserId !== undefined
+          ? extractArray(
+              await fetchLegacyJson(
+                `/users/${encodeURIComponent(user.entityName)}/bookings`,
+                headers,
+              ),
+              "bookings",
+            ).map(parseLegacyBooking)
+          : [];
       invalidBookings += parsedBookings.filter((booking) => booking === null).length;
       const validBookings = parsedBookings.filter(
         (booking): booking is LegacyBooking => booking !== null,
@@ -310,7 +316,7 @@ export const backfillUsersAndBookings = internalAction({
         return true;
       });
 
-      const result = await ctx.runMutation(internal.legacyBackfill.upsertUserAndBookings, {
+      const result = await ctx.runMutation(internal.legacy.userBackfill.upsertUserAndBookings, {
         user,
         bookings,
       });
@@ -325,12 +331,11 @@ export const backfillUsersAndBookings = internalAction({
       wordpressUsers.length === batchSize &&
       lastWordpressUserId !== undefined &&
       validUsers.some(
-        (user) =>
-          user.wordpressUserId !== undefined && user.wordpressUserId > lastWordpressUserId,
+        (user) => user.wordpressUserId !== undefined && user.wordpressUserId > lastWordpressUserId,
       );
     const nextMinWordpressUserId = hasMore ? lastWordpressUserId + 1 : null;
     if (nextMinWordpressUserId !== null) {
-      await ctx.scheduler.runAfter(0, internal.legacyBackfill.backfillUsersAndBookings, {
+      await ctx.scheduler.runAfter(0, internal.legacy.userBackfill.backfillUsersAndBookings, {
         minWordpressUserId: nextMinWordpressUserId,
         limit: batchSize,
       });

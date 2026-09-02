@@ -54,14 +54,17 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   const navigate = useNavigate();
   const activity = useQuery(api.activities.getActivity, { slug });
   const activityId = activity?._id;
-  const status = useQuery(api.activities.getActivityStatus, activityId ? { activityId } : "skip");
+  const status = useQuery(
+    api.activityBookings.getActivityStatus,
+    activityId ? { activityId } : "skip",
+  );
   const participants = useQuery(
-    api.activities.getParticipants,
+    api.activityBookings.getParticipants,
     status?.isAdmin && activityId ? { activityId } : "skip",
   );
 
-  const register = useMutation(api.activities.registerForActivity);
-  const unregister = useMutation(api.activities.unregisterFromActivity);
+  const register = useMutation(api.activityBookings.registerForActivity);
+  const unregister = useMutation(api.activityBookings.unregisterFromActivity);
   const deleteActivity = useMutation(api.activities.deleteActivity);
 
   const [actionError, setActionError] = useState<string | null>(null);

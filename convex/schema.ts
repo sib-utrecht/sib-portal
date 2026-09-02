@@ -99,6 +99,8 @@ export default defineSchema({
      * When present, clicking "Sign up" opens this URL instead of using this portal's registration.
      */
     externalSignupUrl: v.optional(v.string()),
+    /** Signup method reported by the legacy API, retained for v2 API compatibility. */
+    legacySignupMethod: v.optional(v.union(v.literal("none"), v.literal("api"), v.literal("url"))),
     /**
      * External ID from the source system (e.g. "wp-237" from the SIB API).
      * Used to prevent duplicate imports when backfilling.

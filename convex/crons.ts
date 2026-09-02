@@ -8,7 +8,7 @@ const crons = cronJobs();
 crons.daily(
   "backfill activities from legacy API",
   { hourUTC: 3, minuteUTC: 0 },
-  internal.activities.backfillFromApi,
+  internal.legacy.activityBackfill.backfillActivities,
   { limit: 50, offset: 0 },
 );
 
@@ -17,7 +17,7 @@ crons.daily(
 crons.daily(
   "backfill users and bookings from legacy API",
   { hourUTC: 3, minuteUTC: 15 },
-  internal.legacyBackfill.backfillUsersAndBookings,
+  internal.legacy.userBackfill.backfillUsersAndBookings,
   { limit: 20 },
 );
 
