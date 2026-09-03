@@ -20,7 +20,7 @@ interface AuthContextType {
   isAdmin: boolean;
   /** `true` while the initial auth check or a login/logout operation is in progress. */
   isLoading: boolean;
-  /** The raw Cognito ID token (JWT) for the current session, or `null` when signed out. */
+  /** The raw Cognito access token (JWT) for the current session, or `null` when signed out. */
   token: string | null;
   /**
    * Signs in with a Cognito username (email) and password.
@@ -106,7 +106,8 @@ const isAdminUser = (jwtToken: string): boolean => {
   }
 };
 
-const TOKEN_STORAGE_KEY = "cognito_jwt_token";
+const TOKEN_STORAGE_KEY = "cognito_access_token";
+const LEGACY_ID_TOKEN_STORAGE_KEY = "cognito_jwt_token";
 const REFRESH_TOKEN_STORAGE_KEY = "cognito_refresh_token";
 const USERNAME_STORAGE_KEY = "cognito_username";
 const TOKEN_EXPIRY_STORAGE_KEY = "cognito_token_expiry";
@@ -182,6 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAdmin(false);
     [localStorage, sessionStorage].forEach((storage) => {
       storage.removeItem(TOKEN_STORAGE_KEY);
+      storage.removeItem(LEGACY_ID_TOKEN_STORAGE_KEY);
       storage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       storage.removeItem(USERNAME_STORAGE_KEY);
       storage.removeItem(TOKEN_EXPIRY_STORAGE_KEY);
@@ -222,7 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               return;
             }
 
-            const jwtToken = session.getIdToken().getJwtToken();
+            const jwtToken = session.getAccessToken().getJwtToken();
             const sessionRefreshToken = session.getRefreshToken().getToken();
             saveToken(jwtToken, sessionRefreshToken);
             setIsAuthenticated(true);
@@ -243,8 +245,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const response = await cognitoClient.send(command);
 
-      if (response.AuthenticationResult?.IdToken) {
-        const jwtToken = response.AuthenticationResult.IdToken;
+      if (response.AuthenticationResult?.AccessToken) {
+        const jwtToken = response.AuthenticationResult.AccessToken;
         // Keep the same refresh token and username
         saveToken(jwtToken, response.AuthenticationResult.RefreshToken || refreshToken, username);
         return true;
@@ -286,6 +288,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      // Older portal versions stored the ID token under a different key. If
+      // refresh credentials are still available, exchange them immediately
+      // instead of requiring the member to sign in again.
+      if (
+        getTokenStorage().getItem(REFRESH_TOKEN_STORAGE_KEY) &&
+        getTokenStorage().getItem(USERNAME_STORAGE_KEY)
+      ) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // Fallback to checking Cognito session
       const cognitoUser = getUserPool().getCurrentUser();
       if (cognitoUser) {
@@ -295,7 +311,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
           if (session.isValid()) {
-            const jwtToken = session.getIdToken().getJwtToken();
+            const jwtToken = session.getAccessToken().getJwtToken();
             const refreshToken = session.getRefreshToken().getToken();
             saveToken(jwtToken, refreshToken, cognitoUser.getUsername());
             setIsAdmin(isAdminUser(jwtToken));
@@ -350,7 +366,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return new Promise((resolve, reject) => {
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: (session: CognitoUserSession) => {
-          const jwtToken = session.getIdToken().getJwtToken();
+          const jwtToken = session.getAccessToken().getJwtToken();
           const refreshToken = session.getRefreshToken().getToken();
 
           saveToken(jwtToken, refreshToken, username, keepLoggedIn);
@@ -431,8 +447,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const response = await cognitoClient.send(command);
 
-      if (response.AuthenticationResult?.IdToken) {
-        const jwtToken = response.AuthenticationResult.IdToken;
+      if (response.AuthenticationResult?.AccessToken) {
+        const jwtToken = response.AuthenticationResult.AccessToken;
         const refreshToken = response.AuthenticationResult.RefreshToken;
 
         saveToken(jwtToken, refreshToken, email, keepLoggedIn);

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type MutationCtx, query } from "./_generated/server";
-import { isAdmin, requireAdmin, requireLogin } from "./auth";
+import { isAdmin, requireAdmin } from "./auth";
 import { requireCurrentUser } from "./legacy/identity";
 
 const participantValidator = v.object({
@@ -151,25 +151,19 @@ export const getActivityStatus = query({
     isAdmin: v.boolean(),
   }),
   handler: async (ctx, { activityId }) => {
-    const identity = await requireLogin(ctx);
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", identity.email))
-      .first();
+    const user = await requireCurrentUser(ctx);
 
     const [registrations, userRegistration, admin] = await Promise.all([
       ctx.db
         .query("activityRegistrations")
         .withIndex("by_activity", (q) => q.eq("activityId", activityId))
         .take(1_000),
-      user
-        ? ctx.db
-            .query("activityRegistrations")
-            .withIndex("by_activity_and_user", (q) =>
-              q.eq("activityId", activityId).eq("userId", user._id),
-            )
-            .first()
-        : Promise.resolve(null),
+      ctx.db
+        .query("activityRegistrations")
+        .withIndex("by_activity_and_user", (q) =>
+          q.eq("activityId", activityId).eq("userId", user._id),
+        )
+        .first(),
       isAdmin(ctx),
     ]);
 

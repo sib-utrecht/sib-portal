@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { cancelCurrentUserBooking, createCurrentUserBooking } from "../activityBookings";
-import { requireLogin } from "../auth";
 import { findActivity } from "./activityLookup";
+import { requireCurrentUser } from "./identity";
 
 /** Add a booking through the Flutter compatibility API. */
 export const addBooking = internalMutation({
@@ -41,23 +41,7 @@ export const listCurrentUserBookings = internalQuery({
   args: {},
   returns: v.array(bookingValidator),
   handler: async (ctx) => {
-    const identity = await requireLogin(ctx);
-    let user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", identity.email))
-      .first();
-
-    const conscriboId = Number.parseInt(identity.conscriboId, 10);
-    const wordpressUserId = Number.isFinite(conscriboId) ? conscriboId + 1_000 : undefined;
-    if (!user && wordpressUserId !== undefined) {
-      user = await ctx.db
-        .query("users")
-        .withIndex("by_legacyWordpressUserId", (q) =>
-          q.eq("legacyWordpressUserId", wordpressUserId),
-        )
-        .first();
-    }
-    if (!user) return [];
+    const user = await requireCurrentUser(ctx);
 
     const registrations = await ctx.db
       .query("activityRegistrations")

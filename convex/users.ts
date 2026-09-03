@@ -1,7 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { User } from "../types/user";
-import { requireLogin, requireAdmin } from "./auth";
+import { getAuthenticatedIdentity, requireAdmin } from "./auth";
+import { findCurrentUser, requireCurrentUser } from "./legacy/identity";
 
 /**
  * Returns all user records in the database.
@@ -33,33 +34,26 @@ export const getUserByEmail = query({
 });
 
 /**
- * Returns the profile for the currently authenticated user, merging data from
- * both the Cognito identity (name, email) and the Convex `users` table
- * (role, avatar, photoPermission).
+ * Returns the imported profile for the currently authenticated user.
  *
- * Returns `null` when the caller is not authenticated, has no email in their
- * identity token, or has no matching record in the `users` table.
+ * Returns `null` when the caller is not authenticated. A valid Cognito user
+ * without a matching imported record is rejected.
  */
 export const getProfile = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity || !identity.email) return null;
+    const identity = await getAuthenticatedIdentity(ctx);
+    if (!identity) return null;
 
-    const dbUser = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), identity.email))
-      .first();
-
-    if (!dbUser) return null;
+    const dbUser = await findCurrentUser(ctx, identity);
+    if (!dbUser || dbUser.name.trim() === "") {
+      throw new Error("Forbidden: No imported member record with a name found");
+    }
 
     return {
       _id: dbUser._id,
-      name:
-        [identity.givenName, identity.familyName].filter(Boolean).join(" ") ||
-        identity.name ||
-        "User",
-      email: identity.email,
+      name: dbUser.name,
+      email: dbUser.email,
       role: dbUser.role,
       avatar: dbUser.avatar ?? null,
       photoPermission: dbUser.photoPermission,
@@ -88,14 +82,14 @@ export const updateUserPhotoPermission = mutation({
     ),
   },
   handler: async (ctx, { id, photoPermission }) => {
-    const identity = await requireLogin(ctx);
+    const currentUser = await requireCurrentUser(ctx);
 
     const user = await ctx.db.get(id);
     if (!user) {
       throw new Error("User not found");
     }
 
-    if (user.email !== identity.email) {
+    if (user._id !== currentUser._id) {
       await requireAdmin(ctx);
     }
 

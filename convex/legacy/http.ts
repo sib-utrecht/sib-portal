@@ -2,11 +2,11 @@ import { httpRouter } from "convex/server";
 import type { FunctionReturnType } from "convex/server";
 import { httpAction } from "../_generated/server";
 import { internal } from "../_generated/api";
+import { getAuthenticatedIdentity } from "../auth";
 
 const jsonHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "Authorization, Content-Type, X-Access-Token, X-Id-Token, X-App-Version",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Id-Token, X-App-Version",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Content-Type": "application/json; charset=utf-8",
 };
@@ -162,7 +162,7 @@ const getActivity = httpAction(async (ctx, request) => {
 
 const listMyBookings = httpAction(async (ctx) => {
   try {
-    if (!(await ctx.auth.getUserIdentity())) {
+    if (!(await getAuthenticatedIdentity(ctx))) {
       return json({ data: { bookings: [], auth_userid: null } });
     }
     const bookings = await ctx.runQuery(internal.legacy.bookingApi.listCurrentUserBookings, {});
@@ -241,11 +241,8 @@ const proxyLegacyV2 = httpAction(async (_ctx, request) => {
 
   const legacyUrl = new URL(`https://api2.sib-utrecht.nl${legacyPath}`);
   legacyUrl.search = incomingUrl.search;
-  const accessToken = request.headers.get("X-Access-Token");
   const headers = new Headers();
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
-  } else if (request.headers.has("Authorization")) {
+  if (request.headers.has("Authorization")) {
     headers.set("Authorization", request.headers.get("Authorization")!);
   }
   for (const headerName of ["Content-Type", "X-Id-Token", "X-App-Version"]) {
