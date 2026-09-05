@@ -66,12 +66,13 @@ function asV2Signup(activity: PublicActivity) {
 }
 
 function asV2Event(activity: PublicActivity) {
+  const hasEnd = activity.endTime !== activity.startTime;
   return {
     id: activity.id,
     name: { long: activity.title },
     date: {
       start: new Date(activity.startTime).toISOString(),
-      end: new Date(activity.endTime).toISOString(),
+      end: hasEnd ? new Date(activity.endTime).toISOString() : null,
     },
     location: activity.location ?? null,
     organizer: null,

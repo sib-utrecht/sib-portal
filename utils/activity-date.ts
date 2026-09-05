@@ -1,9 +1,7 @@
 const ACTIVITY_TIME_ZONE = "Europe/Amsterdam";
 
-/** The external events API uses midnight to represent a date without a time. */
-export function shouldShowActivityTime(timestamp: number, externalId?: string): boolean {
-  if (!externalId) return true;
-
+/** Midnight represents a date for which no time was specified. */
+export function shouldShowActivityTime(timestamp: number): boolean {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: ACTIVITY_TIME_ZONE,
     hour: "2-digit",
@@ -16,13 +14,9 @@ export function shouldShowActivityTime(timestamp: number, externalId?: string): 
   return hour !== "00" || minute !== "00";
 }
 
-/** Equal imported endpoints are stored one minute apart to satisfy schema validation. */
-export function shouldShowActivityEnd(
-  startTime: number,
-  endTime: number,
-  externalId?: string,
-): boolean {
-  return !externalId || endTime - startTime > 60_000;
+/** Matching start and end timestamps represent an activity without an end. */
+export function shouldShowActivityEnd(startTime: number, endTime: number): boolean {
+  return endTime !== startTime;
 }
 
 export const activityDateTimeZone = ACTIVITY_TIME_ZONE;

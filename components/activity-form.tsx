@@ -46,11 +46,30 @@ type InitialActivity = {
   maxParticipants?: number;
 };
 
+function midnightOn(date: Date): Date {
+  const midnight = new Date(date);
+  midnight.setHours(0, 0, 0, 0);
+  return midnight;
+}
+
+function isMissingEndSelection(startTime: Date, endTime?: Date): boolean {
+  return (
+    endTime === undefined ||
+    (endTime.getFullYear() === startTime.getFullYear() &&
+      endTime.getMonth() === startTime.getMonth() &&
+      endTime.getDate() === startTime.getDate() &&
+      endTime.getHours() === 0 &&
+      endTime.getMinutes() === 0)
+  );
+}
+
 function activityToForm(activity: InitialActivity): ActivityFormData {
+  const startTime = new Date(activity.startTime);
   return {
     title: activity.title,
-    startTime: new Date(activity.startTime),
-    endTime: new Date(activity.endTime),
+    startTime,
+    endTime:
+      activity.endTime === activity.startTime ? midnightOn(startTime) : new Date(activity.endTime),
     description: activity.description,
     location: activity.location ?? "",
     allowSignup: activity.allowSignup,
@@ -124,12 +143,13 @@ export function ActivityForm({
     if (saving || imageUploading) return;
     setError(null);
 
-    if (!form.startTime || !form.endTime) {
-      setError("Start and end times are required.");
+    if (!form.startTime) {
+      setError("A start time is required.");
       return;
     }
-    if (form.endTime <= form.startTime) {
-      setError("End time must be after start time.");
+    const missingEnd = isMissingEndSelection(form.startTime, form.endTime);
+    if (!missingEnd && form.endTime && form.endTime < form.startTime) {
+      setError("End time must not be before start time.");
       return;
     }
 
@@ -146,7 +166,7 @@ export function ActivityForm({
     const payload = {
       title: form.title.trim(),
       startTime: form.startTime.getTime(),
-      endTime: form.endTime.getTime(),
+      endTime: missingEnd ? form.startTime.getTime() : form.endTime!.getTime(),
       description: form.description,
       promotionalImageStorageId: imageStorageId ?? undefined,
       location: form.location.trim() || undefined,
@@ -202,9 +222,7 @@ export function ActivityForm({
             onChange={(d) => {
               set("startTime", d);
               if (d && !form.endTime) {
-                const endDate = new Date(d);
-                endDate.setHours(d.getHours() + 1, d.getMinutes(), 0, 0);
-                set("endTime", endDate);
+                set("endTime", midnightOn(d));
               } else if (d && form.endTime) {
                 const endDate = new Date(form.endTime);
                 endDate.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
@@ -216,13 +234,26 @@ export function ActivityForm({
           />
         </div>
         <div className="min-w-0 space-y-2">
-          <Label htmlFor="endTime">End</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="endTime">End (optional)</Label>
+            {form.startTime &&
+              form.endTime &&
+              !isMissingEndSelection(form.startTime, form.endTime) && (
+                <button
+                  type="button"
+                  className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+                  onClick={() => set("endTime", undefined)}
+                  disabled={saving}
+                >
+                  Remove end
+                </button>
+              )}
+          </div>
           <DateTimePicker
             id="endTime"
             value={form.endTime}
             onChange={(d) => set("endTime", d)}
             disabled={saving}
-            required
             focusTime
           />
         </div>

@@ -159,8 +159,8 @@ function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
   }
   const location = fields.location?.trim() || undefined;
   fields = { ...fields, title, location };
-  if (fields.endTime <= fields.startTime) {
-    throw new Error("endTime must be after startTime");
+  if (fields.endTime < fields.startTime) {
+    throw new Error("endTime must not be before startTime");
   }
   if (!fields.allowSignup) {
     // Strip signup-only fields so they can't be set inconsistently
@@ -183,7 +183,7 @@ export const createActivity = mutation({
   args: {
     title: v.string(),
     startTime: v.number(),
-    endTime: v.number(),
+    endTime: v.optional(v.number()),
     description: v.string(),
     promotionalImageStorageId: v.optional(v.id("_storage")),
     location: v.optional(v.string()),
@@ -194,7 +194,10 @@ export const createActivity = mutation({
   returns: v.object({ id: v.id("activities"), slug: v.string() }),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const fields = validateAndNormalizeActivity(args);
+    const fields = validateAndNormalizeActivity({
+      ...args,
+      endTime: args.endTime ?? args.startTime,
+    });
     const slug = await uniqueActivitySlug(ctx, fields.title, fields.startTime);
     const id = await ctx.db.insert("activities", { ...fields, slug });
     if (args.promotionalImageStorageId) {

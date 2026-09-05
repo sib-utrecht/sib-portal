@@ -135,9 +135,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     activity.maxParticipants !== undefined &&
     (status?.participantCount ?? 0) >= activity.maxParticipants;
   const loginUrl = `/login?redirect_uri=${encodeURIComponent(`/activities/${activity.slug}`)}`;
-  const showStartTime = shouldShowActivityTime(activity.startTime, activity.externalId);
-  const showEnd = shouldShowActivityEnd(activity.startTime, activity.endTime, activity.externalId);
-  const showEndTime = shouldShowActivityTime(activity.endTime, activity.externalId);
+  const showStartTime = shouldShowActivityTime(activity.startTime);
+  const showEnd = shouldShowActivityEnd(activity.startTime, activity.endTime);
+  const showEndTime = shouldShowActivityTime(activity.endTime);
   const showCompactSameDayRange =
     showEnd &&
     showStartTime &&

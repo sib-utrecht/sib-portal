@@ -16,7 +16,7 @@ type ApiEventSignup =
 type ApiEvent = {
   id: string;
   name: { long: string };
-  date: { start: string; end: string };
+  date: { start: string; end?: string };
   location: string | null;
   body: {
     description: { html: string };
@@ -43,7 +43,7 @@ export const upsertActivity = internalMutation({
     externalId: v.string(),
     title: v.string(),
     startTime: v.number(),
-    endTime: v.number(),
+    endTime: v.optional(v.number()),
     description: v.string(),
     promotionalImageUrl: v.optional(v.string()),
     location: v.optional(v.string()),
@@ -74,7 +74,7 @@ export const upsertActivity = internalMutation({
       title: args.title,
       slug: await uniqueActivitySlug(ctx, args.title, args.startTime),
       startTime: args.startTime,
-      endTime: Math.max(args.endTime, args.startTime + 60_000),
+      endTime: args.endTime ?? args.startTime,
       description: args.description,
       promotionalImageUrl: args.promotionalImageUrl,
       location: args.location,
@@ -112,7 +112,7 @@ export const backfillActivities = internalAction({
         externalId: event.id,
         title: event.name.long,
         startTime: new Date(event.date.start).getTime(),
-        endTime: new Date(event.date.end).getTime(),
+        endTime: optionalTimestamp(event.date.end),
         description: event.body.description.html,
         promotionalImageUrl: event.body.image ?? undefined,
         location: event.location ?? undefined,

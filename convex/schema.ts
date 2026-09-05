@@ -77,7 +77,7 @@ export default defineSchema({
     slug: v.optional(v.string()),
     /** Unix timestamp (ms) for when the activity starts. */
     startTime: v.number(),
-    /** Unix timestamp (ms) for when the activity ends. */
+    /** Unix timestamp (ms) for when the activity ends; equals startTime when no end is specified. */
     endTime: v.number(),
     /** HTML description of the activity. */
     description: v.string(),

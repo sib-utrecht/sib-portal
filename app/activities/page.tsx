@@ -226,7 +226,7 @@ function ActivityTile({
                 </div>
                 <div className="text-[11px] text-gray-500 font-medium leading-snug border-l border-gray-200 pl-2">
                   <div>{formatDateShort(activity.startTime).split(",")[0]}</div>
-                  {shouldShowActivityTime(activity.startTime, activity.externalId) && (
+                  {shouldShowActivityTime(activity.startTime) && (
                     <div>{formatTime(activity.startTime)}</div>
                   )}
                 </div>
