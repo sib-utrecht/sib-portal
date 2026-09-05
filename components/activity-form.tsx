@@ -175,7 +175,10 @@ export function ActivityForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 max-w-2xl rounded-2xl bg-white p-6 shadow-sm sm:p-8"
+    >
       {/* Title */}
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>

@@ -15,14 +15,14 @@ function EditActivityContent({ slug }: { slug: string }) {
     return (
       <div className="space-y-4 max-w-2xl">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 rounded-md" />
+          <Skeleton key={i} className="h-10 rounded-md bg-white/60" />
         ))}
       </div>
     );
   }
 
   if (activity === null) {
-    return <p className="text-gray-500">Activity not found.</p>;
+    return <p className="text-white/80">Activity not found.</p>;
   }
 
   return <ActivityForm mode="edit" activityId={activity._id} initial={activity} />;
@@ -35,7 +35,7 @@ export default function EditActivityPage() {
   return (
     <RequireAuth>
       <RequireAdmin>
-        <div className="min-h-screen portal-bg">
+        <div className="min-h-screen bg-[#21526f]">
           <header className="portal-header">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center py-4">

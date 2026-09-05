@@ -33,7 +33,7 @@ class ErrorBoundary extends Component<BoundaryProps, BoundaryState> {
     if (!this.state.error) return this.props.children;
 
     return (
-      <main className="min-h-screen portal-bg flex items-center justify-center px-4">
+      <main className="min-h-screen bg-[#21526f] flex items-center justify-center px-4">
         <div className="w-full max-w-lg rounded-2xl bg-white p-8 text-center shadow-lg ring-1 ring-[#21526f]/10">
           <AlertTriangle className="mx-auto mb-4 h-10 w-10 text-[#21526f]" aria-hidden="true" />
           <h1 className="text-xl font-semibold text-gray-900">We couldn’t load this page</h1>

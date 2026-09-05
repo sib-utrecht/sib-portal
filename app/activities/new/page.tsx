@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 function NewActivityContent() {
   return (
-    <div className="min-h-screen portal-bg">
+    <div className="min-h-screen bg-[#21526f]">
       <header className="portal-header">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">

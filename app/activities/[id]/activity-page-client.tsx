@@ -139,7 +139,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   }
 
   if (activity === null) {
-    return <p className="text-gray-500">Activity not found.</p>;
+    return <p className="text-white/80">Activity not found.</p>;
   }
 
   const now = Date.now();
@@ -174,7 +174,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
       {/* Title & meta */}
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-4">
-          <h2 className="text-2xl font-bold text-gray-900">{activity.title}</h2>
+          <h2 className="text-2xl font-bold text-white">{activity.title}</h2>
           {status.isAdmin && (
             <div className="flex gap-2 shrink-0">
               <Button asChild variant="outline" size="sm" className="rounded-full">
@@ -219,9 +219,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-gray-600">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-[#d7eef8]">
           <span className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4 shrink-0 text-[#21526f]" />
+            <Calendar className="h-4 w-4 shrink-0 text-[#8fc2da]" />
             {showCompactSameDayRange ? (
               <>
                 {formatDate(activity.startTime)}-{formatTime(activity.endTime)}
@@ -236,7 +236,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
           </span>
           {activity.location && (
             <span className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 shrink-0 text-[#21526f]" />
+              <MapPin className="h-4 w-4 shrink-0 text-[#8fc2da]" />
               {activity.location}
             </span>
           )}
@@ -438,7 +438,7 @@ export default function ActivityPage() {
 
   return (
     <RequireAuth>
-      <div className="min-h-screen portal-bg">
+      <div className="min-h-screen bg-[#21526f]">
         <header className="portal-header">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-4 py-4">

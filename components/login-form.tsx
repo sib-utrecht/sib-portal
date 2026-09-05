@@ -128,8 +128,8 @@ export function LoginForm() {
         ["--ring" as any]: "#21526f",
       }}
     >
-      {/* Background: brand-forward gradient with a soft light spot */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_600px_at_10%_-10%,#6fb0cd33,transparent_60%),radial-gradient(800px_400px_at_90%_110%,#21526f22,transparent_60%),linear-gradient(135deg,#eaf5fb_0%,#d7eef8_25%,#c9e7f3_40%,#bfe0ee_55%,#a9d3e6_70%,#8fc2da_85%,#78b3cf_100%)] dark:bg-[radial-gradient(1200px_600px_at_10%_-10%,#6fb0cd22,transparent_60%),radial-gradient(800px_400px_at_90%_110%,#21526f33,transparent_60%),linear-gradient(135deg,#0b1216_0%,#102029_30%,#153544_70%,#1a4a61_100%)]" />
+      {/* Match the solid brand-blue background used on the SIB Utrecht homepage. */}
+      <div className="pointer-events-none absolute inset-0 bg-[#21526f]" />
 
       <Card className="w-full max-w-md backdrop-blur-[2px] bg-card/90 border-[#21526f]/20 shadow-lg shadow-[#21526f]/10">
         <CardHeader className="text-center">
