@@ -1,3 +1,7 @@
+function withoutNullishValues(claims) {
+  return Object.fromEntries(Object.entries(claims).filter(([, value]) => value != null));
+}
+
 export const handler = function (event, context) {
   const attributes = event.request.userAttributes;
   const givenName = attributes["given_name"];
@@ -10,36 +14,27 @@ export const handler = function (event, context) {
   event.response = {
     claimsAndScopeOverrideDetails: {
       idTokenGeneration: {
-        claimsToAddOrOverride: {
-          ...(attributes["custom:wp-userid"] !== undefined
-            ? { "wp-userid": attributes["custom:wp-userid"] }
-            : {}),
-          ...(attributes["custom:entity-id"] !== undefined
-            ? { "entity-id": attributes["custom:entity-id"] }
-            : {}),
-          ...(givenName !== undefined ? { given_name: givenName, short_name: shortName } : {}),
-          ...(familyName !== undefined ? { family_name: familyName } : {}),
-          ...(longName !== undefined ? { long_name: longName } : {}),
-        },
+        claimsToAddOrOverride: withoutNullishValues({
+          "wp-userid": attributes["custom:wp-userid"],
+          "entity-id": attributes["custom:entity-id"],
+          given_name: givenName,
+          family_name: familyName,
+          short_name: shortName,
+          long_name: longName,
+        }),
         // "claimsToSuppress": [
         //   "email",
         //   "phone_number"
         // ]
       },
       accessTokenGeneration: {
-        claimsToAddOrOverride: {
+        claimsToAddOrOverride: withoutNullishValues({
           aud: event.callerContext.clientId,
-          ...(attributes["custom:wp-userid"] !== undefined
-            ? { "wp-userid": attributes["custom:wp-userid"] }
-            : {}),
-          ...(attributes["custom:entity-id"] !== undefined
-            ? { "entity-id": attributes["custom:entity-id"] }
-            : {}),
-          ...(attributes.email !== undefined ? { email: attributes.email } : {}),
-          ...(attributes["custom:conscribo-id"] !== undefined
-            ? { "conscribo-id": attributes["custom:conscribo-id"] }
-            : {}),
-        },
+          "wp-userid": attributes["custom:wp-userid"],
+          "entity-id": attributes["custom:entity-id"],
+          email: attributes.email,
+          "conscribo-id": attributes["custom:conscribo-id"],
+        }),
         // "claimsToSuppress": [],
         // "scopesToAdd": [
         //   "openid",
