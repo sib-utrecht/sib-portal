@@ -8,7 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Calendar, Users, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Users, Pencil, ExternalLink } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
@@ -70,7 +71,6 @@ function formatBookingDate(ts: number) {
 }
 
 function ActivityDetailContent({ slug }: { slug: string }) {
-  const navigate = useNavigate();
   const activity = useQuery(api.activities.getActivity, { slug });
   const activityId = activity?._id;
   const status = useQuery(
@@ -84,11 +84,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
   const register = useMutation(api.activityBookings.registerForActivity);
   const unregister = useMutation(api.activityBookings.unregisterFromActivity);
-  const deleteActivity = useMutation(api.activities.deleteActivity);
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function handleRegister() {
     if (!activityId) return;
@@ -112,19 +110,6 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleDelete() {
-    if (!activityId) return;
-    setBusy(true);
-    setActionError(null);
-    try {
-      await deleteActivity({ id: activityId });
-      navigate("/");
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Something went wrong.");
       setBusy(false);
     }
   }
@@ -173,51 +158,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
       {/* Title & meta */}
       <div className="space-y-3">
-        <div className="flex items-start justify-between gap-4">
-          <h2 className="text-2xl font-bold text-white">{activity.title}</h2>
-          {status.isAdmin && (
-            <div className="flex gap-2 shrink-0">
-              <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link to={`/activities/${activity.slug}/edit`}>
-                  <Pencil className="h-4 w-4 mr-1" />
-                  Edit
-                </Link>
-              </Button>
-              {confirmDelete ? (
-                <div className="flex gap-1">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={handleDelete}
-                    disabled={busy}
-                  >
-                    Confirm delete
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => setConfirmDelete(false)}
-                    disabled={busy}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full text-red-600 border-red-300 hover:bg-red-50"
-                  onClick={() => setConfirmDelete(true)}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+        <h2 className="text-2xl font-bold text-white">{activity.title}</h2>
 
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-[#d7eef8]">
           <span className="flex items-center gap-1.5">
@@ -436,6 +377,7 @@ export default function ActivityPage() {
   const params = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useAuth();
   const slug = params.slug ?? "";
 
   useLayoutEffect(() => {
@@ -456,18 +398,32 @@ export default function ActivityPage() {
       <div className="min-h-screen bg-[#21526f]">
         <header className="portal-header">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-4 py-4">
-              <Button
-                variant="outline"
-                size="icon"
-                className="border-[#21526f]/30 bg-white/80 text-[#21526f] shadow-sm hover:bg-[#eaf3f7] hover:text-[#21526f]"
-                onClick={handleBack}
-                aria-label="Back to activities"
-                title="Back to activities"
-              >
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              </Button>
-              <h1 className="text-2xl font-bold portal-title">Activity</h1>
+            <div className="flex items-center justify-between gap-4 py-4">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-[#21526f]/30 bg-white/80 text-[#21526f] shadow-sm hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                  onClick={handleBack}
+                  aria-label="Back to activities"
+                  title="Back to activities"
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                </Button>
+                <h1 className="text-2xl font-bold portal-title">Activity</h1>
+              </div>
+              {isAdmin && (
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
+                >
+                  <Link to={`/activities/${slug}/edit`}>
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Edit activity
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </header>

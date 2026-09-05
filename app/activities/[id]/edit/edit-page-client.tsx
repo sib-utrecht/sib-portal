@@ -1,15 +1,36 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RequireAuth } from "@/components/require-auth";
 import { RequireAdmin } from "@/components/require-admin";
 import { ActivityForm } from "@/components/activity-form";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
 
 function EditActivityContent({ slug }: { slug: string }) {
+  const navigate = useNavigate();
   const activity = useQuery(api.activities.getActivity, { slug });
+  const deleteActivity = useMutation(api.activities.deleteActivity);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  async function handleDelete() {
+    if (!activity) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteActivity({ id: activity._id });
+      navigate("/");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Something went wrong.");
+      setDeleting(false);
+    }
+  }
 
   if (activity === undefined) {
     return (
@@ -25,7 +46,59 @@ function EditActivityContent({ slug }: { slug: string }) {
     return <p className="text-white/80">Activity not found.</p>;
   }
 
-  return <ActivityForm mode="edit" activityId={activity._id} initial={activity} />;
+  return (
+    <div className="max-w-2xl space-y-6">
+      <ActivityForm mode="edit" activityId={activity._id} initial={activity} />
+
+      <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm sm:p-8">
+        <h2 className="font-semibold text-gray-900">Delete activity</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Permanently delete this activity and its sign-ups.
+        </p>
+
+        {deleteError && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertDescription>{deleteError}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {confirmDelete ? (
+            <>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="rounded-full"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting…" : "Confirm delete"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={() => setConfirmDelete(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={() => setConfirmDelete(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete activity
+            </Button>
+          )}
+        </div>
+      </section>
+    </div>
+  );
 }
 
 export default function EditActivityPage() {
