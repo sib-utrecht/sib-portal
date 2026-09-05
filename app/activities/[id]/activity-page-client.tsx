@@ -1,7 +1,6 @@
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "convex/react";
+import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -71,11 +70,12 @@ function formatBookingDate(ts: number) {
 }
 
 function ActivityDetailContent({ slug }: { slug: string }) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
   const activity = useQuery(api.activities.getActivity, { slug });
   const activityId = activity?._id;
   const status = useQuery(
     api.activityBookings.getActivityStatus,
-    activityId ? { activityId } : "skip",
+    isAuthenticated && activityId ? { activityId } : "skip",
   );
   const participants = useQuery(
     api.activityBookings.getParticipants,
@@ -114,7 +114,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     }
   }
 
-  if (activity === undefined || status === undefined) {
+  if (activity === undefined) {
     return (
       <div className="space-y-4 max-w-3xl">
         <Skeleton className="h-10 w-64 rounded-full" />
@@ -133,7 +133,8 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     (!activity.registrationDeadline || now <= activity.registrationDeadline);
   const isFull =
     activity.maxParticipants !== undefined &&
-    (status.participantCount ?? 0) >= activity.maxParticipants;
+    (status?.participantCount ?? 0) >= activity.maxParticipants;
+  const loginUrl = `/login?redirect_uri=${encodeURIComponent(`/activities/${activity.slug}`)}`;
   const showStartTime = shouldShowActivityTime(activity.startTime, activity.externalId);
   const showEnd = shouldShowActivityEnd(activity.startTime, activity.endTime, activity.externalId);
   const showEndTime = shouldShowActivityTime(activity.endTime, activity.externalId);
@@ -218,15 +219,21 @@ function ActivityDetailContent({ slug }: { slug: string }) {
               <p className="text-sm text-gray-600">
                 Sign-ups for this activity are managed externally.
               </p>
-              {safeUrl ? (
+              {!safeUrl ? (
+                <p className="text-sm text-gray-500">Sign-up link is unavailable.</p>
+              ) : isAuthLoading ? (
+                <Skeleton className="h-9 w-36 rounded-full" />
+              ) : !isAuthenticated ? (
+                <Button asChild className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full">
+                  <Link to={loginUrl}>Log in to sign up</Link>
+                </Button>
+              ) : (
                 <Button asChild className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full">
                   <a href={safeUrl} target="_blank" rel="noopener noreferrer">
                     Sign up
                     <ExternalLink className="h-4 w-4 ml-2" />
                   </a>
                 </Button>
-              ) : (
-                <p className="text-sm text-gray-500">Sign-up link is unavailable.</p>
               )}
             </Card>
           );
@@ -241,7 +248,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
           </div>
 
           <div className="text-sm text-gray-600 space-y-1">
-            {activity.maxParticipants !== undefined && (
+            {activity.maxParticipants !== undefined && status && (
               <p>
                 {status.participantCount} / {activity.maxParticipants} spots filled
               </p>
@@ -257,7 +264,17 @@ function ActivityDetailContent({ slug }: { slug: string }) {
             </Alert>
           )}
 
-          {status.isRegistered ? (
+          {isAuthLoading || (isAuthenticated && status === undefined) ? (
+            <Skeleton className="h-9 w-36 rounded-full" />
+          ) : !isAuthenticated ? (
+            registrationOpen ? (
+              <Button asChild className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full">
+                <Link to={loginUrl}>Log in to sign up</Link>
+              </Button>
+            ) : (
+              <p className="text-gray-500 text-sm">Registration is closed.</p>
+            )
+          ) : status?.isRegistered ? (
             <div className="flex items-center gap-4">
               <span className="text-green-700 font-medium">You are signed up</span>
               {registrationOpen && (
@@ -289,7 +306,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
       )}
 
       {/* Sign-up list (admin only, including externally managed activities) */}
-      {status.isAdmin && (
+      {status?.isAdmin && (
         <Card className="p-6 rounded-2xl shadow-sm space-y-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-700">
@@ -394,44 +411,42 @@ export default function ActivityPage() {
   }
 
   return (
-    <RequireAuth>
-      <div className="min-h-screen bg-[#21526f]">
-        <header className="portal-header">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between gap-4 py-4">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="border-[#21526f]/30 bg-white/80 text-[#21526f] shadow-sm hover:bg-[#eaf3f7] hover:text-[#21526f]"
-                  onClick={handleBack}
-                  aria-label="Back to activities"
-                  title="Back to activities"
-                >
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                </Button>
-                <h1 className="text-2xl font-bold portal-title">Activity</h1>
-              </div>
-              {isAdmin && (
-                <Button
-                  asChild
-                  size="sm"
-                  className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
-                >
-                  <Link to={`/activities/${slug}/edit`}>
-                    <Pencil className="h-4 w-4 mr-1" />
-                    Edit activity
-                  </Link>
-                </Button>
-              )}
+    <div className="min-h-screen bg-[#21526f]">
+      <header className="portal-header">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4 py-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="icon"
+                className="border-[#21526f]/30 bg-white/80 text-[#21526f] shadow-sm hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                onClick={handleBack}
+                aria-label="Back to activities"
+                title="Back to activities"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <h1 className="text-2xl font-bold portal-title">Activity</h1>
             </div>
+            {isAdmin && (
+              <Button
+                asChild
+                size="sm"
+                className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
+              >
+                <Link to={`/activities/${slug}/edit`}>
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Edit activity
+                </Link>
+              </Button>
+            )}
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ActivityDetailContent slug={slug} />
-        </main>
-      </div>
-    </RequireAuth>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ActivityDetailContent slug={slug} />
+      </main>
+    </div>
   );
 }

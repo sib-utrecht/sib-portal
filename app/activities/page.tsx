@@ -1,6 +1,5 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
@@ -267,9 +266,5 @@ function ActivityTile({
 }
 
 export default function ActivitiesPage() {
-  return (
-    <RequireAuth>
-      <ActivitiesContent />
-    </RequireAuth>
-  );
+  return <ActivitiesContent />;
 }

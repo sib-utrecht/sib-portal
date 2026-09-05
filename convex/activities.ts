@@ -51,12 +51,11 @@ export const getImageUrl = query({
   },
 });
 
-/** Return all activities ordered by start time (ascending). */
+/** Return all public activities ordered by start time (ascending). */
 export const getActivities = query({
   args: {},
   returns: v.array(activityWithImageValidator),
   handler: async (ctx) => {
-    await requireLogin(ctx);
     const activities = await ctx.db
       .query("activities")
       .withIndex("by_startTime")
@@ -79,12 +78,11 @@ export const getActivities = query({
   },
 });
 
-/** Return a single activity by its public URL slug. */
+/** Return a single public activity by its URL slug. */
 export const getActivity = query({
   args: { slug: v.string() },
   returns: v.union(activityWithImageValidator, v.null()),
   handler: async (ctx, { slug }) => {
-    await requireLogin(ctx);
     const activity = await ctx.db
       .query("activities")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
