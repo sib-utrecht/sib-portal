@@ -254,7 +254,11 @@ function ActivityTile({
   );
 
   return activity ? (
-    <Link to={`/activities/${activity.slug}`} className="block group">
+    <Link
+      to={`/activities/${activity.slug}`}
+      state={{ fromActivities: true }}
+      className="block group"
+    >
       {card}
     </Link>
   ) : (

@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RequireAuth } from "@/components/require-auth";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, MapPin, Calendar, Users, Pencil, Trash2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -434,7 +434,22 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
 export default function ActivityPage() {
   const params = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const slug = params.slug ?? "";
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  function handleBack() {
+    if (location.state?.fromActivities) {
+      navigate(-1);
+      return;
+    }
+
+    navigate("/");
+  }
 
   return (
     <RequireAuth>
@@ -443,14 +458,14 @@ export default function ActivityPage() {
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-4 py-4">
               <Button
-                asChild
                 variant="outline"
                 size="icon"
                 className="border-[#21526f]/30 bg-white/80 text-[#21526f] shadow-sm hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                onClick={handleBack}
+                aria-label="Back to activities"
+                title="Back to activities"
               >
-                <Link to="/" aria-label="Back to activities" title="Back to activities">
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                </Link>
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               </Button>
               <h1 className="text-2xl font-bold portal-title">Activity</h1>
             </div>
