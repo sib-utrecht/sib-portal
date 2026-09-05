@@ -193,8 +193,8 @@ export function ActivityForm({
       </div>
 
       {/* Start / End */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="min-w-0 space-y-2">
           <Label htmlFor="startTime">Start</Label>
           <DateTimePicker
             id="startTime"
@@ -215,7 +215,7 @@ export function ActivityForm({
             required
           />
         </div>
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <Label htmlFor="endTime">End</Label>
           <DateTimePicker
             id="endTime"

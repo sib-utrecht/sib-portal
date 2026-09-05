@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { Link } from "react-router-dom";
 import { MapPin, Users, Plus, ChevronRight } from "lucide-react";
 import { activityDateTimeZone, shouldShowActivityTime } from "@/utils/activity-date";
+import { useState } from "react";
 
 function formatDateShort(ts: number) {
   return new Date(ts).toLocaleDateString("en-GB", {
@@ -76,11 +77,11 @@ function ActivitiesContent() {
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden bg-white/60 shadow-sm">
-                  <Skeleton className="h-48 w-full rounded-none" />
-                  <div className="p-4 space-y-2">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                <div key={i} className="overflow-hidden rounded-2xl bg-white shadow-sm">
+                  <Skeleton className="h-48 w-full animate-none rounded-none bg-[#163f55]/80" />
+                  <div className="space-y-2 bg-white p-4">
+                    <Skeleton className="h-5 w-3/4 bg-[#21526f]/20" />
+                    <Skeleton className="h-4 w-1/2 bg-[#21526f]/15" />
                   </div>
                 </div>
               ))}
@@ -137,6 +138,8 @@ function ActivityTile({
   };
   past?: boolean;
 }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   return (
     <Link to={`/activities/${activity.slug}`} className="block group">
       <div
@@ -148,13 +151,18 @@ function ActivityTile({
           }`}
       >
         {/* Image area */}
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[#c8e3ef] to-[#a3cfe0]">
+        <div className="relative h-48 overflow-hidden bg-[#163f55]/80">
           {activity.promotionalImage ? (
-            <img
-              src={activity.promotionalImage}
-              alt=""
-              className={`w-full h-full object-cover transition-transform duration-500 ${past ? "" : "group-hover:scale-105"}`}
-            />
+            <div
+              className={`h-full w-full transition-opacity duration-200 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+            >
+              <img
+                src={activity.promotionalImage}
+                alt=""
+                onLoad={() => setImageLoaded(true)}
+                className={`h-full w-full object-cover transition-transform duration-500 ${past ? "" : "group-hover:scale-105"}`}
+              />
+            </div>
           ) : (
             /* Placeholder pattern when no image */
             <div className="w-full h-full flex items-center justify-center">
