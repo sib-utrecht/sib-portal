@@ -81,7 +81,7 @@ function PhotoPermissionsContent() {
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold portal-title">Photo permissions</h1>
             <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
-              <Link to="/">Back to dashboard</Link>
+              <Link to="/dashboard">Back to dashboard</Link>
             </Button>
           </div>
         </div>

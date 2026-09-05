@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
  * Route guard that restricts access to admin users only.
  *
  * While the auth state is still loading a placeholder is rendered.  Once
- * loading completes, non-admin users are redirected to the root path (`/`).
+ * loading completes, non-admin users are redirected to `/dashboard`.
  * Admin users see the wrapped `children` as normal.
  */
 export function RequireAdmin({ children }: { children: React.ReactNode }) {
@@ -15,7 +15,7 @@ export function RequireAdmin({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [isAdmin, isLoading, navigate]);
 

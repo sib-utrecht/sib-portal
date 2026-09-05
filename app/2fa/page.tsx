@@ -28,7 +28,7 @@ export default function TwoFAPage() {
               </h1>
               <div className="flex items-center gap-2">
                 <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
-                  <Link to="/">Back to dashboard</Link>
+                  <Link to="/dashboard">Back to dashboard</Link>
                 </Button>
               </div>
             </div>

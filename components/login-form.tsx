@@ -141,9 +141,7 @@ export function LoginForm() {
             />
           </div>
           <CardTitle className="text-2xl font-semibold tracking-tight">
-            <span className="bg-gradient-to-r from-[#21526f] via-[#2a6a88] to-[#58a6c7] bg-clip-text text-transparent">
-              SIB-Utrecht
-            </span>
+            <span className="text-[#21526f]">SIB-Utrecht</span>
           </CardTitle>
           <CardDescription className="text-sm">
             Sign in with a password, or with a login code sent to your email.

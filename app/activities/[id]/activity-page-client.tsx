@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Users, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Users, Pencil, Trash2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
@@ -103,7 +103,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     setActionError(null);
     try {
       await deleteActivity({ id: activityId });
-      navigate("/activities");
+      navigate("/");
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Something went wrong.");
       setBusy(false);
@@ -409,16 +409,18 @@ export default function ActivityPage() {
       <div className="min-h-screen portal-bg">
         <header className="portal-header">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
-              <h1 className="text-2xl font-bold portal-title">Activity</h1>
+            <div className="flex items-center gap-4 py-4">
               <Button
                 asChild
                 variant="outline"
-                size="sm"
-                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                size="icon"
+                className="border-[#21526f]/30 bg-white/80 text-[#21526f] shadow-sm hover:bg-[#eaf3f7] hover:text-[#21526f]"
               >
-                <Link to="/activities">Back to activities</Link>
+                <Link to="/" aria-label="Back to activities" title="Back to activities">
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                </Link>
               </Button>
+              <h1 className="text-2xl font-bold portal-title">Activity</h1>
             </div>
           </div>
         </header>

@@ -55,28 +55,18 @@ function ActivitiesContent() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold portal-title">Activities</h1>
-            <div className="flex gap-2">
-              {isAdmin && (
-                <Button
-                  asChild
-                  size="sm"
-                  className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
-                >
-                  <Link to="/activities/new">
-                    <Plus className="h-4 w-4 mr-1" />
-                    New activity
-                  </Link>
-                </Button>
-              )}
+            {isAdmin && (
               <Button
                 asChild
-                variant="outline"
                 size="sm"
-                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
               >
-                <Link to="/">Back to dashboard</Link>
+                <Link to="/activities/new">
+                  <Plus className="h-4 w-4 mr-1" />
+                  New activity
+                </Link>
               </Button>
-            </div>
+            )}
           </div>
         </div>
       </header>

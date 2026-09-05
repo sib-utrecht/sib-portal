@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import Dashboard from "../dashboard";
 import { LoginForm } from "../components/login-form";
 import ActivitiesPage from "../app/activities/page";
@@ -16,9 +16,10 @@ import TwoFAPage from "../app/2fa/page";
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<ActivitiesPage />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/login" element={<LoginForm />} />
-      <Route path="/activities" element={<ActivitiesPage />} />
+      <Route path="/activities" element={<Navigate to="/" replace />} />
       <Route path="/activities/new" element={<NewActivityPage />} />
       <Route path="/activities/:slug" element={<ActivityPage />} />
       <Route path="/activities/:slug/edit" element={<EditActivityPage />} />

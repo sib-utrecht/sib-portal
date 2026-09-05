@@ -184,12 +184,7 @@ html {
     z-index: 40;
   }
 
-  /* Gradient text in brand colors */
   .portal-title {
-    background: linear-gradient(135deg, #21526f 0%, #2a6a88 55%, #58a6c7 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    color: #21526f;
   }
 }
