@@ -9,9 +9,7 @@ import { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, MapPin, Calendar, Users, Pencil, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import { ActivityDescription } from "@/components/activity-description";
 import {
   activityDateTimeZone,
   shouldShowActivityEnd,
@@ -186,24 +184,8 @@ function ActivityDetailContent({ slug }: { slug: string }) {
       </div>
 
       {/* Description */}
-      <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 prose max-w-none">
-        <ReactMarkdown
-          rehypePlugins={[
-            rehypeRaw,
-            [
-              rehypeSanitize,
-              {
-                ...defaultSchema,
-                attributes: {
-                  ...defaultSchema.attributes,
-                  "*": ["style", "className", ...(defaultSchema.attributes?.["*"] ?? [])],
-                },
-              },
-            ],
-          ]}
-        >
-          {activity.description}
-        </ReactMarkdown>
+      <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 max-w-none">
+        <ActivityDescription>{activity.description}</ActivityDescription>
       </Card>
 
       {/* External sign-up section */}

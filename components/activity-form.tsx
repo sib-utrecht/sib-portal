@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ActivityDescriptionEditors } from "@/components/activity-description-editors";
 import { DateTimePicker } from "@/components/date-time-picker";
 
 type ActivityFormData = {
@@ -152,6 +153,11 @@ export function ActivityForm({
     e.preventDefault();
     if (saving || imageUploading) return;
     setError(null);
+
+    if (!form.description.trim()) {
+      setError("A description is required. Enter text in the selected editor.");
+      return;
+    }
 
     if (!form.startTime) {
       setError("A start time is required.");
@@ -327,19 +333,11 @@ export function ActivityForm({
       </div>
 
       {/* Description */}
-      <div className="space-y-2">
-        <Label htmlFor="description">Description (Markdown, HTML tags allowed)</Label>
-        <textarea
-          id="description"
-          required
-          value={form.description}
-          onChange={(e) => set("description", e.target.value)}
-          placeholder="Describe the activity…"
-          disabled={saving}
-          rows={6}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 font-mono"
-        />
-      </div>
+      <ActivityDescriptionEditors
+        value={form.description}
+        disabled={saving}
+        onChange={(html) => set("description", html)}
+      />
 
       {/* Allow sign-up */}
       <div className="flex items-center gap-3">
