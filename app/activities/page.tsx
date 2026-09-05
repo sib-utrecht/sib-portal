@@ -74,7 +74,6 @@ function ActivitiesContent() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         {loading ? (
           <div>
-            <Skeleton className="h-5 w-28 mb-6 rounded-full" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden bg-white/60 shadow-sm">
@@ -90,10 +89,6 @@ function ActivitiesContent() {
         ) : (
           <>
             <section>
-              <h2 className="text-sm font-semibold text-[#21526f] mb-5 flex items-center gap-2 uppercase tracking-widest">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#21526f]" />
-                Upcoming
-              </h2>
               {upcoming.length === 0 ? (
                 <p className="text-gray-400 text-sm">No upcoming activities.</p>
               ) : (
@@ -107,8 +102,7 @@ function ActivitiesContent() {
 
             {past.length > 0 && (
               <section>
-                <h2 className="text-sm font-semibold text-gray-400 mb-5 flex items-center gap-2 uppercase tracking-widest">
-                  <span className="inline-block w-2 h-2 rounded-full bg-gray-300" />
+                <h2 className="text-sm font-semibold text-gray-400 mb-5 uppercase tracking-widest">
                   Past
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
