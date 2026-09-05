@@ -346,7 +346,7 @@ export function DateTimePicker({
           onBlur={handleDateBlur}
           disabled={disabled}
           className={cn(
-            "border-0 p-0 h-auto shadow-none focus-visible:ring-0 tabular-nums w-[88px] shrink-0",
+            "h-auto w-[calc(10ch+4px)] shrink-0 border-0 p-0 tabular-nums shadow-none focus-visible:ring-0",
             !value && "text-muted-foreground",
           )}
         />
