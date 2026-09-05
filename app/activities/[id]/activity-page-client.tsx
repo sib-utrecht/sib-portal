@@ -38,6 +38,25 @@ function formatDate(ts: number, includeTime = true) {
   });
 }
 
+function formatTime(ts: number) {
+  return new Date(ts).toLocaleTimeString("en-GB", {
+    timeZone: activityDateTimeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function isSameActivityDay(startTime: number, endTime: number) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: activityDateTimeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  return formatter.format(startTime) === formatter.format(endTime);
+}
+
 function formatBookingDate(ts: number) {
   if (ts <= 0) return "Date unavailable";
   return new Date(ts).toLocaleString("en-GB", {
@@ -133,6 +152,11 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   const showStartTime = shouldShowActivityTime(activity.startTime, activity.externalId);
   const showEnd = shouldShowActivityEnd(activity.startTime, activity.endTime, activity.externalId);
   const showEndTime = shouldShowActivityTime(activity.endTime, activity.externalId);
+  const showCompactSameDayRange =
+    showEnd &&
+    showStartTime &&
+    showEndTime &&
+    isSameActivityDay(activity.startTime, activity.endTime);
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -198,9 +222,17 @@ function ActivityDetailContent({ slug }: { slug: string }) {
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-gray-600">
           <span className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4 shrink-0 text-[#21526f]" />
-            {showEnd && "From "}
-            {formatDate(activity.startTime, showStartTime)}
-            {showEnd && <> until {formatDate(activity.endTime, showEndTime)}</>}
+            {showCompactSameDayRange ? (
+              <>
+                {formatDate(activity.startTime)}-{formatTime(activity.endTime)}
+              </>
+            ) : (
+              <>
+                {showEnd && "From "}
+                {formatDate(activity.startTime, showStartTime)}
+                {showEnd && <> until {formatDate(activity.endTime, showEndTime)}</>}
+              </>
+            )}
           </span>
           {activity.location && (
             <span className="flex items-center gap-1.5">
@@ -212,7 +244,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
       </div>
 
       {/* Description */}
-      <Card className="p-6 border-t-4 border-t-[#21526f] rounded-2xl shadow-sm shadow-[#21526f]/5 prose max-w-none">
+      <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 prose max-w-none">
         <ReactMarkdown
           rehypePlugins={[
             rehypeRaw,
@@ -237,7 +269,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
         (() => {
           const safeUrl = safeHttpUrl(activity.externalSignupUrl);
           return (
-            <Card className="p-6 border-t-4 border-t-[#6fb0cd] rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
+            <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-[#21526f]" />
                 <h3 className="text-lg font-semibold">Sign up</h3>
@@ -261,7 +293,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
       {/* Sign-up section — hidden when external sign-up URL takes precedence */}
       {activity.allowSignup && !activity.externalSignupUrl && (
-        <Card className="p-6 border-t-4 border-t-[#6fb0cd] rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
+        <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-[#21526f]" />
             <h3 className="text-lg font-semibold">Sign up</h3>
@@ -317,7 +349,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
       {/* Sign-up list (admin only, including externally managed activities) */}
       {status.isAdmin && (
-        <Card className="p-6 border-t-4 border-t-[#21526f]/30 rounded-2xl shadow-sm space-y-4">
+        <Card className="p-6 rounded-2xl shadow-sm space-y-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-700">
               Sign-ups{participants ? ` (${participants.length})` : ""}

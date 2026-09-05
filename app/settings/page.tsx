@@ -57,7 +57,7 @@ export default function SettingsPage() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid gap-6">
             <div className="space-y-6">
-              <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
+              <Card className="shadow-sm shadow-[#21526f]/5">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-[#21526f]">
                     <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
@@ -73,7 +73,7 @@ export default function SettingsPage() {
               </Card>
 
               <div className="grid gap-6 md:grid-cols-2">
-                <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
+                <Card className="shadow-sm shadow-[#21526f]/5">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-[#21526f]">
                       <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
@@ -119,7 +119,7 @@ export default function SettingsPage() {
                 </Card>
 
                 <div className="space-y-6">
-                  <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
+                  <Card className="shadow-sm shadow-[#21526f]/5">
                     <CardHeader>
                       <CardTitle className="text-[#21526f]">Pronouns</CardTitle>
                     </CardHeader>
@@ -139,7 +139,7 @@ export default function SettingsPage() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
+                  <Card className="shadow-sm shadow-[#21526f]/5">
                     <CardHeader>
                       <CardTitle className="text-[#21526f]">I study at</CardTitle>
                     </CardHeader>
@@ -165,7 +165,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
+              <Card className="shadow-sm shadow-[#21526f]/5">
                 <CardHeader>
                   <CardTitle className="text-[#21526f]">Your membership</CardTitle>
                 </CardHeader>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
+              <Card className="shadow-sm shadow-[#21526f]/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-[#21526f]">
                     <div className="p-1.5 rounded-lg bg-[#eaf3f7]">

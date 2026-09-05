@@ -19,6 +19,7 @@ import {
   getActivityImage,
 } from "../utils/activity-helpers";
 import type { Activity } from "../types/activity";
+import { activityDateTimeZone } from "../utils/activity-date";
 
 /** Props for the {@link ActivityDialog} component. */
 interface ActivityDialogProps {
@@ -49,6 +50,7 @@ export function ActivityDialog({ activity, open, onOpenChange }: ActivityDialogP
     if (!dateString) return "TBD";
     try {
       return new Date(dateString).toLocaleDateString("en-US", {
+        timeZone: activityDateTimeZone,
         weekday: "long",
         year: "numeric",
         month: "long",

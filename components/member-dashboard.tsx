@@ -75,7 +75,7 @@ export function MemberDashboard() {
         <div className="grid gap-6 lg:grid-cols-5">
           {/* Profile and Photo Permissions */}
           <div className="lg:col-span-3 space-y-6">
-            <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
+            <Card className="shadow-sm shadow-[#21526f]/5">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[#21526f]">
                   <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
@@ -113,7 +113,7 @@ export function MemberDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-t-4 border-t-[#6fb0cd] shadow-sm shadow-[#21526f]/5">
+            <Card className="shadow-sm shadow-[#21526f]/5">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[#21526f]">
                   <div className="p-1.5 rounded-lg bg-[#eaf3f7]">

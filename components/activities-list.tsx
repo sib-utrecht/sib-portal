@@ -12,6 +12,7 @@ import {
   getActivityStartDate,
 } from "../utils/activity-helpers";
 import type { Activity } from "../types/activity";
+import { activityDateTimeZone } from "../utils/activity-date";
 
 /**
  * Formats an ISO 8601 date string into a short locale string showing month,
@@ -24,6 +25,7 @@ function formatDate(dateString: string) {
   if (!dateString) return "TBD";
   try {
     return new Date(dateString).toLocaleDateString("en-US", {
+      timeZone: activityDateTimeZone,
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -70,7 +72,7 @@ export function ActivitiesList() {
 
   return (
     <>
-      <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
+      <Card className="shadow-sm shadow-[#21526f]/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-[#21526f]">
             <div className="p-1.5 rounded-lg bg-[#eaf3f7]">

@@ -234,7 +234,7 @@ export function AdminDashboard() {
         <div className="space-y-6">
           {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-4">
-            <Card className="relative border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
+            <Card className="relative shadow-sm shadow-[#21526f]/5">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
@@ -310,7 +310,7 @@ export function AdminDashboard() {
           )}
 
           {/* Members Table */}
-          <Card className="border-t-4 border-t-[#21526f] shadow-sm shadow-[#21526f]/5">
+          <Card className="shadow-sm shadow-[#21526f]/5">
             <CardHeader>
               <CardTitle className="text-[#21526f]">
                 Member Photo Permissions
