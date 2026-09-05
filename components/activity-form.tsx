@@ -52,12 +52,22 @@ function midnightOn(date: Date): Date {
   return midnight;
 }
 
+function isSameCalendarDay(first: Date, second: Date): boolean {
+  return (
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
+  );
+}
+
+function calendarDayNumber(date: Date): number {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000;
+}
+
 function isMissingEndSelection(startTime: Date, endTime?: Date): boolean {
   return (
     endTime === undefined ||
-    (endTime.getFullYear() === startTime.getFullYear() &&
-      endTime.getMonth() === startTime.getMonth() &&
-      endTime.getDate() === startTime.getDate() &&
+    (isSameCalendarDay(startTime, endTime) &&
       endTime.getHours() === 0 &&
       endTime.getMinutes() === 0)
   );
@@ -220,12 +230,14 @@ export function ActivityForm({
             id="startTime"
             value={form.startTime}
             onChange={(d) => {
+              const previousStart = form.startTime;
               set("startTime", d);
               if (d && !form.endTime) {
                 set("endTime", midnightOn(d));
-              } else if (d && form.endTime) {
+              } else if (d && previousStart && form.endTime) {
+                const dayDelta = calendarDayNumber(d) - calendarDayNumber(previousStart);
                 const endDate = new Date(form.endTime);
-                endDate.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
+                endDate.setDate(endDate.getDate() + dayDelta);
                 set("endTime", endDate);
               }
             }}
@@ -242,7 +254,7 @@ export function ActivityForm({
                 <button
                   type="button"
                   className="text-xs text-muted-foreground underline-offset-4 hover:underline"
-                  onClick={() => set("endTime", undefined)}
+                  onClick={() => set("endTime", midnightOn(form.startTime!))}
                   disabled={saving}
                 >
                   Remove end
@@ -266,7 +278,7 @@ export function ActivityForm({
           id="location"
           value={form.location}
           onChange={(e) => set("location", e.target.value)}
-          placeholder="e.g. Utrecht city centre"
+          placeholder="Location"
           disabled={saving}
         />
       </div>
