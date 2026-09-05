@@ -71,7 +71,9 @@ export async function createCurrentUserBooking(
       q.eq("activityId", activity._id).eq("userId", user._id),
     )
     .first();
-  if (existing?.active !== false) throw new Error("Already registered for this activity");
+  if (existing && existing.active !== false) {
+    throw new Error("Already registered for this activity");
+  }
 
   if (activity.maxParticipants !== undefined) {
     const registrations = await ctx.db
