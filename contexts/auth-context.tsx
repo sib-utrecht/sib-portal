@@ -284,16 +284,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsLoading(false);
           if (refreshed) return;
           // If refresh failed, fall through to clear and re-check
-        } else if (isAdminUser(storedToken)) {
-          // Token is still valid
-          setToken(storedToken);
-          setIsAuthenticated(true);
-          setIsAdmin(true);
-          setIsLoading(false);
-          return;
         } else {
-          setToken(storedToken);
-          setIsAuthenticated(true);
+          // Restore through the same helper used after login so tokenRef is
+          // populated for Convex's fetchAccessToken callback as well.
+          saveToken(storedToken);
           setIsLoading(false);
           return;
         }

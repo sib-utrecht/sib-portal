@@ -20,7 +20,7 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
         "Missing required environment variable: VITE_CONVEX_URL or VITE_CONVEX_SELF_HOSTED_URL",
       );
     }
-    return new ConvexReactClient(url);
+    return new ConvexReactClient(url, { initialAuthTokenReuse: true });
   }, []);
 
   return (
