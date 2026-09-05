@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   CognitoUserPool,
@@ -22,6 +22,8 @@ interface AuthContextType {
   isLoading: boolean;
   /** The raw Cognito access token (JWT) for the current session, or `null` when signed out. */
   token: string | null;
+  /** Returns a current access token, refreshing it when requested by Convex. */
+  fetchAccessToken: (args: { forceRefreshToken: boolean }) => Promise<string | null>;
   /**
    * Signs in with a Cognito username (email) and password.
    * @param keepLoggedIn - When `true`, tokens are persisted in `localStorage`; otherwise `sessionStorage`.
@@ -139,45 +141,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [sessionData, setSessionData] = useState<string | null>(null); // Store session for OTP flow
+  const tokenRef = useRef<string | null>(null);
+  const refreshPromiseRef = useRef<Promise<string | null> | null>(null);
 
   // Helper to save token to appropriate storage based on keep-logged-in preference.
   // When keepLoggedIn is not supplied, the existing stored preference is used so
   // that refresh/restore paths do not accidentally change the user's selection.
-  const saveToken = (
-    jwtToken: string,
-    refreshToken?: string,
-    username?: string,
-    keepLoggedIn = localStorage.getItem(KEEP_LOGGED_IN_KEY) === "true",
-  ) => {
-    setToken(jwtToken);
-    setIsAuthenticated(true);
-    setIsAdmin(isAdminUser(jwtToken));
+  const saveToken = useCallback(
+    (
+      jwtToken: string,
+      refreshToken?: string,
+      username?: string,
+      keepLoggedIn = localStorage.getItem(KEEP_LOGGED_IN_KEY) === "true",
+    ) => {
+      tokenRef.current = jwtToken;
+      setToken(jwtToken);
+      setIsAuthenticated(true);
+      setIsAdmin(isAdminUser(jwtToken));
 
-    localStorage.setItem(KEEP_LOGGED_IN_KEY, keepLoggedIn.toString());
-    const storage = keepLoggedIn ? localStorage : sessionStorage;
+      localStorage.setItem(KEEP_LOGGED_IN_KEY, keepLoggedIn.toString());
+      const storage = keepLoggedIn ? localStorage : sessionStorage;
 
-    storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
+      storage.setItem(TOKEN_STORAGE_KEY, jwtToken);
 
-    if (refreshToken) {
-      storage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
-    }
+      if (refreshToken) {
+        storage.setItem(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+      }
 
-    if (username) {
-      storage.setItem(USERNAME_STORAGE_KEY, username);
-    }
+      if (username) {
+        storage.setItem(USERNAME_STORAGE_KEY, username);
+      }
 
-    // Calculate and store token expiry
-    try {
-      const payload = decodeJwtPayload(jwtToken);
-      const expiryTime = (payload.exp as number) * 1000; // Convert to milliseconds
-      storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
-    } catch (error) {
-      console.error("Failed to parse token expiry:", error);
-    }
-  };
+      try {
+        const payload = decodeJwtPayload(jwtToken);
+        const expiryTime = (payload.exp as number) * 1000;
+        storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
+      } catch (error) {
+        console.error("Failed to parse token expiry:", error);
+      }
+    },
+    [],
+  );
 
   // Helper to clear token from localStorage
-  const clearToken = () => {
+  const clearToken = useCallback(() => {
+    tokenRef.current = null;
     setToken(null);
     setIsAuthenticated(false);
     setIsAdmin(false);
@@ -189,77 +197,80 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       storage.removeItem(TOKEN_EXPIRY_STORAGE_KEY);
     });
     localStorage.removeItem(KEEP_LOGGED_IN_KEY);
-  };
+  }, []);
 
   // Helper to check if token needs refresh
-  const needsRefresh = (): boolean => {
-    const expiryStr = getTokenStorage().getItem(TOKEN_EXPIRY_STORAGE_KEY);
-    if (!expiryStr) return false;
-
-    const expiryTime = parseInt(expiryStr, 10);
-    const now = Date.now();
-
-    // Refresh if we're within the buffer time of expiry
-    return expiryTime - now < REFRESH_BUFFER_MS;
-  };
-
-  // Helper to refresh token using refresh token
-  const refreshAccessToken = async (): Promise<boolean> => {
-    const refreshToken = getTokenStorage().getItem(REFRESH_TOKEN_STORAGE_KEY);
-    const username = getTokenStorage().getItem(USERNAME_STORAGE_KEY);
-
-    if (!refreshToken || !username) {
-      return false;
-    }
+  const needsRefresh = useCallback((): boolean => {
+    const currentToken = tokenRef.current ?? getTokenStorage().getItem(TOKEN_STORAGE_KEY);
+    if (!currentToken) return false;
 
     try {
-      // For password-based auth, use Cognito SDK
-      const cognitoUser = getUserPool().getCurrentUser();
-      if (cognitoUser) {
-        return new Promise((resolve) => {
-          cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
-            if (err || !session || !session.isValid()) {
-              clearToken();
-              resolve(false);
-              return;
-            }
-
-            const jwtToken = session.getAccessToken().getJwtToken();
-            const sessionRefreshToken = session.getRefreshToken().getToken();
-            saveToken(jwtToken, sessionRefreshToken);
-            setIsAuthenticated(true);
-
-            resolve(true);
-          });
-        });
-      }
-
-      // For email OTP auth, use AWS SDK InitiateAuth with REFRESH_TOKEN
-      const command = new InitiateAuthCommand({
-        ClientId: poolData.ClientId,
-        AuthFlow: "REFRESH_TOKEN_AUTH",
-        AuthParameters: {
-          REFRESH_TOKEN: refreshToken,
-        },
-      });
-
-      const response = await cognitoClient.send(command);
-
-      if (response.AuthenticationResult?.AccessToken) {
-        const jwtToken = response.AuthenticationResult.AccessToken;
-        // Keep the same refresh token and username
-        saveToken(jwtToken, response.AuthenticationResult.RefreshToken || refreshToken, username);
-        return true;
-      }
-
-      clearToken();
-      return false;
-    } catch (error) {
-      console.error("Failed to refresh token:", error);
-      clearToken();
-      return false;
+      const payload = decodeJwtPayload(currentToken);
+      return typeof payload.exp !== "number" || payload.exp * 1000 - Date.now() < REFRESH_BUFFER_MS;
+    } catch {
+      return true;
     }
-  };
+  }, []);
+
+  // Helper to refresh token using refresh token
+  const refreshAccessToken = useCallback(async (): Promise<string | null> => {
+    if (refreshPromiseRef.current) return refreshPromiseRef.current;
+
+    const refresh = (async () => {
+      const storage = getTokenStorage();
+      const refreshToken = storage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+      const username = storage.getItem(USERNAME_STORAGE_KEY);
+
+      if (!refreshToken || !username) {
+        clearToken();
+        return null;
+      }
+
+      try {
+        // Use Cognito's refresh-token flow directly. CognitoUser.getSession()
+        // may return its cached access token while it is still barely valid,
+        // which does not satisfy Convex's request for a fresh token.
+        const response = await cognitoClient.send(
+          new InitiateAuthCommand({
+            ClientId: poolData.ClientId,
+            AuthFlow: "REFRESH_TOKEN_AUTH",
+            AuthParameters: { REFRESH_TOKEN: refreshToken },
+          }),
+        );
+        const jwtToken = response.AuthenticationResult?.AccessToken;
+
+        if (!jwtToken) {
+          clearToken();
+          return null;
+        }
+
+        saveToken(jwtToken, response.AuthenticationResult?.RefreshToken || refreshToken, username);
+        setError(null);
+        return jwtToken;
+      } catch (refreshError) {
+        console.error("Failed to refresh token:", refreshError);
+        clearToken();
+        return null;
+      }
+    })();
+
+    refreshPromiseRef.current = refresh;
+    try {
+      return await refresh;
+    } finally {
+      refreshPromiseRef.current = null;
+    }
+  }, [clearToken, saveToken]);
+
+  const fetchAccessToken = useCallback(
+    async ({ forceRefreshToken }: { forceRefreshToken: boolean }): Promise<string | null> => {
+      const currentToken = tokenRef.current;
+      if (!currentToken) return null;
+      if (!forceRefreshToken && !needsRefresh()) return currentToken;
+      return await refreshAccessToken();
+    },
+    [needsRefresh, refreshAccessToken],
+  );
 
   // Check if user is already authenticated on mount
   useEffect(() => {
@@ -324,7 +335,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initAuth();
-  }, []);
+  }, [refreshAccessToken, saveToken]);
 
   // Set up automatic token refresh
   useEffect(() => {
@@ -338,9 +349,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Check every minute
     const interval = setInterval(checkAndRefresh, 60 * 1000);
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") void checkAndRefresh();
+    };
+    document.addEventListener("visibilitychange", refreshWhenVisible);
 
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [isAuthenticated, needsRefresh, refreshAccessToken]);
 
   const login = async (username: string, password: string, keepLoggedIn = false): Promise<void> => {
     setError(null);
@@ -529,6 +547,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin,
         isLoading,
         token,
+        fetchAccessToken,
         login,
         requestPasswordlessCode,
         loginWithCode,

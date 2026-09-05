@@ -1,26 +1,13 @@
-import { ConvexProvider, ConvexReactClient } from "convex/react";
-import { ReactNode, useMemo, useEffect } from "react";
+import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
+import { ReactNode, useMemo } from "react";
 import { useAuth } from "../contexts/auth-context";
 
-function ConvexAuthWrapper({
-  convex,
-  children,
-}: {
-  convex: ConvexReactClient;
-  children: React.ReactNode;
-}) {
-  const { token } = useAuth();
-
-  // Update Convex client with auth token whenever it changes
-  useEffect(() => {
-    if (token) {
-      convex.setAuth(async () => token);
-    } else {
-      convex.clearAuth();
-    }
-  }, [token, convex]);
-
-  return <>{children}</>;
+function useCognitoAuthForConvex() {
+  const { isLoading, isAuthenticated, fetchAccessToken } = useAuth();
+  return useMemo(
+    () => ({ isLoading, isAuthenticated, fetchAccessToken }),
+    [isLoading, isAuthenticated, fetchAccessToken],
+  );
 }
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
@@ -37,8 +24,8 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ConvexProvider client={convex}>
-      <ConvexAuthWrapper convex={convex}>{children}</ConvexAuthWrapper>
-    </ConvexProvider>
+    <ConvexProviderWithAuth client={convex} useAuth={useCognitoAuthForConvex}>
+      {children}
+    </ConvexProviderWithAuth>
   );
 }

@@ -5,6 +5,7 @@ import { Providers } from "../app/providers";
 import { ConvexClientProvider } from "../app/ConvexClientProvider";
 import App from "./App";
 import "../app/globals.css";
+import { PortalErrorBoundary } from "../components/portal-error-boundary";
 
 const base = import.meta.env.BASE_URL;
 
@@ -13,7 +14,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter basename={base === "/" ? undefined : base}>
       <Providers>
         <ConvexClientProvider>
-          <App />
+          <PortalErrorBoundary>
+            <App />
+          </PortalErrorBoundary>
         </ConvexClientProvider>
       </Providers>
     </BrowserRouter>

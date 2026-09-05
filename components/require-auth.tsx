@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useConvexAuth } from "convex/react";
 
 /**
  * Route guard that redirects unauthenticated users to the login page.
@@ -11,9 +12,12 @@ import { useNavigate, useLocation } from "react-router-dom";
  * signing in.  Authenticated users see the wrapped `children` as normal.
  */
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const cognitoAuth = useAuth();
+  const convexAuth = useConvexAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isLoading = cognitoAuth.isLoading || (cognitoAuth.isAuthenticated && convexAuth.isLoading);
+  const isAuthenticated = cognitoAuth.isAuthenticated && convexAuth.isAuthenticated;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
