@@ -18,6 +18,9 @@ type LegacyUser = {
   entityName: string;
   wordpressUserId?: number;
   name: string;
+  firstName: string | null;
+  lastName: string | null;
+  shortName: string | null;
   email?: string;
   modified?: string;
 };
@@ -52,16 +55,20 @@ function parseLegacyUser(value: unknown): LegacyUser | null {
   if (!entityName) return null;
 
   const details = asRecord(user.details);
-  const name =
-    optionalString(user.long_name) ??
-    optionalString(user.short_name_unique) ??
-    optionalString(user.short_name) ??
-    entityName;
+  const legalName = asRecord(details?.legal_name);
+  const sourceShortName = optionalString(user.short_name);
+  const firstName = optionalString(legalName?.first_name) ?? sourceShortName ?? null;
+  const lastName = optionalString(legalName?.last_name) ?? null;
+  const effectiveShortName = optionalString(user.short_name_unique) ?? sourceShortName ?? firstName;
+  const name = optionalString(user.long_name) ?? effectiveShortName ?? entityName;
 
   return {
     entityName,
     wordpressUserId: optionalNumber(user.wordpress_user_id),
     name,
+    firstName,
+    lastName,
+    shortName: effectiveShortName === firstName ? null : effectiveShortName,
     email: optionalString(details?.email),
     modified: optionalString(user.modified),
   };
@@ -129,6 +136,9 @@ export const upsertUserAndBookings = internalMutation({
       entityName: v.string(),
       wordpressUserId: v.optional(v.number()),
       name: v.string(),
+      firstName: v.union(v.string(), v.null()),
+      lastName: v.union(v.string(), v.null()),
+      shortName: v.union(v.string(), v.null()),
       email: v.optional(v.string()),
       modified: v.optional(v.string()),
     }),
@@ -169,6 +179,9 @@ export const upsertUserAndBookings = internalMutation({
       ? existingUser._id
       : await ctx.db.insert("users", {
           name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          shortName: user.shortName,
           email: user.email ?? "",
           role: "member",
           photoPermission: "nowhere",
@@ -180,6 +193,10 @@ export const upsertUserAndBookings = internalMutation({
 
     if (existingUser) {
       await ctx.db.patch(existingUser._id, {
+        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        shortName: user.shortName,
         // Fill an address that was absent on an earlier import without
         // overwriting an address already managed in the portal.
         ...(existingUser.email === "" && user.email ? { email: user.email } : {}),

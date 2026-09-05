@@ -12,6 +12,12 @@ export interface User {
   _id: string;
   /** Full display name. */
   name: string;
+  /** First name imported from the member profile, when available. */
+  firstName?: string | null;
+  /** Last name imported from the member profile, when available. */
+  lastName?: string | null;
+  /** Manually configured short-name override; null means to use `firstName`. */
+  shortName?: string | null;
   /** Email address used for login and communications. */
   email: string;
   /** Access level; admins can view and manage all members. */

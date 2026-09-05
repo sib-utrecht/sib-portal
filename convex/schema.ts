@@ -11,12 +11,20 @@ import { v } from "convex/values";
  */
 export default defineSchema({
   /**
-   * Member profile records.  A row is created the first time a member logs in
-   * and their Cognito identity is resolved against an existing Conscribo record.
+   * Member profile records imported from the legacy member database.
    */
   users: defineTable({
     /** Full display name (given + family name). */
     name: v.string(),
+    /** Legal/preferred first name from the legacy member profile. */
+    firstName: v.optional(v.union(v.string(), v.null())),
+    /** Legal/preferred last name from the legacy member profile. */
+    lastName: v.optional(v.union(v.string(), v.null())),
+    /**
+     * Manually configured short-name override. Null when the effective short
+     * name is exactly `firstName`.
+     */
+    shortName: v.optional(v.union(v.string(), v.null())),
     /** Primary email address; used to match the Cognito identity to this record. */
     email: v.string(),
     /** Access level — `"admin"` users can view and manage all member records. */

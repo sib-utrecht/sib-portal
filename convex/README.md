@@ -92,8 +92,12 @@ directory. To learn more, launch the docs with `npx convex docs`.
 ## Legacy API backfill
 
 The nightly user and activity-booking backfill reads privileged endpoints on
-`api2.sib-utrecht.nl`. Configure a full-read legacy API key on each Convex
-deployment before enabling the cron:
+`api2.sib-utrecht.nl`. It imports full, first, last, and manually disambiguated
+short names along with booking data. A short name equal to the first name is
+stored as `null`, so only actual overrides occupy the `shortName` field.
+
+Configure a full-read legacy API key on each Convex deployment before enabling
+the cron:
 
 ```sh
 npx convex env set LEGACY_API_KEY '<prefix>.<secret>'
@@ -101,3 +105,10 @@ npx convex env set LEGACY_API_KEY '<prefix>.<secret>'
 
 The value is sent only as the `X-Api-Key` request header and is never stored in
 the database or returned by a Convex function.
+
+The cron runs the backfill nightly. To start the resumable backfill immediately
+after deploying the optional schema fields, run:
+
+```sh
+npx convex run legacy/userBackfill:backfillUsersAndBookings '{"limit":20}'
+```

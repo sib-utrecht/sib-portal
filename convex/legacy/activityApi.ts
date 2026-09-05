@@ -114,6 +114,10 @@ const participantValidator = v.object({
   entity: v.union(entityValidator, v.null()),
 });
 
+function effectiveShortName(user: Doc<"users">): string {
+  return user.shortName ?? user.firstName ?? user.name;
+}
+
 /** Flutter-compatible participant list. Admin only. */
 export const listParticipants = internalQuery({
   args: { activityId: v.id("activities") },
@@ -131,6 +135,8 @@ export const listParticipants = internalQuery({
         .sort((left, right) => right.registeredAt - left.registeredAt)
         .map(async (registration) => {
           const user = await ctx.db.get(registration.userId);
+          const shortName = user ? effectiveShortName(user) : null;
+          const firstName = user ? (user.firstName ?? shortName) : null;
           const entity = user
             ? {
                 type: "user" as const,
@@ -138,8 +144,8 @@ export const listParticipants = internalQuery({
                 entity_name: user.legacyEntityName ?? user._id,
                 wordpress_user_id: user.legacyWordpressUserId,
                 long_name: user.name,
-                short_name: user.name,
-                short_name_unique: user.name,
+                short_name: user.firstName ?? effectiveShortName(user),
+                short_name_unique: effectiveShortName(user),
                 pronouns: null,
                 modified: user.legacyModifiedAt,
               }
@@ -148,12 +154,12 @@ export const listParticipants = internalQuery({
             id: entity?.wordpress_user_id ?? null,
             user_id: entity?.entity_name ?? null,
             name: user?.name ?? null,
-            name_first: user?.name ?? null,
+            name_first: firstName,
             comment: registration.comment ?? null,
             spaces: registration.spaces ?? 1,
             entity_name: entity?.entity_name ?? null,
-            short_name: user?.name ?? null,
-            short_name_unique: user?.name ?? null,
+            short_name: firstName,
+            short_name_unique: shortName,
             long_name: user?.name ?? null,
             entity,
           };

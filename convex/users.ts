@@ -53,6 +53,9 @@ export const getProfile = query({
     return {
       _id: dbUser._id,
       name: dbUser.name,
+      firstName: dbUser.firstName ?? null,
+      lastName: dbUser.lastName ?? null,
+      shortName: dbUser.shortName ?? null,
       email: dbUser.email,
       role: dbUser.role,
       avatar: dbUser.avatar ?? null,
