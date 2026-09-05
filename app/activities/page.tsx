@@ -3,9 +3,12 @@ import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth-context";
-import { Link } from "react-router-dom";
+import { useLayoutEffect } from "react";
+import { Link, useLocation, useNavigationType } from "react-router-dom";
 import { MapPin, Users, Plus, ChevronRight } from "lucide-react";
 import { activityDateTimeZone, shouldShowActivityTime } from "@/utils/activity-date";
+
+const activityListScrollPositions = new Map<string, number>();
 
 function formatDateShort(ts: number) {
   return new Date(ts).toLocaleDateString("en-GB", {
@@ -42,7 +45,27 @@ function formatMonthAbbr(ts: number) {
 function ActivitiesContent() {
   const activities = useQuery(api.activities.getActivities);
   const { isAdmin } = useAuth();
+  const location = useLocation();
+  const navigationType = useNavigationType();
   const loading = activities === undefined;
+
+  useLayoutEffect(() => {
+    if (loading || navigationType !== "POP") return;
+
+    const scrollY = activityListScrollPositions.get(location.key);
+    if (scrollY === undefined) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo(0, scrollY);
+      activityListScrollPositions.delete(location.key);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [loading, location.key, navigationType]);
+
+  const rememberScrollPosition = () => {
+    activityListScrollPositions.set(location.key, window.scrollY);
+  };
 
   const now = Date.now();
   const upcoming = activities?.filter((a) => a.endTime >= now) ?? [];
@@ -85,7 +108,11 @@ function ActivitiesContent() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {upcoming.map((activity) => (
-                    <ActivityTile key={activity._id} activity={activity} />
+                    <ActivityTile
+                      key={activity._id}
+                      activity={activity}
+                      onOpen={rememberScrollPosition}
+                    />
                   ))}
                 </div>
               )}
@@ -98,7 +125,12 @@ function ActivitiesContent() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {[...past].reverse().map((activity) => (
-                    <ActivityTile key={activity._id} activity={activity} past />
+                    <ActivityTile
+                      key={activity._id}
+                      activity={activity}
+                      past
+                      onOpen={rememberScrollPosition}
+                    />
                   ))}
                 </div>
               </section>
@@ -126,9 +158,11 @@ type ActivityTileActivity = {
 function ActivityTile({
   activity,
   past = false,
+  onOpen,
 }: {
   activity?: ActivityTileActivity;
   past?: boolean;
+  onOpen?: () => void;
 }) {
   const loading = activity === undefined;
 
@@ -257,6 +291,7 @@ function ActivityTile({
       to={`/activities/${activity.slug}`}
       state={{ fromActivities: true }}
       className="block group"
+      onClick={onOpen}
     >
       {card}
     </Link>
