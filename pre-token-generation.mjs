@@ -1,23 +1,25 @@
 export const handler = function (event, context) {
-  var givenName = event.request.userAttributes["given_name"] ?? null;
-  var familyName = event.request.userAttributes["family_name"] ?? null;
+  const attributes = event.request.userAttributes;
+  const givenName = attributes["given_name"];
+  const familyName = attributes["family_name"];
 
-  var shortName = givenName;
-  var longName = givenName;
-  if (givenName != null && familyName != null) {
-    longName = `${givenName} ${familyName}`;
-  }
+  const shortName = givenName;
+  const longName =
+    givenName && familyName ? `${givenName} ${familyName}` : (givenName ?? familyName);
 
   event.response = {
     claimsAndScopeOverrideDetails: {
       idTokenGeneration: {
         claimsToAddOrOverride: {
-          "wp-userid": event.request.userAttributes["custom:wp-userid"] ?? null,
-          "entity-id": event.request.userAttributes["custom:entity-id"] ?? null,
-          given_name: givenName,
-          family_name: familyName,
-          short_name: shortName,
-          long_name: longName,
+          ...(attributes["custom:wp-userid"] !== undefined
+            ? { "wp-userid": attributes["custom:wp-userid"] }
+            : {}),
+          ...(attributes["custom:entity-id"] !== undefined
+            ? { "entity-id": attributes["custom:entity-id"] }
+            : {}),
+          ...(givenName !== undefined ? { given_name: givenName, short_name: shortName } : {}),
+          ...(familyName !== undefined ? { family_name: familyName } : {}),
+          ...(longName !== undefined ? { long_name: longName } : {}),
         },
         // "claimsToSuppress": [
         //   "email",
@@ -27,10 +29,16 @@ export const handler = function (event, context) {
       accessTokenGeneration: {
         claimsToAddOrOverride: {
           aud: event.callerContext.clientId,
-          "wp-userid": event.request.userAttributes["custom:wp-userid"] ?? null,
-          "entity-id": event.request.userAttributes["custom:entity-id"] ?? null,
-          email: event.request.userAttributes["email"] ?? null,
-          "conscribo-id": event.request.userAttributes["custom:conscribo-id"] ?? null,
+          ...(attributes["custom:wp-userid"] !== undefined
+            ? { "wp-userid": attributes["custom:wp-userid"] }
+            : {}),
+          ...(attributes["custom:entity-id"] !== undefined
+            ? { "entity-id": attributes["custom:entity-id"] }
+            : {}),
+          ...(attributes.email !== undefined ? { email: attributes.email } : {}),
+          ...(attributes["custom:conscribo-id"] !== undefined
+            ? { "conscribo-id": attributes["custom:conscribo-id"] }
+            : {}),
         },
         // "claimsToSuppress": [],
         // "scopesToAdd": [
