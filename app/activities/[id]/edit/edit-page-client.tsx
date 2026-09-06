@@ -7,12 +7,26 @@ import { ActivityForm } from "@/components/activity-form";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { HeaderAuthControls } from "@/components/header-auth-controls";
 
-function EditActivityContent({ slug }: { slug: string }) {
+const activityFormId = "edit-activity-form";
+
+type FormStatus = {
+  dirty: boolean;
+  saving: boolean;
+  imageUploading: boolean;
+};
+
+function EditActivityContent({
+  slug,
+  onFormStatusChange,
+}: {
+  slug: string;
+  onFormStatusChange: (status: FormStatus) => void;
+}) {
   const navigate = useNavigate();
   const activity = useQuery(api.activities.getActivity, { slug });
   const deleteActivity = useMutation(api.activities.deleteActivity);
@@ -49,7 +63,13 @@ function EditActivityContent({ slug }: { slug: string }) {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <ActivityForm mode="edit" activityId={activity._id} initial={activity} />
+      <ActivityForm
+        mode="edit"
+        activityId={activity._id}
+        initial={activity}
+        formId={activityFormId}
+        onStatusChange={onFormStatusChange}
+      />
 
       <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm sm:p-8">
         <h2 className="font-semibold text-gray-900">Delete activity</h2>
@@ -105,6 +125,37 @@ function EditActivityContent({ slug }: { slug: string }) {
 export default function EditActivityPage() {
   const params = useParams();
   const slug = params.slug ?? "";
+  const navigate = useNavigate();
+  const [formStatus, setFormStatus] = useState<FormStatus>({
+    dirty: false,
+    saving: false,
+    imageUploading: false,
+  });
+  const handleFormStatusChange = useCallback((status: FormStatus) => {
+    setFormStatus(status);
+  }, []);
+  const navigationIsBlocked = formStatus.dirty && !formStatus.saving;
+
+  useEffect(() => {
+    if (!navigationIsBlocked) return;
+
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = true;
+    };
+
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [navigationIsBlocked]);
+
+  function cancelEditing() {
+    if (navigationIsBlocked && !window.confirm("Discard your unsaved changes?")) {
+      return;
+    }
+    navigate(`/activities/${slug}`);
+  }
+
+  const saveDisabled = formStatus.saving || formStatus.imageUploading;
 
   return (
     <RequireAuth>
@@ -114,23 +165,38 @@ export default function EditActivityPage() {
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center py-4">
                 <h1 className="text-2xl font-bold portal-title">Edit activity</h1>
-                <div className="flex items-center gap-2">
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
-                  >
-                    <Link to={`/activities/${slug}`}>Back to activity</Link>
-                  </Button>
-                  <HeaderAuthControls />
-                </div>
+                <HeaderAuthControls />
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-[#21526f]/10 py-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={formStatus.saving}
+                  onClick={cancelEditing}
+                  className="rounded-full border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  form={activityFormId}
+                  size="sm"
+                  disabled={saveDisabled}
+                  className="rounded-full bg-[#21526f] px-6 text-white hover:bg-[#1a3f55]"
+                >
+                  {formStatus.saving
+                    ? "Saving…"
+                    : formStatus.imageUploading
+                      ? "Uploading…"
+                      : "Save changes"}
+                </Button>
               </div>
             </div>
           </header>
 
           <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <EditActivityContent slug={slug} />
+            <EditActivityContent slug={slug} onFormStatusChange={handleFormStatusChange} />
           </main>
         </div>
       </RequireAdmin>

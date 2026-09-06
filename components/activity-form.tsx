@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -95,10 +95,14 @@ export function ActivityForm({
   mode,
   activityId,
   initial,
+  formId,
+  onStatusChange,
 }: {
   mode: "create" | "edit";
   activityId?: Id<"activities">;
   initial?: InitialActivity;
+  formId?: string;
+  onStatusChange?: (status: { dirty: boolean; saving: boolean; imageUploading: boolean }) => void;
 }) {
   const navigate = useNavigate();
   const createActivity = useMutation(api.activities.createActivity);
@@ -122,6 +126,22 @@ export function ActivityForm({
     api.activities.getImageUrl,
     imageStorageId ? { storageId: imageStorageId } : "skip",
   );
+
+  const initialForm = initial ? activityToForm(initial) : emptyForm();
+  const dirty =
+    form.title !== initialForm.title ||
+    form.startTime?.getTime() !== initialForm.startTime?.getTime() ||
+    form.endTime?.getTime() !== initialForm.endTime?.getTime() ||
+    form.description !== initialForm.description ||
+    form.location !== initialForm.location ||
+    form.allowSignup !== initialForm.allowSignup ||
+    form.registrationDeadline?.getTime() !== initialForm.registrationDeadline?.getTime() ||
+    form.maxParticipants !== initialForm.maxParticipants ||
+    imageStorageId !== (initial?.promotionalImageStorageId ?? null);
+
+  useEffect(() => {
+    onStatusChange?.({ dirty, saving, imageUploading });
+  }, [dirty, imageUploading, onStatusChange, saving]);
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -217,6 +237,7 @@ export function ActivityForm({
 
   return (
     <form
+      id={formId}
       onSubmit={handleSubmit}
       className="space-y-6 max-w-2xl rounded-2xl bg-white p-6 shadow-sm sm:p-8"
     >
