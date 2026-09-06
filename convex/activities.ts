@@ -1,13 +1,10 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, MutationCtx, query } from "./_generated/server";
-import { internal } from "./_generated/api";
-import { paginationOptsValidator } from "convex/server";
+import { mutation, MutationCtx, query } from "./_generated/server";
 import { requireLogin, requireAdmin } from "./auth";
 import { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
 const activityWithImageValidator = schema.doc("activities").extend({
-  slug: v.string(),
   promotionalImage: v.optional(v.string()),
 });
 
@@ -64,12 +61,8 @@ export const getActivities = query({
       .collect();
     return await Promise.all(
       activities.map(async (a) => {
-        if (!a.slug) {
-          throw new Error("Activity slugs have not been backfilled yet");
-        }
         return {
           ...a,
-          slug: a.slug,
           promotionalImage: a.promotionalImageStorageId
             ? ((await ctx.storage.getUrl(a.promotionalImageStorageId)) ?? undefined)
             : a.promotionalImageUrl,
@@ -88,15 +81,8 @@ export const getActivity = query({
       .query("activitySlugs")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .unique();
-    // Keep the direct lookup during the routing-table backfill so deployment
-    // does not create a window in which existing links stop resolving.
-    const activity = slugRoute
-      ? await ctx.db.get(slugRoute.activityId)
-      : await ctx.db
-          .query("activities")
-          .withIndex("by_slug", (q) => q.eq("slug", slug))
-          .unique();
-    if (!activity?.slug) return null;
+    const activity = slugRoute ? await ctx.db.get(slugRoute.activityId) : null;
+    if (!activity) return null;
     return {
       ...activity,
       slug: activity.slug,
@@ -162,14 +148,7 @@ export async function uniqueActivitySlug(
       if (existingRoute.activityId === excludeId) return slug;
       continue;
     }
-
-    // Transitional collision check for activities that have not been copied
-    // into activitySlugs yet.
-    const existingActivity = await ctx.db
-      .query("activities")
-      .withIndex("by_slug", (q) => q.eq("slug", slug))
-      .unique();
-    if (!existingActivity || existingActivity._id === excludeId) return slug;
+    return slug;
   }
 }
 
@@ -320,91 +299,11 @@ export const updateActivity = mutation({
       externalSignupUrl: fields.externalSignupUrl ?? undefined,
     });
     const slug = await uniqueActivitySlug(ctx, normalized.title, normalized.startTime, id);
-    // Preserve the current URL even when this activity predates the route-table
-    // backfill, then reserve the new canonical URL before changing the activity.
-    if (activity.slug) await ensureActivitySlugRoute(ctx, id, activity.slug);
+    // Keep the current URL as an alias, then reserve the new canonical URL.
+    await ensureActivitySlugRoute(ctx, id, activity.slug);
     await ensureActivitySlugRoute(ctx, id, slug);
     await ctx.db.patch(id, { ...normalized, slug });
     return { slug };
-  },
-});
-
-/**
- * Populate slugs for records created before the slug field was introduced.
- * Runs in bounded batches and schedules itself until every record is migrated.
- */
-export const backfillActivitySlugs = internalMutation({
-  args: {},
-  returns: v.object({ updated: v.number(), complete: v.boolean() }),
-  handler: async (ctx): Promise<{ updated: number; complete: boolean }> => {
-    const activities = await ctx.db
-      .query("activities")
-      .withIndex("by_slug", (q) => q.eq("slug", undefined))
-      .take(100);
-
-    for (const activity of activities) {
-      const slug = await uniqueActivitySlug(ctx, activity.title, activity.startTime, activity._id);
-      await ctx.db.patch(activity._id, { slug });
-      await ensureActivitySlugRoute(ctx, activity._id, slug);
-    }
-
-    const complete = activities.length < 100;
-    if (!complete) {
-      await ctx.scheduler.runAfter(0, internal.activities.backfillActivitySlugs, {});
-    }
-    return { updated: activities.length, complete };
-  },
-});
-
-/** Start copying all existing canonical slugs into the slug routing table. */
-export const backfillActivitySlugRoutes = internalMutation({
-  args: {},
-  returns: v.null(),
-  handler: async (ctx) => {
-    await ctx.scheduler.runAfter(0, internal.activities.backfillActivitySlugRoutesPage, {
-      paginationOpts: { numItems: 100, cursor: null },
-    });
-    return null;
-  },
-});
-
-/** Copy one bounded page of existing activity slugs and schedule the next. */
-export const backfillActivitySlugRoutesPage = internalMutation({
-  args: { paginationOpts: paginationOptsValidator },
-  returns: v.object({
-    scanned: v.number(),
-    inserted: v.number(),
-    complete: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
-    const page = await ctx.db.query("activities").order("asc").paginate(args.paginationOpts);
-    let inserted = 0;
-
-    for (const activity of page.page) {
-      if (!activity.slug) continue;
-      const existing = await ctx.db
-        .query("activitySlugs")
-        .withIndex("by_slug", (q) => q.eq("slug", activity.slug!))
-        .unique();
-      if (existing && existing.activityId !== activity._id) {
-        throw new Error(`Activity slug is already owned by another activity: ${activity.slug}`);
-      }
-      if (!existing) {
-        await ctx.db.insert("activitySlugs", {
-          slug: activity.slug,
-          activityId: activity._id,
-        });
-        inserted++;
-      }
-    }
-
-    if (!page.isDone) {
-      await ctx.scheduler.runAfter(0, internal.activities.backfillActivitySlugRoutesPage, {
-        paginationOpts: { ...args.paginationOpts, cursor: page.continueCursor },
-      });
-    }
-
-    return { scanned: page.page.length, inserted, complete: page.isDone };
   },
 });
 
