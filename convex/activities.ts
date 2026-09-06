@@ -3,9 +3,14 @@ import { mutation, MutationCtx, query } from "./_generated/server";
 import { getAuthenticatedIdentity, requireLogin, requireAdmin } from "./auth";
 import { Id } from "./_generated/dataModel";
 import schema from "./schema";
+import { findCurrentUser } from "./legacy/identity";
 
 const activityWithImageValidator = schema.doc("activities").extend({
   promotionalImage: v.optional(v.string()),
+});
+
+const activityListItemValidator = activityWithImageValidator.extend({
+  isSignedUp: v.boolean(),
 });
 
 export type ActivityVisibility = "draft" | "private" | "public";
@@ -72,7 +77,7 @@ export const getImageUrl = query({
 /** Return all activities visible to the current visitor, ordered by start time. */
 export const getActivities = query({
   args: {},
-  returns: v.array(activityWithImageValidator),
+  returns: v.array(activityListItemValidator),
   handler: async (ctx) => {
     const identity = await getAuthenticatedIdentity(ctx);
     const admin = identity?.groups.includes("admins") ?? false;
@@ -94,10 +99,26 @@ export const getActivities = query({
     )
       .flat()
       .sort((left, right) => left.startTime - right.startTime);
+
+    const currentUser = identity ? await findCurrentUser(ctx, identity) : null;
+    const activeRegistrationActivityIds = new Set(
+      currentUser
+        ? (
+            await ctx.db
+              .query("activityRegistrations")
+              .withIndex("by_user", (q) => q.eq("userId", currentUser._id))
+              .take(1_000)
+          )
+            .filter((registration) => registration.active !== false)
+            .map((registration) => registration.activityId)
+        : [],
+    );
+
     return await Promise.all(
       activities.map(async (a) => {
         return {
           ...a,
+          isSignedUp: activeRegistrationActivityIds.has(a._id),
           promotionalImage: a.promotionalImageStorageId
             ? ((await ctx.storage.getUrl(a.promotionalImageStorageId)) ?? undefined)
             : a.promotionalImageUrl,
