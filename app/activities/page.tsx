@@ -155,6 +155,7 @@ type ActivityTileActivity = {
   externalId?: string;
   location?: string;
   allowSignup: boolean;
+  externalSignupUrl?: string;
   maxParticipants?: number;
   promotionalImage?: string;
 };
@@ -240,7 +241,7 @@ function ActivityTile({
         </div>
 
         {/* Signup badge */}
-        {!loading && activity.allowSignup && !past && (
+        {!loading && (activity.allowSignup || activity.externalSignupUrl) && !past && (
           <div className="absolute top-3 right-3">
             <span className="bg-[#21526f] text-white text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full shadow-sm">
               Sign-up

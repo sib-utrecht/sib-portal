@@ -6,7 +6,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ActivityDescriptionEditors } from "@/components/activity-description-editors";
 import { DateTimePicker } from "@/components/date-time-picker";
@@ -17,7 +17,8 @@ type ActivityFormData = {
   endTime: Date | undefined;
   description: string;
   location: string; // empty string means no location
-  allowSignup: boolean;
+  signupMethod: "none" | "external" | "portal";
+  externalSignupUrl: string;
   registrationDeadline: Date | undefined;
   maxParticipants: string;
 };
@@ -29,7 +30,8 @@ function emptyForm(): ActivityFormData {
     endTime: undefined,
     description: "",
     location: "",
-    allowSignup: false,
+    signupMethod: "none",
+    externalSignupUrl: "",
     registrationDeadline: undefined,
     maxParticipants: "",
   };
@@ -43,6 +45,7 @@ type InitialActivity = {
   promotionalImageStorageId?: Id<"_storage">;
   location?: string;
   allowSignup: boolean;
+  externalSignupUrl?: string;
   registrationDeadline?: number;
   maxParticipants?: number;
 };
@@ -83,7 +86,12 @@ function activityToForm(activity: InitialActivity): ActivityFormData {
       activity.endTime === activity.startTime ? midnightOn(startTime) : new Date(activity.endTime),
     description: activity.description,
     location: activity.location ?? "",
-    allowSignup: activity.allowSignup,
+    signupMethod: activity.externalSignupUrl
+      ? "external"
+      : activity.allowSignup
+        ? "portal"
+        : "none",
+    externalSignupUrl: activity.externalSignupUrl ?? "",
     registrationDeadline: activity.registrationDeadline
       ? new Date(activity.registrationDeadline)
       : undefined,
@@ -134,7 +142,8 @@ export function ActivityForm({
     form.endTime?.getTime() !== initialForm.endTime?.getTime() ||
     form.description !== initialForm.description ||
     form.location !== initialForm.location ||
-    form.allowSignup !== initialForm.allowSignup ||
+    form.signupMethod !== initialForm.signupMethod ||
+    form.externalSignupUrl !== initialForm.externalSignupUrl ||
     form.registrationDeadline?.getTime() !== initialForm.registrationDeadline?.getTime() ||
     form.maxParticipants !== initialForm.maxParticipants ||
     imageStorageId !== (initial?.promotionalImageStorageId ?? null);
@@ -190,7 +199,17 @@ export function ActivityForm({
     }
 
     let maxParticipants: number | undefined;
-    if (form.allowSignup && form.maxParticipants) {
+    if (form.signupMethod === "external") {
+      try {
+        const url = new URL(form.externalSignupUrl);
+        if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error();
+      } catch {
+        setError("Enter a valid external sign-up URL starting with http:// or https://.");
+        return;
+      }
+    }
+
+    if (form.signupMethod === "portal" && form.maxParticipants) {
       const parsed = parseInt(form.maxParticipants, 10);
       if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 1) {
         setError("Maximum participants must be a whole number of at least 1.");
@@ -206,9 +225,11 @@ export function ActivityForm({
       description: form.description,
       promotionalImageStorageId: imageStorageId ?? undefined,
       location: form.location.trim() || undefined,
-      allowSignup: form.allowSignup,
+      allowSignup: form.signupMethod === "portal",
+      externalSignupUrl:
+        form.signupMethod === "external" ? form.externalSignupUrl.trim() : undefined,
       registrationDeadline:
-        form.allowSignup && form.registrationDeadline
+        form.signupMethod === "portal" && form.registrationDeadline
           ? form.registrationDeadline.getTime()
           : undefined,
       maxParticipants,
@@ -226,6 +247,7 @@ export function ActivityForm({
           ...payload,
           registrationDeadline: payload.registrationDeadline ?? null,
           maxParticipants: maxParticipants ?? null,
+          externalSignupUrl: payload.externalSignupUrl ?? null,
         });
         navigate(`/activities/${activity.slug}`);
       }
@@ -353,18 +375,54 @@ export function ActivityForm({
         onChange={(html) => set("description", html)}
       />
 
-      {/* Allow sign-up */}
-      <div className="flex items-center gap-3">
-        <Checkbox
-          id="allowSignup"
-          checked={form.allowSignup}
-          onCheckedChange={(v) => set("allowSignup", v === true)}
+      {/* Sign-up method */}
+      <div className="space-y-3">
+        <Label>Sign-ups</Label>
+        <RadioGroup
+          value={form.signupMethod}
+          onValueChange={(value) => set("signupMethod", value as ActivityFormData["signupMethod"])}
           disabled={saving}
-        />
-        <Label htmlFor="allowSignup">Allow sign-ups</Label>
+          className="gap-2"
+        >
+          {[
+            ["none", "No sign-ups", "This activity does not require registration."],
+            ["external", "External website", "Send members to another website to sign up."],
+            ["portal", "On the portal", "Let logged-in members sign up on this activity page."],
+          ].map(([value, title, description]) => (
+            <Label
+              key={value}
+              htmlFor={`signup-${value}`}
+              className="flex cursor-pointer items-start gap-3 rounded-lg border border-input p-3 font-normal has-[[data-state=checked]]:border-[#21526f] has-[[data-state=checked]]:bg-[#21526f]/5"
+            >
+              <RadioGroupItem id={`signup-${value}`} value={value} className="mt-0.5" />
+              <span>
+                <span className="block font-medium text-gray-900">{title}</span>
+                <span className="block text-sm text-gray-500">{description}</span>
+              </span>
+            </Label>
+          ))}
+        </RadioGroup>
       </div>
 
-      {form.allowSignup && (
+      {form.signupMethod === "external" && (
+        <div className="space-y-2 border-l-2 border-[#21526f] pl-6">
+          <Label htmlFor="externalSignupUrl">External sign-up URL</Label>
+          <Input
+            id="externalSignupUrl"
+            type="url"
+            required
+            value={form.externalSignupUrl}
+            onChange={(e) => set("externalSignupUrl", e.target.value)}
+            placeholder="https://example.com/sign-up"
+            disabled={saving}
+          />
+          <p className="text-sm text-gray-500">
+            The Sign up button will open this page in a new tab.
+          </p>
+        </div>
+      )}
+
+      {form.signupMethod === "portal" && (
         <div className="pl-6 border-l-2 border-[#21526f] space-y-4">
           <div className="space-y-2">
             <Label htmlFor="registrationDeadline">Register until (optional)</Label>

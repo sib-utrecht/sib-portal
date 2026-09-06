@@ -106,6 +106,7 @@ type ActivityFields = {
   promotionalImageStorageId?: Id<"_storage">;
   location?: string;
   allowSignup: boolean;
+  externalSignupUrl?: string;
   registrationDeadline?: number;
   maxParticipants?: number;
 };
@@ -158,9 +159,21 @@ function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
     throw new Error("title must not be empty or whitespace-only");
   }
   const location = fields.location?.trim() || undefined;
-  fields = { ...fields, title, location };
+  const externalSignupUrl = fields.externalSignupUrl?.trim() || undefined;
+  fields = { ...fields, title, location, externalSignupUrl };
   if (fields.endTime < fields.startTime) {
     throw new Error("endTime must not be before startTime");
+  }
+  if (fields.allowSignup && fields.externalSignupUrl) {
+    throw new Error("Portal sign-ups and an external sign-up URL cannot both be enabled");
+  }
+  if (fields.externalSignupUrl) {
+    try {
+      const url = new URL(fields.externalSignupUrl);
+      if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error();
+    } catch {
+      throw new Error("externalSignupUrl must be a valid HTTP or HTTPS URL");
+    }
   }
   if (!fields.allowSignup) {
     // Strip signup-only fields so they can't be set inconsistently
@@ -188,6 +201,7 @@ export const createActivity = mutation({
     promotionalImageStorageId: v.optional(v.id("_storage")),
     location: v.optional(v.string()),
     allowSignup: v.boolean(),
+    externalSignupUrl: v.optional(v.string()),
     registrationDeadline: v.optional(v.number()),
     maxParticipants: v.optional(v.number()),
   },
@@ -231,6 +245,7 @@ export const updateActivity = mutation({
     promotionalImageStorageId: v.optional(v.id("_storage")),
     location: v.optional(v.string()),
     allowSignup: v.boolean(),
+    externalSignupUrl: v.union(v.string(), v.null()),
     registrationDeadline: v.union(v.number(), v.null()),
     maxParticipants: v.union(v.number(), v.null()),
   },
@@ -262,6 +277,7 @@ export const updateActivity = mutation({
       ...fields,
       registrationDeadline: fields.registrationDeadline ?? undefined,
       maxParticipants: fields.maxParticipants ?? undefined,
+      externalSignupUrl: fields.externalSignupUrl ?? undefined,
     });
     const slug = await uniqueActivitySlug(ctx, normalized.title, normalized.startTime, id);
     await ctx.db.patch(id, { ...normalized, slug });
