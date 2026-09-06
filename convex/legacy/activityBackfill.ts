@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction, internalMutation } from "../_generated/server";
-import { uniqueActivitySlug } from "../activities";
+import { ensureActivitySlugRoute, uniqueActivitySlug } from "../activities";
 
 type SignupMethod = "none" | "api" | "url";
 type ApiEventSignup =
@@ -69,10 +69,11 @@ export const upsertActivity = internalMutation({
       return { id: existing._id, inserted: false };
     }
 
+    const slug = await uniqueActivitySlug(ctx, args.title, args.startTime);
     const id = await ctx.db.insert("activities", {
       externalId: args.externalId,
       title: args.title,
-      slug: await uniqueActivitySlug(ctx, args.title, args.startTime),
+      slug,
       startTime: args.startTime,
       endTime: args.endTime ?? args.startTime,
       description: args.description,
@@ -84,6 +85,7 @@ export const upsertActivity = internalMutation({
       externalSignupUrl: args.externalSignupUrl,
       legacySignupMethod: args.legacySignupMethod,
     });
+    await ensureActivitySlugRoute(ctx, id, slug);
     return { id, inserted: true };
   },
 });

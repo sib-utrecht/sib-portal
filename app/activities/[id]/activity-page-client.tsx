@@ -1,4 +1,4 @@
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useParams, useNavigate } from "react-router-dom";
 import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -194,6 +194,10 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
   if (activity === null) {
     return <p className="text-white/80">Activity not found.</p>;
+  }
+
+  if (activity.slug !== slug) {
+    return <Navigate to={`/activities/${activity.slug}`} replace />;
   }
 
   const now = Date.now();

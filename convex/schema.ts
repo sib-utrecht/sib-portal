@@ -121,6 +121,19 @@ export default defineSchema({
     .index("by_externalId", ["externalId"]),
 
   /**
+   * Routes canonical and historical URL slugs to activities. Keeping one row
+   * per slug makes alias lookup indexable and prevents old links from breaking.
+   */
+  activitySlugs: defineTable({
+    /** Canonical or historical activity URL slug. */
+    slug: v.string(),
+    /** Activity currently owning this slug. */
+    activityId: v.id("activities"),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_activityId", ["activityId"]),
+
+  /**
    * Tracks every promotional image ever uploaded for an activity.
    * Images are kept in storage even when replaced; deletion happens manually
    * via the admin storage page.

@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RequireAuth } from "@/components/require-auth";
@@ -59,6 +59,10 @@ function EditActivityContent({
 
   if (activity === null) {
     return <p className="text-white/80">Activity not found.</p>;
+  }
+
+  if (activity.slug !== slug) {
+    return <Navigate to={`/activities/${activity.slug}/edit`} replace />;
   }
 
   return (

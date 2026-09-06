@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, MutationCtx, query } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { paginationOptsValidator } from "convex/server";
 import { requireLogin, requireAdmin } from "./auth";
 import { Id } from "./_generated/dataModel";
 import schema from "./schema";
@@ -83,10 +84,18 @@ export const getActivity = query({
   args: { slug: v.string() },
   returns: v.union(activityWithImageValidator, v.null()),
   handler: async (ctx, { slug }) => {
-    const activity = await ctx.db
-      .query("activities")
+    const slugRoute = await ctx.db
+      .query("activitySlugs")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .unique();
+    // Keep the direct lookup during the routing-table backfill so deployment
+    // does not create a window in which existing links stop resolving.
+    const activity = slugRoute
+      ? await ctx.db.get(slugRoute.activityId)
+      : await ctx.db
+          .query("activities")
+          .withIndex("by_slug", (q) => q.eq("slug", slug))
+          .unique();
     if (!activity?.slug) return null;
     return {
       ...activity,
@@ -145,12 +154,42 @@ export async function uniqueActivitySlug(
   const base = activitySlugBase(title, startTime);
   for (let suffix = 1; ; suffix++) {
     const slug = suffix === 1 ? base : `${base}-${suffix}`;
-    const existing = await ctx.db
+    const existingRoute = await ctx.db
+      .query("activitySlugs")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .unique();
+    if (existingRoute) {
+      if (existingRoute.activityId === excludeId) return slug;
+      continue;
+    }
+
+    // Transitional collision check for activities that have not been copied
+    // into activitySlugs yet.
+    const existingActivity = await ctx.db
       .query("activities")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .unique();
-    if (!existing || existing._id === excludeId) return slug;
+    if (!existingActivity || existingActivity._id === excludeId) return slug;
   }
+}
+
+/** Ensure a slug is permanently reserved for an activity. */
+export async function ensureActivitySlugRoute(
+  ctx: MutationCtx,
+  activityId: Id<"activities">,
+  slug: string,
+): Promise<void> {
+  const existing = await ctx.db
+    .query("activitySlugs")
+    .withIndex("by_slug", (q) => q.eq("slug", slug))
+    .unique();
+  if (existing) {
+    if (existing.activityId !== activityId) {
+      throw new Error(`Activity slug is already in use: ${slug}`);
+    }
+    return;
+  }
+  await ctx.db.insert("activitySlugs", { slug, activityId });
 }
 
 function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
@@ -214,6 +253,7 @@ export const createActivity = mutation({
     });
     const slug = await uniqueActivitySlug(ctx, fields.title, fields.startTime);
     const id = await ctx.db.insert("activities", { ...fields, slug });
+    await ensureActivitySlugRoute(ctx, id, slug);
     if (args.promotionalImageStorageId) {
       // Link the tracking record created at upload time, or create one for pre-existing images
       const existing = await ctx.db
@@ -280,6 +320,10 @@ export const updateActivity = mutation({
       externalSignupUrl: fields.externalSignupUrl ?? undefined,
     });
     const slug = await uniqueActivitySlug(ctx, normalized.title, normalized.startTime, id);
+    // Preserve the current URL even when this activity predates the route-table
+    // backfill, then reserve the new canonical URL before changing the activity.
+    if (activity.slug) await ensureActivitySlugRoute(ctx, id, activity.slug);
+    await ensureActivitySlugRoute(ctx, id, slug);
     await ctx.db.patch(id, { ...normalized, slug });
     return { slug };
   },
@@ -301,6 +345,7 @@ export const backfillActivitySlugs = internalMutation({
     for (const activity of activities) {
       const slug = await uniqueActivitySlug(ctx, activity.title, activity.startTime, activity._id);
       await ctx.db.patch(activity._id, { slug });
+      await ensureActivitySlugRoute(ctx, activity._id, slug);
     }
 
     const complete = activities.length < 100;
@@ -311,12 +356,69 @@ export const backfillActivitySlugs = internalMutation({
   },
 });
 
+/** Start copying all existing canonical slugs into the slug routing table. */
+export const backfillActivitySlugRoutes = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    await ctx.scheduler.runAfter(0, internal.activities.backfillActivitySlugRoutesPage, {
+      paginationOpts: { numItems: 100, cursor: null },
+    });
+    return null;
+  },
+});
+
+/** Copy one bounded page of existing activity slugs and schedule the next. */
+export const backfillActivitySlugRoutesPage = internalMutation({
+  args: { paginationOpts: paginationOptsValidator },
+  returns: v.object({
+    scanned: v.number(),
+    inserted: v.number(),
+    complete: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const page = await ctx.db.query("activities").order("asc").paginate(args.paginationOpts);
+    let inserted = 0;
+
+    for (const activity of page.page) {
+      if (!activity.slug) continue;
+      const existing = await ctx.db
+        .query("activitySlugs")
+        .withIndex("by_slug", (q) => q.eq("slug", activity.slug!))
+        .unique();
+      if (existing && existing.activityId !== activity._id) {
+        throw new Error(`Activity slug is already owned by another activity: ${activity.slug}`);
+      }
+      if (!existing) {
+        await ctx.db.insert("activitySlugs", {
+          slug: activity.slug,
+          activityId: activity._id,
+        });
+        inserted++;
+      }
+    }
+
+    if (!page.isDone) {
+      await ctx.scheduler.runAfter(0, internal.activities.backfillActivitySlugRoutesPage, {
+        paginationOpts: { ...args.paginationOpts, cursor: page.continueCursor },
+      });
+    }
+
+    return { scanned: page.page.length, inserted, complete: page.isDone };
+  },
+});
+
 /** Delete an activity, its registrations, and all its stored images. Admin only. */
 export const deleteActivity = mutation({
   args: { id: v.id("activities") },
   handler: async (ctx, { id }) => {
     await requireAdmin(ctx);
     const activity = await ctx.db.get(id);
+    for await (const route of ctx.db
+      .query("activitySlugs")
+      .withIndex("by_activityId", (q) => q.eq("activityId", id))) {
+      await ctx.db.delete(route._id);
+    }
     // Delete all tracked images for this activity
     const imageRecords = await ctx.db
       .query("activityImages")
