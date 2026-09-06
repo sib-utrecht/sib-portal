@@ -185,7 +185,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
   if (activity === undefined) {
     return (
-      <div className="space-y-4 max-w-3xl">
+      <div className="w-full space-y-4">
         <Skeleton className="h-10 w-64 rounded-full" />
         <Skeleton className="h-64 rounded-3xl" />
       </div>
@@ -214,7 +214,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     isSameActivityDay(activity.startTime, activity.endTime);
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="w-full space-y-8">
       {/* Promotional image */}
       {activity.promotionalImage && (
         <div className="rounded-2xl overflow-hidden ring-1 ring-[#21526f]/20 shadow-md shadow-[#21526f]/10 bg-[#eaf3f7] flex justify-center">
