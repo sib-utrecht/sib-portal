@@ -3,7 +3,7 @@
 import * as React from "react";
 import { format, isValid } from "date-fns";
 import { enGB } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,10 @@ interface DateTimePickerProps {
   disabled?: boolean;
   required?: boolean;
   id?: string;
+  /** Show a button inside the field for clearing an optional value. */
+  clearable?: boolean;
+  /** Value that represents an empty picker and is restored when clearing. */
+  nullDate?: Date;
   /** When true, focusing this field puts the cursor in the time input instead of the date input */
   focusTime?: boolean;
 }
@@ -48,36 +52,52 @@ export function DateTimePicker({
   disabled,
   required,
   id,
+  clearable = false,
+  nullDate,
   focusTime = false,
 }: DateTimePickerProps) {
+  const effectiveTimestamp = value?.getTime() ?? nullDate?.getTime();
+  const effectiveValue = React.useMemo(
+    () => (effectiveTimestamp === undefined ? undefined : new Date(effectiveTimestamp)),
+    [effectiveTimestamp],
+  );
   const [open, setOpen] = React.useState(false);
-  const [dateStr, setDateStr] = React.useState(value ? format(value, "dd/MM/yyyy") : "00/00/0000");
-  const [timeStr, setTimeStr] = React.useState(value ? format(value, "HH:mm") : "00:00");
+  const [dateStr, setDateStr] = React.useState(
+    effectiveValue ? format(effectiveValue, "dd/MM/yyyy") : "00/00/0000",
+  );
+  const [timeStr, setTimeStr] = React.useState(
+    effectiveValue ? format(effectiveValue, "HH:mm") : "00:00",
+  );
   const dateFocused = React.useRef(false);
   const timeFocused = React.useRef(false);
   const dateInputRef = React.useRef<HTMLInputElement>(null);
   const timeInputRef = React.useRef<HTMLInputElement>(null);
   const calendarButtonRef = React.useRef<HTMLButtonElement>(null);
+  const isNullDate = value === undefined || value.getTime() === nullDate?.getTime();
 
   React.useEffect(() => {
-    if (!dateFocused.current) setDateStr(value ? format(value, "dd/MM/yyyy") : "00/00/0000");
-  }, [value]);
+    if (!dateFocused.current) {
+      setDateStr(effectiveValue ? format(effectiveValue, "dd/MM/yyyy") : "00/00/0000");
+    }
+  }, [effectiveValue]);
 
   const displayDate = React.useMemo(() => {
     const dm = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (!dm) return value;
+    if (!dm) return effectiveValue;
     const day = Number(dm[1]),
       month = Number(dm[2]),
       year = Number(dm[3]);
-    if (day < 1 || month < 1 || year < 1000) return value;
+    if (day < 1 || month < 1 || year < 1000) return effectiveValue;
     const d = new Date(year, month - 1, day);
     if (isValid(d) && d.getDate() === day && d.getMonth() === month - 1) return d;
-    return value;
-  }, [dateStr, value]);
+    return effectiveValue;
+  }, [dateStr, effectiveValue]);
 
   React.useEffect(() => {
-    if (!timeFocused.current) setTimeStr(value ? format(value, "HH:mm") : "00:00");
-  }, [value]);
+    if (!timeFocused.current) {
+      setTimeStr(effectiveValue ? format(effectiveValue, "HH:mm") : "00:00");
+    }
+  }, [effectiveValue]);
 
   function tryCommit(dStr: string, tStr: string) {
     const dm = dStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -93,7 +113,7 @@ export function DateTimePicker({
 
   function handleDaySelect(day: Date | undefined) {
     if (!day) {
-      onChange(undefined);
+      onChange(nullDate);
       return;
     }
     const tm = timeStr.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
@@ -201,7 +221,7 @@ export function DateTimePicker({
       }
     }
     tryCommit(effectiveDateStr, timeStr);
-    setDateStr(value ? format(value, "dd/MM/yyyy") : effectiveDateStr);
+    setDateStr(effectiveValue ? format(effectiveValue, "dd/MM/yyyy") : effectiveDateStr);
   }
 
   function handleDateClick(e: React.MouseEvent<HTMLInputElement>) {
@@ -287,7 +307,7 @@ export function DateTimePicker({
   function handleTimeBlur() {
     timeFocused.current = false;
     tryCommit(dateStr, timeStr);
-    setTimeStr(value ? format(value, "HH:mm") : "00:00");
+    setTimeStr(effectiveValue ? format(effectiveValue, "HH:mm") : "00:00");
   }
 
   function handleTimeClick(e: React.MouseEvent<HTMLInputElement>) {
@@ -347,7 +367,7 @@ export function DateTimePicker({
           disabled={disabled}
           className={cn(
             "h-auto w-[calc(10ch+4px)] shrink-0 border-0 p-0 tabular-nums shadow-none focus-visible:ring-0",
-            !value && "text-muted-foreground",
+            isNullDate && "text-muted-foreground",
           )}
         />
 
@@ -373,15 +393,28 @@ export function DateTimePicker({
           ref={timeInputRef}
           className={cn(
             "border-0 p-0 h-auto shadow-none focus-visible:ring-0 tabular-nums w-[48px] shrink-0",
-            !value && "text-muted-foreground",
+            isNullDate && "text-muted-foreground",
           )}
         />
+
+        {clearable && !isNullDate && (
+          <button
+            type="button"
+            disabled={disabled}
+            aria-label="Clear date and time"
+            title="Clear date and time"
+            onClick={() => onChange(nullDate)}
+            className="ml-auto shrink-0 rounded-sm p-0.5 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
-          selected={value}
+          selected={effectiveValue}
           onSelect={handleDaySelect}
           locale={enGB}
           autoFocus

@@ -231,8 +231,8 @@ export const updateActivity = mutation({
     promotionalImageStorageId: v.optional(v.id("_storage")),
     location: v.optional(v.string()),
     allowSignup: v.boolean(),
-    registrationDeadline: v.optional(v.number()),
-    maxParticipants: v.optional(v.number()),
+    registrationDeadline: v.union(v.number(), v.null()),
+    maxParticipants: v.union(v.number(), v.null()),
   },
   returns: v.object({ slug: v.string() }),
   handler: async (ctx, { id, ...fields }) => {
@@ -258,7 +258,11 @@ export const updateActivity = mutation({
         });
       }
     }
-    const normalized = validateAndNormalizeActivity(fields);
+    const normalized = validateAndNormalizeActivity({
+      ...fields,
+      registrationDeadline: fields.registrationDeadline ?? undefined,
+      maxParticipants: fields.maxParticipants ?? undefined,
+    });
     const slug = await uniqueActivitySlug(ctx, normalized.title, normalized.startTime, id);
     await ctx.db.patch(id, { ...normalized, slug });
     return { slug };

@@ -229,20 +229,25 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
       {/* Sign-up section — hidden when external sign-up URL takes precedence */}
       {activity.allowSignup && !activity.externalSignupUrl && (
-        <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-[#21526f]" />
-            <h3 className="text-lg font-semibold">Sign up</h3>
-          </div>
+        <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-3">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-[#21526f]" />
+              <h3 className="text-lg font-semibold">Sign up</h3>
+            </div>
 
-          <div className="text-sm text-gray-600 space-y-1">
-            {activity.maxParticipants !== undefined && status && (
-              <p>
-                {status.participantCount} / {activity.maxParticipants} spots filled
-              </p>
-            )}
-            {activity.registrationDeadline && (
-              <p>Register until: {formatDate(activity.registrationDeadline)}</p>
+            {((activity.maxParticipants !== undefined && status) ||
+              activity.registrationDeadline) && (
+              <div className="text-sm text-gray-600 space-y-1">
+                {activity.maxParticipants !== undefined && status && (
+                  <p>
+                    {status.participantCount} / {activity.maxParticipants} spots filled
+                  </p>
+                )}
+                {activity.registrationDeadline && (
+                  <p>Register until: {formatDate(activity.registrationDeadline)}</p>
+                )}
+              </div>
             )}
           </div>
 
@@ -263,18 +268,28 @@ function ActivityDetailContent({ slug }: { slug: string }) {
               <p className="text-gray-500 text-sm">Registration is closed.</p>
             )
           ) : status?.isRegistered ? (
-            <div className="flex items-center gap-4">
-              <span className="text-green-700 font-medium">You are signed up</span>
-              {deregistrationOpen && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full"
-                  onClick={handleUnregister}
-                  disabled={busy}
-                >
-                  Cancel sign-up
-                </Button>
+            <div className="space-y-3">
+              <div className="flex items-center gap-4">
+                <span className="text-green-700 font-medium">You are signed up</span>
+                {deregistrationOpen && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full"
+                    onClick={handleUnregister}
+                    disabled={busy}
+                  >
+                    Cancel sign-up
+                  </Button>
+                )}
+              </div>
+              {status.comment && (
+                <div className="space-y-1.5">
+                  <p className="text-sm font-medium text-gray-700">Your comment</p>
+                  <p className="whitespace-pre-wrap break-words rounded-md bg-[#f4f8fa] px-3 py-2 text-sm text-gray-700">
+                    {status.comment}
+                  </p>
+                </div>
               )}
             </div>
           ) : registrationOpen && !isFull ? (

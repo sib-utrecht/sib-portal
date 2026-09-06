@@ -201,7 +201,12 @@ export function ActivityForm({
         navigate(`/activities/${activity.slug}`);
       } else {
         if (!activityId) throw new Error("Missing activity ID");
-        const activity = await updateActivity({ id: activityId, ...payload });
+        const activity = await updateActivity({
+          id: activityId,
+          ...payload,
+          registrationDeadline: payload.registrationDeadline ?? null,
+          maxParticipants: maxParticipants ?? null,
+        });
         navigate(`/activities/${activity.slug}`);
       }
     } catch (err) {
@@ -252,27 +257,15 @@ export function ActivityForm({
           />
         </div>
         <div className="min-w-0 space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label htmlFor="endTime">End (optional)</Label>
-            {form.startTime &&
-              form.endTime &&
-              !isMissingEndSelection(form.startTime, form.endTime) && (
-                <button
-                  type="button"
-                  className="text-xs text-muted-foreground underline-offset-4 hover:underline"
-                  onClick={() => set("endTime", midnightOn(form.startTime!))}
-                  disabled={saving}
-                >
-                  Remove end
-                </button>
-              )}
-          </div>
+          <Label htmlFor="endTime">End (optional)</Label>
           <DateTimePicker
             id="endTime"
             value={form.endTime}
             onChange={(d) => set("endTime", d)}
             disabled={saving}
             focusTime
+            clearable
+            nullDate={form.startTime ? midnightOn(form.startTime) : undefined}
           />
         </div>
       </div>
@@ -359,6 +352,7 @@ export function ActivityForm({
               value={form.registrationDeadline}
               onChange={(d) => set("registrationDeadline", d)}
               disabled={saving}
+              clearable
             />
           </div>
           <div className="space-y-2">

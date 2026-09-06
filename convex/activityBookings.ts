@@ -162,6 +162,7 @@ export const getActivityStatus = query({
   args: { activityId: v.id("activities") },
   returns: v.object({
     isRegistered: v.boolean(),
+    comment: v.optional(v.string()),
     participantCount: v.number(),
     isAdmin: v.boolean(),
   }),
@@ -182,8 +183,10 @@ export const getActivityStatus = query({
       isAdmin(ctx),
     ]);
 
+    const isRegistered = userRegistration !== null && userRegistration.active !== false;
     return {
-      isRegistered: userRegistration !== null && userRegistration.active !== false,
+      isRegistered,
+      comment: isRegistered && userRegistration ? userRegistration.comment : undefined,
       participantCount: registrations
         .filter((registration) => registration.active !== false)
         .reduce((total, registration) => total + (registration.spaces ?? 1), 0),
