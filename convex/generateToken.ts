@@ -37,13 +37,21 @@ export const generateTokens = action({
     const periodSeconds = 30;
     const end = (Math.floor(Date.now() / 1000 / periodSeconds) + 1) * periodSeconds * 1000;
 
+    const conscriboId = identity.conscriboId;
+    if (!conscriboId) {
+      return {
+        codes: [],
+        endTime: end
+      };
+    }
+
     return {
       codes: await Promise.all(
         secrets.map(async (s) => {
           if (s == null) {
             throw new Error("Invalid committee ID");
           }
-          if (!s.members.includes(identity.conscriboId)) {
+          if (!s.members.includes(conscriboId)) {
             throw new Error("Unauthorized: Not a member of committee " + s.name);
           }
           return await generate({ secret: s.secret });

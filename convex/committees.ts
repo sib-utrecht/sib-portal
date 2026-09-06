@@ -40,10 +40,15 @@ export const getCommittees = query({
   ),
   handler: async (ctx) => {
     const identity = await requireLogin(ctx);
+    const conscriboId = identity.conscriboId;
+    if (!conscriboId) {
+      return [];
+    }
+
     const res = await ctx.db.query("committees").collect();
     return (
       res
-        .filter((c) => c.members.includes(identity.conscriboId))
+        .filter((c) => c.members.includes(conscriboId))
         .sort((a, b) => a.name.localeCompare(b.name))
         // Do not include secret in response
         .map(({ _id, _creationTime, name, members }) => ({ _id, _creationTime, name, members }))

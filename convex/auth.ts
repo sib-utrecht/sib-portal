@@ -10,11 +10,11 @@ export type AuthenticatedIdentity = {
   /** Primary email address from the Cognito access token. */
   email: string;
   /** The member's Conscribo ID. */
-  conscriboId: string;
+  conscriboId?: string;
   /** Stable entity identifier used by the legacy API. */
-  entityId: string | undefined;
+  entityId?: string | undefined;
   /** WordPress user ID used by the legacy API. */
-  wordpressUserId: number | undefined;
+  wordpressUserId?: number | undefined;
   /** Cognito groups used for application authorization. */
   groups: string[];
 };
@@ -35,7 +35,7 @@ export async function getAuthenticatedIdentity(
   if (!identity.email) return null;
 
   const conscriboId = claims["conscribo-id"];
-  if (typeof conscriboId !== "string" || conscriboId === "") return null;
+  if (conscriboId !== undefined && typeof conscriboId !== "string") return null;
 
   const entityId = claims["entity-id"];
   const groups = Array.isArray(claims["cognito:groups"])
