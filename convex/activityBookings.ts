@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { mutation, type MutationCtx, query } from "./_generated/server";
-import { isAdmin, requireAdmin } from "./auth";
-import { requireCurrentUser } from "./legacy/identity";
+import { isAdmin, requireAdmin, requireLogin } from "./auth";
+import { findCurrentUser, requireCurrentUser } from "./legacy/identity";
 import { isActivityDeregistrationOpen, isActivitySignupOpen } from "../utils/activity-registration";
 import { activityVisibility } from "./activities";
 
@@ -172,9 +172,11 @@ export const getActivityStatus = query({
     comment: v.optional(v.string()),
     participantCount: v.number(),
     isAdmin: v.boolean(),
+    needsActivation: v.boolean(),
   }),
   handler: async (ctx, { activityId }) => {
-    const user = await requireCurrentUser(ctx);
+    const identity = await requireLogin(ctx);
+    const user = await findCurrentUser(ctx, identity);
     const activity = await ctx.db.get(activityId);
     if (!activity || (activityVisibility(activity) === "draft" && !(await isAdmin(ctx)))) {
       throw new Error("Activity not found");
@@ -185,12 +187,14 @@ export const getActivityStatus = query({
         .query("activityRegistrations")
         .withIndex("by_activity", (q) => q.eq("activityId", activityId))
         .take(1_000),
-      ctx.db
-        .query("activityRegistrations")
-        .withIndex("by_activity_and_user", (q) =>
-          q.eq("activityId", activityId).eq("userId", user._id),
-        )
-        .first(),
+      user && user.name.trim() !== ""
+        ? ctx.db
+            .query("activityRegistrations")
+            .withIndex("by_activity_and_user", (q) =>
+              q.eq("activityId", activityId).eq("userId", user._id),
+            )
+            .first()
+        : null,
       isAdmin(ctx),
     ]);
 
@@ -202,6 +206,7 @@ export const getActivityStatus = query({
         .filter((registration) => registration.active !== false)
         .reduce((total, registration) => total + (registration.spaces ?? 1), 0),
       isAdmin: admin,
+      needsActivation: !user || user.name.trim() === "",
     };
   },
 });

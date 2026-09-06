@@ -6,9 +6,18 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { useLayoutEffect, useState } from "react";
+import { Component, useLayoutEffect, useState, type ErrorInfo, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Calendar, Users, Pencil, ExternalLink, Share2 } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  Users,
+  Pencil,
+  ExternalLink,
+  Share2,
+} from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { ActivityDescription } from "@/components/activity-description";
 import { HeaderAuthControls } from "@/components/header-auth-controls";
@@ -78,6 +87,43 @@ function sharedImageFilename(title: string, mimeType: string): string {
     .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-|-$/g, "");
   return `${basename || "activity"}.${extension}`;
+}
+
+class SignupErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("Activity sign-up failed to render:", error, info);
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+
+    const needsActivation = this.state.error.message.includes(
+      "No imported member record with a name found",
+    );
+    return (
+      <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[#21526f]" aria-hidden="true" />
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              {needsActivation ? "Your account still needs to be activated" : "Sign-up unavailable"}
+            </h3>
+            <p className="mt-1 text-sm text-gray-600">
+              {needsActivation
+                ? "You are signed in, but your membership has not been activated in the portal yet. Please contact the board before signing up for this activity."
+                : "We couldn’t load the sign-up options. Please try again later."}
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 }
 
 function ActivityDetailContent({ slug }: { slug: string }) {
@@ -321,99 +367,113 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
       {/* Sign-up section — hidden when external sign-up URL takes precedence */}
       {activity.allowSignup && !activity.externalSignupUrl && (
-        <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-3">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-[#21526f]" />
-              <h3 className="text-lg font-semibold">Sign up</h3>
-            </div>
-
-            {((activity.maxParticipants !== undefined && status) ||
-              activity.registrationDeadline) && (
-              <div className="text-sm text-gray-600 space-y-1">
-                {activity.maxParticipants !== undefined && status && (
-                  <p>
-                    {status.participantCount} / {activity.maxParticipants} spots filled
-                  </p>
-                )}
-                {activity.registrationDeadline && (
-                  <p>Register until: {formatDate(activity.registrationDeadline)}</p>
-                )}
+        <SignupErrorBoundary>
+          <Card className="p-6 rounded-2xl shadow-sm shadow-[#21526f]/5 space-y-3">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-[#21526f]" />
+                <h3 className="text-lg font-semibold">Sign up</h3>
               </div>
-            )}
-          </div>
 
-          {actionError && (
-            <Alert variant="destructive">
-              <AlertDescription>{actionError}</AlertDescription>
-            </Alert>
-          )}
-
-          {isAuthLoading || (isAuthenticated && status === undefined) ? (
-            <Skeleton className="h-9 w-36 rounded-full" />
-          ) : !isAuthenticated ? (
-            registrationOpen ? (
-              <Button asChild className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full">
-                <Link to={loginUrl}>Log in to sign up</Link>
-              </Button>
-            ) : (
-              <p className="text-gray-500 text-sm">Registration is closed.</p>
-            )
-          ) : status?.isRegistered ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-4">
-                <span className="text-green-700 font-medium">You are signed up</span>
-                {deregistrationOpen && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={handleUnregister}
-                    disabled={busy}
-                  >
-                    Cancel sign-up
-                  </Button>
-                )}
-              </div>
-              {status.comment && (
-                <div className="space-y-1.5">
-                  <p className="text-sm font-medium text-gray-700">Your comment</p>
-                  <p className="whitespace-pre-wrap break-words rounded-md bg-[#f4f8fa] px-3 py-2 text-sm text-gray-700">
-                    {status.comment}
-                  </p>
+              {((activity.maxParticipants !== undefined && status) ||
+                activity.registrationDeadline) && (
+                <div className="text-sm text-gray-600 space-y-1">
+                  {activity.maxParticipants !== undefined && status && (
+                    <p>
+                      {status.participantCount} / {activity.maxParticipants} spots filled
+                    </p>
+                  )}
+                  {activity.registrationDeadline && (
+                    <p>Register until: {formatDate(activity.registrationDeadline)}</p>
+                  )}
                 </div>
               )}
             </div>
-          ) : registrationOpen && !isFull ? (
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <label htmlFor="signup-comment" className="text-sm font-medium text-gray-700">
-                  Comment (optional)
-                </label>
-                <textarea
-                  id="signup-comment"
-                  value={signupComment}
-                  onChange={(event) => setSignupComment(event.target.value)}
-                  rows={4}
-                  disabled={busy}
-                  className="w-full resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs outline-none placeholder:text-gray-400 focus:border-[#21526f] focus:ring-2 focus:ring-[#21526f]/20 disabled:cursor-not-allowed disabled:opacity-50"
-                  placeholder="Add a comment"
-                />
+
+            {status?.needsActivation ? (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                <AlertDescription>
+                  <span className="font-medium">Your account still needs to be activated.</span> You
+                  are signed in, but your membership has not been activated in the portal yet.
+                  Please contact the board before signing up for this activity.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              actionError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{actionError}</AlertDescription>
+                </Alert>
+              )
+            )}
+
+            {status?.needsActivation ? null : isAuthLoading ||
+              (isAuthenticated && status === undefined) ? (
+              <Skeleton className="h-9 w-36 rounded-full" />
+            ) : !isAuthenticated ? (
+              registrationOpen ? (
+                <Button asChild className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full">
+                  <Link to={loginUrl}>Log in to sign up</Link>
+                </Button>
+              ) : (
+                <p className="text-gray-500 text-sm">Registration is closed.</p>
+              )
+            ) : status?.isRegistered ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <span className="text-green-700 font-medium">You are signed up</span>
+                  {deregistrationOpen && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full"
+                      onClick={handleUnregister}
+                      disabled={busy}
+                    >
+                      Cancel sign-up
+                    </Button>
+                  )}
+                </div>
+                {status.comment && (
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-medium text-gray-700">Your comment</p>
+                    <p className="whitespace-pre-wrap break-words rounded-md bg-[#f4f8fa] px-3 py-2 text-sm text-gray-700">
+                      {status.comment}
+                    </p>
+                  </div>
+                )}
               </div>
-              <Button
-                className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full"
-                onClick={handleRegister}
-                disabled={busy}
-              >
-                {busy ? "Processing…" : "Sign up"}
-              </Button>
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm">
-              {isFull ? "Activity is full." : "Registration is closed."}
-            </p>
-          )}
-        </Card>
+            ) : registrationOpen && !isFull ? (
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label htmlFor="signup-comment" className="text-sm font-medium text-gray-700">
+                    Comment (optional)
+                  </label>
+                  <textarea
+                    id="signup-comment"
+                    value={signupComment}
+                    onChange={(event) => setSignupComment(event.target.value)}
+                    rows={4}
+                    disabled={busy}
+                    className="w-full resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs outline-none placeholder:text-gray-400 focus:border-[#21526f] focus:ring-2 focus:ring-[#21526f]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Add a comment"
+                  />
+                </div>
+                <Button
+                  className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full"
+                  onClick={handleRegister}
+                  disabled={busy}
+                >
+                  {busy ? "Processing…" : "Sign up"}
+                </Button>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm">
+                {isFull ? "Activity is full." : "Registration is closed."}
+              </p>
+            )}
+          </Card>
+        </SignupErrorBoundary>
       )}
 
       {/* Sign-up list (admin only, including externally managed activities) */}
