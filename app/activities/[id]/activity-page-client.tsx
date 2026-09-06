@@ -115,7 +115,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     };
 
     try {
-      if (activity.promotionalImage && navigator.share && navigator.canShare) {
+      let imageFile: File | undefined;
+
+      if (activity.promotionalImage && navigator.canShare) {
         try {
           const response = await fetch(activity.promotionalImage);
           if (!response.ok) throw new Error("Could not download the activity image.");
@@ -125,14 +127,23 @@ function ActivityDetailContent({ slug }: { slug: string }) {
             type: blob.type || "image/jpeg",
           });
 
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({ title: activity.title, text, files: [file] });
-            return;
-          }
+          if (navigator.canShare({ files: [file] })) imageFile = file;
+        } catch {
+          // Native text sharing remains available if the image cannot be downloaded.
+        }
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: activity.title,
+            text,
+            ...(imageFile ? { files: [imageFile] } : {}),
+          });
+          return;
         } catch (error) {
           if (error instanceof DOMException && error.name === "AbortError") return;
-          // Some image hosts do not allow a browser fetch. The URL fallback still lets
-          // WhatsApp create a link preview and keeps sharing available on those devices.
+          // Fall through to the WhatsApp link when the native share attempt fails.
         }
       }
 
