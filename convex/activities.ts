@@ -120,7 +120,6 @@ export const getActivity = query({
     if (!activity || !(await canViewActivity(ctx, activity))) return null;
     return {
       ...activity,
-      slug: activity.slug,
       promotionalImage: activity.promotionalImageStorageId
         ? ((await ctx.storage.getUrl(activity.promotionalImageStorageId)) ?? undefined)
         : activity.promotionalImageUrl,
@@ -337,8 +336,6 @@ export const updateActivity = mutation({
       externalSignupUrl: fields.externalSignupUrl ?? undefined,
     });
     const slug = await uniqueActivitySlug(ctx, normalized.title, normalized.startTime, id);
-    // Keep the current URL as an alias, then reserve the new canonical URL.
-    await ensureActivitySlugRoute(ctx, id, activity.slug);
     await ensureActivitySlugRoute(ctx, id, slug);
     await ctx.db.patch(id, { ...normalized, slug });
     return { slug };
