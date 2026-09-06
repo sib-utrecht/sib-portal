@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Calendar, Users, Pencil, ExternalLink } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Users, Pencil, ExternalLink, Share2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { ActivityDescription } from "@/components/activity-description";
 import { HeaderAuthControls } from "@/components/header-auth-controls";
@@ -17,6 +17,7 @@ import {
   shouldShowActivityTime,
 } from "@/utils/activity-date";
 import { isActivityDeregistrationOpen, isActivitySignupOpen } from "@/utils/activity-registration";
+import { buildActivityShareText } from "@/utils/activity-sharing";
 
 function safeHttpUrl(url: string): string | null {
   try {
@@ -69,6 +70,15 @@ function formatBookingDate(ts: number) {
   });
 }
 
+function sharedImageFilename(title: string, mimeType: string): string {
+  const extension = mimeType === "image/png" ? "png" : mimeType === "image/webp" ? "webp" : "jpg";
+  const basename = title
+    .toLocaleLowerCase("en-GB")
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-|-$/g, "");
+  return `${basename || "activity"}.${extension}`;
+}
+
 function ActivityDetailContent({ slug }: { slug: string }) {
   const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
   const activity = useQuery(api.activities.getActivity, { slug });
@@ -88,6 +98,52 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [signupComment, setSignupComment] = useState("");
+  const [sharing, setSharing] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+
+  async function handleWhatsAppShare() {
+    if (!activity) return;
+
+    setSharing(true);
+    setShareError(null);
+    const text = buildActivityShareText(activity);
+    const openWhatsAppFallback = () => {
+      const fallbackText = activity.promotionalImage
+        ? `${text}\n\n${activity.promotionalImage}`
+        : text;
+      window.location.assign(`https://wa.me/?text=${encodeURIComponent(fallbackText)}`);
+    };
+
+    try {
+      if (activity.promotionalImage && navigator.share && navigator.canShare) {
+        try {
+          const response = await fetch(activity.promotionalImage);
+          if (!response.ok) throw new Error("Could not download the activity image.");
+
+          const blob = await response.blob();
+          const file = new File([blob], sharedImageFilename(activity.title, blob.type), {
+            type: blob.type || "image/jpeg",
+          });
+
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ title: activity.title, text, files: [file] });
+            return;
+          }
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          // Some image hosts do not allow a browser fetch. The URL fallback still lets
+          // WhatsApp create a link preview and keeps sharing available on those devices.
+        }
+      }
+
+      openWhatsAppFallback();
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setShareError(error instanceof Error ? error.message : "Could not share this activity.");
+    } finally {
+      setSharing(false);
+    }
+  }
 
   async function handleRegister() {
     if (!activityId) return;
@@ -161,7 +217,21 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
       {/* Title & meta */}
       <div className="space-y-3">
-        <h2 className="text-2xl font-bold text-white">{activity.title}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl font-bold text-white">{activity.title}</h2>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+            onClick={handleWhatsAppShare}
+            disabled={sharing}
+            aria-label={sharing ? "Preparing activity to share" : "Share activity on WhatsApp"}
+            title="Share activity on WhatsApp"
+          >
+            <Share2 className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
 
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-[#d7eef8]">
           <span className="flex items-center gap-1.5">
@@ -185,6 +255,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
             </span>
           )}
         </div>
+        {shareError && <p className="text-sm text-red-200">{shareError}</p>}
       </div>
 
       {/* Description */}
