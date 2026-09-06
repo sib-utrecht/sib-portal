@@ -1,8 +1,9 @@
 import { v } from "convex/values";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Doc } from "./_generated/dataModel";
 import { mutation, type MutationCtx, query } from "./_generated/server";
 import { isAdmin, requireAdmin } from "./auth";
 import { requireCurrentUser } from "./legacy/identity";
+import { isActivityDeregistrationOpen, isActivitySignupOpen } from "../utils/activity-registration";
 
 const participantValidator = v.object({
   _id: v.id("activityRegistrations"),
@@ -60,8 +61,8 @@ export async function createCurrentUserBooking(
   signupAllowed: boolean,
 ) {
   if (!signupAllowed) throw new Error("This activity does not allow sign-ups");
-  if (activity.registrationDeadline && Date.now() > activity.registrationDeadline) {
-    throw new Error("Registration deadline has passed");
+  if (!isActivitySignupOpen(activity)) {
+    throw new Error("Registration is closed");
   }
 
   const user = await requireCurrentUser(ctx);
@@ -106,11 +107,16 @@ export async function createCurrentUserBooking(
 }
 
 /** Shared transactional cancellation used by portal and compatibility functions. */
-export async function cancelCurrentUserBooking(ctx: MutationCtx, activityId: Id<"activities">) {
+export async function cancelCurrentUserBooking(ctx: MutationCtx, activity: Doc<"activities">) {
+  if (!isActivityDeregistrationOpen(activity.endTime)) {
+    throw new Error("The cancellation period has passed");
+  }
   const user = await requireCurrentUser(ctx);
   const registration = await ctx.db
     .query("activityRegistrations")
-    .withIndex("by_activity_and_user", (q) => q.eq("activityId", activityId).eq("userId", user._id))
+    .withIndex("by_activity_and_user", (q) =>
+      q.eq("activityId", activity._id).eq("userId", user._id),
+    )
     .first();
   if (!registration || registration.active === false) {
     throw new Error("Not registered for this activity");
@@ -139,7 +145,9 @@ export const unregisterFromActivity = mutation({
   args: { activityId: v.id("activities") },
   returns: v.null(),
   handler: async (ctx, { activityId }) => {
-    await cancelCurrentUserBooking(ctx, activityId);
+    const activity = await ctx.db.get(activityId);
+    if (!activity) throw new Error("Activity not found");
+    await cancelCurrentUserBooking(ctx, activity);
     return null;
   },
 });

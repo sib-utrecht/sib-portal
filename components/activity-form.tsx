@@ -353,7 +353,7 @@ export function ActivityForm({
       {form.allowSignup && (
         <div className="pl-6 border-l-2 border-[#21526f] space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="registrationDeadline">Registration deadline (optional)</Label>
+            <Label htmlFor="registrationDeadline">Register until (optional)</Label>
             <DateTimePicker
               id="registrationDeadline"
               value={form.registrationDeadline}

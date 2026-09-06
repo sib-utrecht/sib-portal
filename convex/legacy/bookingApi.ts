@@ -23,7 +23,7 @@ export const removeBooking = internalMutation({
   handler: async (ctx, { activityIdentifier }) => {
     const activity = await findActivity(ctx, activityIdentifier);
     if (!activity) throw new Error("Activity not found");
-    await cancelCurrentUserBooking(ctx, activity._id);
+    await cancelCurrentUserBooking(ctx, activity);
     return null;
   },
 });

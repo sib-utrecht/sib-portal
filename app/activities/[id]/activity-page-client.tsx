@@ -16,6 +16,7 @@ import {
   shouldShowActivityEnd,
   shouldShowActivityTime,
 } from "@/utils/activity-date";
+import { isActivityDeregistrationOpen, isActivitySignupOpen } from "@/utils/activity-registration";
 
 function safeHttpUrl(url: string): string | null {
   try {
@@ -127,9 +128,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   }
 
   const now = Date.now();
-  const registrationOpen =
-    activity.allowSignup &&
-    (!activity.registrationDeadline || now <= activity.registrationDeadline);
+  const signupTimingOpen = isActivitySignupOpen(activity, now);
+  const registrationOpen = activity.allowSignup && signupTimingOpen;
+  const deregistrationOpen = isActivityDeregistrationOpen(activity.endTime, now);
   const isFull =
     activity.maxParticipants !== undefined &&
     (status?.participantCount ?? 0) >= activity.maxParticipants;
@@ -202,7 +203,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
               <p className="text-sm text-gray-600">
                 Sign-ups for this activity are managed externally.
               </p>
-              {!safeUrl ? (
+              {!signupTimingOpen ? (
+                <p className="text-sm text-gray-500">Registration is closed.</p>
+              ) : !safeUrl ? (
                 <p className="text-sm text-gray-500">Sign-up link is unavailable.</p>
               ) : isAuthLoading ? (
                 <Skeleton className="h-9 w-36 rounded-full" />
@@ -237,7 +240,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
               </p>
             )}
             {activity.registrationDeadline && (
-              <p>Deadline: {formatDate(activity.registrationDeadline)}</p>
+              <p>Register until: {formatDate(activity.registrationDeadline)}</p>
             )}
           </div>
 
@@ -260,7 +263,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
           ) : status?.isRegistered ? (
             <div className="flex items-center gap-4">
               <span className="text-green-700 font-medium">You are signed up</span>
-              {registrationOpen && (
+              {deregistrationOpen && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -303,7 +306,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
           </div>
           <dl className="grid gap-3 rounded-2xl bg-[#f4f8fa] p-4 text-sm sm:grid-cols-2">
             <div>
-              <dt className="font-medium text-gray-500">Registration deadline</dt>
+              <dt className="font-medium text-gray-500">Register until</dt>
               <dd className="mt-1 text-gray-900">
                 {activity.registrationDeadline
                   ? formatDate(activity.registrationDeadline)
