@@ -5,6 +5,8 @@ import { isAdmin, requireAdmin } from "./auth";
 import { requireCurrentUser } from "./legacy/identity";
 import { isActivityDeregistrationOpen, isActivitySignupOpen } from "../utils/activity-registration";
 
+const MAX_COMMENT_LENGTH = 1_000;
+
 const participantValidator = v.object({
   _id: v.id("activityRegistrations"),
   registeredAt: v.number(),
@@ -63,6 +65,9 @@ export async function createCurrentUserBooking(
   if (!signupAllowed) throw new Error("This activity does not allow sign-ups");
   if (!isActivitySignupOpen(activity)) {
     throw new Error("Registration is closed");
+  }
+  if (comment !== undefined && comment.length > MAX_COMMENT_LENGTH) {
+    throw new Error(`Comment cannot exceed ${MAX_COMMENT_LENGTH} characters`);
   }
 
   const user = await requireCurrentUser(ctx);
