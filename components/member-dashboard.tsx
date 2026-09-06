@@ -3,13 +3,12 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Camera, LogOut, User } from "lucide-react";
+import { Camera, User } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useAuth } from "../contexts/auth-context";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 import { PhotoPermissionSettings } from "./photo-permission-settings";
 import { ActivitiesList } from "./activities-list";
-import { useNavigate } from "react-router-dom";
 
 /**
  * Main dashboard for authenticated members.
@@ -20,9 +19,6 @@ import { useNavigate } from "react-router-dom";
  * Also provides logout and preferences navigation links in the header.
  */
 export function MemberDashboard() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
   const profileData = useQuery(api.users.getProfile);
   const isLoading = profileData === undefined;
   const user = profileData ?? { name: "User", email: "", role: "member" as const, avatar: null };
@@ -31,11 +27,6 @@ export function MemberDashboard() {
     .map((n) => n[0])
     .join("");
 
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true });
-  };
-
   return (
     <div className="min-h-screen portal-bg">
       <header className="portal-header">
@@ -43,29 +34,15 @@ export function MemberDashboard() {
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold portal-title">Member Dashboard</h1>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                {isLoading ? (
-                  <>
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-4 w-24" />
-                  </>
-                ) : (
-                  <>
-                    <Avatar className="h-8 w-8 ring-2 ring-[#21526f]/20">
-                      <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
-                      <AvatarFallback className="bg-[#eaf3f7] text-[#21526f] font-semibold">{initials}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium text-[#21526f]">{user.name}</span>
-                  </>
-                )}
-              </div>
-              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+              >
                 <Link to="/settings">Preferences</Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+              <HeaderAuthControls />
             </div>
           </div>
         </div>
@@ -100,12 +77,16 @@ export function MemberDashboard() {
                     <>
                       <Avatar className="h-16 w-16 ring-2 ring-[#21526f]/20">
                         <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
-                        <AvatarFallback className="text-lg bg-[#eaf3f7] text-[#21526f] font-bold">{initials}</AvatarFallback>
+                        <AvatarFallback className="text-lg bg-[#eaf3f7] text-[#21526f] font-bold">
+                          {initials}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <h3 className="font-semibold text-lg text-gray-900">{user.name}</h3>
                         <p className="text-gray-500 text-sm">{user.email}</p>
-                        <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-[#eaf3f7] text-[#21526f] capitalize">{user.role}</span>
+                        <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full bg-[#eaf3f7] text-[#21526f] capitalize">
+                          {user.role}
+                        </span>
                       </div>
                     </>
                   )}

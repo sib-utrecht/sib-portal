@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { PhotoPermissionSettings } from "@/components/photo-permission-settings";
 import { RequireAuth } from "@/components/require-auth";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 import { Mail, PencilLine, Phone, ShieldQuestion, UserRoundCog } from "lucide-react";
 import { ChangeAddressDialog } from "@/components/quick-actions/change-address-dialog";
 import { ChangeEmailDialog } from "@/components/quick-actions/change-email-dialog";
@@ -46,9 +47,15 @@ export default function SettingsPage() {
             <div className="flex justify-between items-center py-4">
               <h1 className="text-2xl font-bold portal-title">Preferences</h1>
               <div className="flex items-center gap-2">
-                <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                >
                   <Link to="/dashboard">Back to dashboard</Link>
                 </Button>
+                <HeaderAuthControls />
               </div>
             </div>
           </div>
@@ -61,7 +68,24 @@ export default function SettingsPage() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-[#21526f]">
                     <div className="p-1.5 rounded-lg bg-[#eaf3f7]">
-                      <svg className="h-4 w-4 text-[#21526f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      <svg
+                        className="h-4 w-4 text-[#21526f]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
                     </div>
                     Photo permission
                   </CardTitle>

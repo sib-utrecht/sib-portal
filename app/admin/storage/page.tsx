@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "react-router-dom";
 import { Trash2, ImageOff, Download } from "lucide-react";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 
 function formatBytes(bytes: number | undefined) {
   if (bytes === undefined) return "unknown size";
@@ -50,14 +51,17 @@ function StorageContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold portal-title">Stored images</h1>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
-            >
-              <Link to="/admin">Back to admin</Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+              >
+                <Link to="/admin">Back to admin</Link>
+              </Button>
+              <HeaderAuthControls />
+            </div>
           </div>
         </div>
       </header>

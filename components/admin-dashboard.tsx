@@ -14,7 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  LogOut,
   Users,
   Camera,
   Eye,
@@ -29,8 +28,8 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context";
-import { useNavigate } from "react-router-dom";
 import type { PhotoPermission } from "../types/user";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 
 interface FilterCardProps {
   label: string;
@@ -128,14 +127,12 @@ const getPermissionBadge = (permission: PhotoPermission) => {
  * Non-admin users see an "Access Denied" message instead of the dashboard.
  */
 export function AdminDashboard() {
-  const { logout, isAdmin } = useAuth();
-  const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [selectedPermissions, setSelectedPermissions] = useState<Set<PhotoPermission>>(new Set());
 
-  const profileData = useQuery(api.users.getProfile);
   const usersData = useQuery(api.users.getUsers, isAdmin ? {} : "skip");
 
-  if (profileData === undefined || (isAdmin && usersData === undefined)) {
+  if (isAdmin && usersData === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         Loading…
@@ -147,13 +144,7 @@ export function AdminDashboard() {
     return <div className="min-h-screen flex items-center justify-center">Access Denied</div>;
   }
 
-  const user = profileData ?? { name: "Admin", email: "", avatar: null };
   const users = usersData ?? [];
-
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true });
-  };
 
   const permissionStats = {
     "internal+external": users.filter((u) => u.photoPermission === "internal+external").length,
@@ -194,37 +185,34 @@ export function AdminDashboard() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold portal-title">Admin Dashboard</h1>
-              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#21526f] text-white">Admin</span>
+              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-[#21526f] text-white">
+                Admin
+              </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8 ring-2 ring-[#21526f]/20">
-                  <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                  <AvatarFallback className="bg-[#eaf3f7] text-[#21526f] font-semibold">
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium text-[#21526f]">{user.name}</span>
-              </div>
-              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+              >
                 <Link to="/admin/storage">
                   <ImageIcon className="h-4 w-4 mr-2" />
                   Images
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+              >
                 <Link to="/photo-permissions">
                   <Search className="h-4 w-4 mr-2" />
                   Photo Search
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+              <HeaderAuthControls />
             </div>
           </div>
         </div>

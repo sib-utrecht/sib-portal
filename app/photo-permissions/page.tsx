@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { PhotoPermission } from "@/types/user";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 
 type FilterType = "all" | PhotoPermission;
 
@@ -80,9 +81,17 @@ function PhotoPermissionsContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold portal-title">Photo permissions</h1>
-            <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
-              <Link to="/dashboard">Back to dashboard</Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+              >
+                <Link to="/dashboard">Back to dashboard</Link>
+              </Button>
+              <HeaderAuthControls />
+            </div>
           </div>
         </div>
       </header>

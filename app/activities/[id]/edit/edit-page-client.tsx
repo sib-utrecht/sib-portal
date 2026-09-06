@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 
 function EditActivityContent({ slug }: { slug: string }) {
   const navigate = useNavigate();
@@ -113,14 +114,17 @@ export default function EditActivityPage() {
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center py-4">
                 <h1 className="text-2xl font-bold portal-title">Edit activity</h1>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
-                >
-                  <Link to={`/activities/${slug}`}>Back to activity</Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                  >
+                    <Link to={`/activities/${slug}`}>Back to activity</Link>
+                  </Button>
+                  <HeaderAuthControls />
+                </div>
               </div>
             </div>
           </header>

@@ -121,7 +121,7 @@ export function LoginForm() {
 
   return (
     <div
-      className="min-h-screen relative flex items-center justify-center overflow-hidden"
+      className="relative flex min-h-dvh items-center justify-center overflow-hidden sm:p-6"
       style={{
         ["--primary" as any]: "#21526f",
         ["--primary-foreground" as any]: "#ffffff",
@@ -129,9 +129,9 @@ export function LoginForm() {
       }}
     >
       {/* Match the solid brand-blue background used on the SIB Utrecht homepage. */}
-      <div className="pointer-events-none absolute inset-0 bg-[#21526f]" />
+      <div className="pointer-events-none absolute inset-0 hidden bg-[#21526f] sm:block" />
 
-      <Card className="w-full max-w-md backdrop-blur-[2px] bg-card/90 border-[#21526f]/20 shadow-lg shadow-[#21526f]/10">
+      <Card className="min-h-dvh w-full max-w-none justify-center rounded-none border-0 bg-white shadow-none sm:min-h-0 sm:max-w-md sm:justify-start sm:rounded-xl sm:border sm:border-[#21526f]/20 sm:bg-card/90 sm:shadow-lg sm:shadow-[#21526f]/10 sm:backdrop-blur-[2px]">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center">
             <img

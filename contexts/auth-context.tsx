@@ -22,6 +22,8 @@ interface AuthContextType {
   isLoading: boolean;
   /** The raw Cognito access token (JWT) for the current session, or `null` when signed out. */
   token: string | null;
+  /** Email address (or Cognito username fallback) for the current session. */
+  userEmail: string | null;
   /** Returns a current access token, refreshing it when requested by Convex. */
   fetchAccessToken: (args: { forceRefreshToken: boolean }) => Promise<string | null>;
   /**
@@ -138,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [sessionData, setSessionData] = useState<string | null>(null); // Store session for OTP flow
@@ -174,10 +177,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         const payload = decodeJwtPayload(jwtToken);
+        const tokenEmail = typeof payload.email === "string" ? payload.email : null;
+        setUserEmail(tokenEmail ?? username ?? storage.getItem(USERNAME_STORAGE_KEY));
         const expiryTime = (payload.exp as number) * 1000;
         storage.setItem(TOKEN_EXPIRY_STORAGE_KEY, expiryTime.toString());
       } catch (error) {
         console.error("Failed to parse token expiry:", error);
+        setUserEmail(username ?? storage.getItem(USERNAME_STORAGE_KEY));
       }
     },
     [],
@@ -189,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setIsAuthenticated(false);
     setIsAdmin(false);
+    setUserEmail(null);
     [localStorage, sessionStorage].forEach((storage) => {
       storage.removeItem(TOKEN_STORAGE_KEY);
       storage.removeItem(LEGACY_ID_TOKEN_STORAGE_KEY);
@@ -541,6 +548,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin,
         isLoading,
         token,
+        userEmail,
         fetchAccessToken,
         login,
         requestPasswordlessCode,

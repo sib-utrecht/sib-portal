@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, MapPin, Calendar, Users, Pencil, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { ActivityDescription } from "@/components/activity-description";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 import {
   activityDateTimeZone,
   shouldShowActivityEnd,
@@ -410,18 +411,21 @@ export default function ActivityPage() {
               </Button>
               <h1 className="text-2xl font-bold portal-title">Activity</h1>
             </div>
-            {isAdmin && (
-              <Button
-                asChild
-                size="sm"
-                className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
-              >
-                <Link to={`/activities/${slug}/edit`}>
-                  <Pencil className="h-4 w-4 mr-1" />
-                  Edit activity
-                </Link>
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
+                >
+                  <Link to={`/activities/${slug}/edit`}>
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Edit activity
+                  </Link>
+                </Button>
+              )}
+              <HeaderAuthControls />
+            </div>
           </div>
         </div>
       </header>

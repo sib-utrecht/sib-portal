@@ -3,6 +3,7 @@ import { RequireAdmin } from "@/components/require-admin";
 import { ActivityForm } from "@/components/activity-form";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 
 function NewActivityContent() {
   return (
@@ -11,9 +12,17 @@ function NewActivityContent() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold portal-title">New activity</h1>
-            <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
-              <Link to="/">Back to activities</Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+              >
+                <Link to="/">Back to activities</Link>
+              </Button>
+              <HeaderAuthControls />
+            </div>
           </div>
         </div>
       </header>

@@ -7,6 +7,7 @@ import { useLayoutEffect } from "react";
 import { Link, useLocation, useNavigationType } from "react-router-dom";
 import { MapPin, Users, Plus, ChevronRight } from "lucide-react";
 import { activityDateTimeZone, shouldShowActivityTime } from "@/utils/activity-date";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 
 const activityListScrollPositions = new Map<string, number>();
 
@@ -77,18 +78,21 @@ function ActivitiesContent() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold portal-title">Activities</h1>
-            {isAdmin && (
-              <Button
-                asChild
-                size="sm"
-                className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
-              >
-                <Link to="/activities/new">
-                  <Plus className="h-4 w-4 mr-1" />
-                  New activity
-                </Link>
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-[#21526f] hover:bg-[#1a3f55] text-white rounded-full shadow-sm shadow-[#21526f]/20"
+                >
+                  <Link to="/activities/new">
+                    <Plus className="h-4 w-4 mr-1" />
+                    New activity
+                  </Link>
+                </Button>
+              )}
+              <HeaderAuthControls />
+            </div>
           </div>
         </div>
       </header>

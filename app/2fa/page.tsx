@@ -13,6 +13,7 @@ import { api } from "@/convex/_generated/api";
 import { useAction, useQuery } from "convex/react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { HeaderAuthControls } from "@/components/header-auth-controls";
 
 const TOAST_MS = 1800;
 
@@ -23,13 +24,17 @@ export default function TwoFAPage() {
         <header className="portal-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              <h1 className="text-2xl font-bold portal-title">
-                Two-Factor Authentication Codes
-              </h1>
+              <h1 className="text-2xl font-bold portal-title">Two-Factor Authentication Codes</h1>
               <div className="flex items-center gap-2">
-                <Button asChild variant="outline" size="sm" className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="border-[#21526f]/30 hover:bg-[#eaf3f7] hover:text-[#21526f]"
+                >
                   <Link to="/dashboard">Back to dashboard</Link>
                 </Button>
+                <HeaderAuthControls />
               </div>
             </div>
           </div>
