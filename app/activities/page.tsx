@@ -206,12 +206,27 @@ function ActivityTile({
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
         )}
 
-        {/* Date badge */}
-        {!loading && activity.visibility && activity.visibility !== "public" && (
-          <Badge className="absolute right-3 top-3 bg-white/95 text-[#21526f] capitalize">
-            {activity.visibility}
-          </Badge>
-        )}
+        {/* Status badges */}
+        {!loading &&
+          ((activity.visibility && activity.visibility !== "public") ||
+            ((activity.allowSignup || activity.externalSignupUrl) && !past)) && (
+            <div className="absolute right-3 top-3 flex items-center gap-2">
+              {activity.visibility && activity.visibility !== "public" && (
+                <Badge className="bg-white/95 text-[#21526f] capitalize">
+                  {activity.visibility}
+                </Badge>
+              )}
+              {(activity.allowSignup || activity.externalSignupUrl) && !past && (
+                <span
+                  className={`${
+                    activity.isSignedUp ? "bg-green-600" : "bg-[#21526f]"
+                  } text-white text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full shadow-sm`}
+                >
+                  {activity.isSignedUp ? "Signed up" : "Sign-up"}
+                </span>
+              )}
+            </div>
+          )}
         <div
           className={`absolute bottom-3 left-3 flex items-center gap-2 ${past ? "opacity-70" : ""}`}
         >
@@ -247,19 +262,6 @@ function ActivityTile({
             )}
           </div>
         </div>
-
-        {/* Signup badge */}
-        {!loading && (activity.allowSignup || activity.externalSignupUrl) && !past && (
-          <div className="absolute top-3 right-3">
-            <span
-              className={`${
-                activity.isSignedUp ? "bg-green-600" : "bg-[#21526f]"
-              } text-white text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full shadow-sm`}
-            >
-              {activity.isSignedUp ? "Signed up" : "Sign-up"}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Content */}
