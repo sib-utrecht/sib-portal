@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ActivityDescriptionEditors } from "@/components/activity-description-editors";
+import { ActivityDescriptionEditor } from "@/components/activity-description-editor";
 import { DateTimePicker } from "@/components/date-time-picker";
 
 type ActivityFormData = {
@@ -184,7 +184,7 @@ export function ActivityForm({
     setError(null);
 
     if (!form.description.trim()) {
-      setError("A description is required. Enter text in the selected editor.");
+      setError("A description is required. Enter a description.");
       return;
     }
 
@@ -369,7 +369,7 @@ export function ActivityForm({
       </div>
 
       {/* Description */}
-      <ActivityDescriptionEditors
+      <ActivityDescriptionEditor
         value={form.description}
         disabled={saving}
         onChange={(html) => set("description", html)}

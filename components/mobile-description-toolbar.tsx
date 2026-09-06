@@ -77,7 +77,7 @@ export function FontSizeControl({
   );
 }
 
-/** Both editors use the same mobile controls, positioned in the visible viewport. */
+/** Mobile formatting controls positioned in the visible viewport. */
 export function MobileDescriptionToolbar({
   root,
   name,
