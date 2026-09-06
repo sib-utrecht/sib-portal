@@ -8,6 +8,7 @@ import { Link, useLocation, useNavigationType } from "react-router-dom";
 import { MapPin, Users, Plus, ChevronRight } from "lucide-react";
 import { activityDateTimeZone, shouldShowActivityTime } from "@/utils/activity-date";
 import { HeaderAuthControls } from "@/components/header-auth-controls";
+import { Badge } from "@/components/ui/badge";
 
 const activityListScrollPositions = new Map<string, number>();
 
@@ -147,6 +148,7 @@ function ActivitiesContent() {
 }
 
 type ActivityTileActivity = {
+  visibility?: "draft" | "private" | "public";
   _id: string;
   slug: string;
   title: string;
@@ -204,6 +206,11 @@ function ActivityTile({
         )}
 
         {/* Date badge */}
+        {!loading && activity.visibility && activity.visibility !== "public" && (
+          <Badge className="absolute right-3 top-3 bg-white/95 text-[#21526f] capitalize">
+            {activity.visibility}
+          </Badge>
+        )}
         <div
           className={`absolute bottom-3 left-3 flex items-center gap-2 ${past ? "opacity-70" : ""}`}
         >

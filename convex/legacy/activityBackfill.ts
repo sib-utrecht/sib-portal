@@ -71,6 +71,7 @@ export const upsertActivity = internalMutation({
 
     const slug = await uniqueActivitySlug(ctx, args.title, args.startTime);
     const id = await ctx.db.insert("activities", {
+      visibility: "public",
       externalId: args.externalId,
       title: args.title,
       slug,

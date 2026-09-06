@@ -10,8 +10,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ActivityDescriptionEditor } from "@/components/activity-description-editor";
 import { DateTimePicker } from "@/components/date-time-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type ActivityVisibility = "draft" | "private" | "public";
 
 type ActivityFormData = {
+  visibility: ActivityVisibility;
   title: string;
   startTime: Date | undefined;
   endTime: Date | undefined;
@@ -25,6 +35,7 @@ type ActivityFormData = {
 
 function emptyForm(): ActivityFormData {
   return {
+    visibility: "draft",
     title: "",
     startTime: undefined,
     endTime: undefined,
@@ -38,6 +49,7 @@ function emptyForm(): ActivityFormData {
 }
 
 type InitialActivity = {
+  visibility?: ActivityVisibility;
   title: string;
   startTime: number;
   endTime: number;
@@ -80,6 +92,7 @@ function isMissingEndSelection(startTime: Date, endTime?: Date): boolean {
 function activityToForm(activity: InitialActivity): ActivityFormData {
   const startTime = new Date(activity.startTime);
   return {
+    visibility: activity.visibility ?? "public",
     title: activity.title,
     startTime,
     endTime:
@@ -137,6 +150,7 @@ export function ActivityForm({
 
   const initialForm = initial ? activityToForm(initial) : emptyForm();
   const dirty =
+    form.visibility !== initialForm.visibility ||
     form.title !== initialForm.title ||
     form.startTime?.getTime() !== initialForm.startTime?.getTime() ||
     form.endTime?.getTime() !== initialForm.endTime?.getTime() ||
@@ -219,6 +233,7 @@ export function ActivityForm({
     }
 
     const payload = {
+      visibility: form.visibility,
       title: form.title.trim(),
       startTime: form.startTime.getTime(),
       endTime: missingEnd ? form.startTime.getTime() : form.endTime!.getTime(),
@@ -263,6 +278,24 @@ export function ActivityForm({
       onSubmit={handleSubmit}
       className="space-y-6 max-w-2xl rounded-2xl bg-white p-6 shadow-sm sm:p-8"
     >
+      <div className="space-y-2">
+        <Label htmlFor="visibility">Visibility</Label>
+        <Select
+          value={form.visibility}
+          onValueChange={(value) => set("visibility", value as ActivityVisibility)}
+          disabled={saving}
+        >
+          <SelectTrigger id="visibility">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="draft">Draft — admins only</SelectItem>
+            <SelectItem value="private">Signed-in members</SelectItem>
+            <SelectItem value="public">Public</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Title */}
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>

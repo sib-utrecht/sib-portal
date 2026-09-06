@@ -1,12 +1,32 @@
 import { v } from "convex/values";
 import { mutation, MutationCtx, query } from "./_generated/server";
-import { requireLogin, requireAdmin } from "./auth";
+import { getAuthenticatedIdentity, requireLogin, requireAdmin } from "./auth";
 import { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
 const activityWithImageValidator = schema.doc("activities").extend({
   promotionalImage: v.optional(v.string()),
 });
+
+export type ActivityVisibility = "draft" | "private" | "public";
+
+/** Historical activities predate visibility and are public by default. */
+export function activityVisibility(activity: {
+  visibility?: ActivityVisibility;
+}): ActivityVisibility {
+  return activity.visibility ?? "public";
+}
+
+async function canViewActivity(
+  ctx: Parameters<typeof getAuthenticatedIdentity>[0],
+  activity: { visibility?: ActivityVisibility },
+): Promise<boolean> {
+  const visibility = activityVisibility(activity);
+  if (visibility === "public") return true;
+  const identity = await getAuthenticatedIdentity(ctx);
+  if (!identity) return false;
+  return visibility === "private" || identity.groups.includes("admins");
+}
 
 /** Generate a short-lived upload URL for storing a promotional image. Admin only. */
 export const generateUploadUrl = mutation({
@@ -49,16 +69,31 @@ export const getImageUrl = query({
   },
 });
 
-/** Return all public activities ordered by start time (ascending). */
+/** Return all activities visible to the current visitor, ordered by start time. */
 export const getActivities = query({
   args: {},
   returns: v.array(activityWithImageValidator),
   handler: async (ctx) => {
-    const activities = await ctx.db
-      .query("activities")
-      .withIndex("by_startTime")
-      .order("asc")
-      .collect();
+    const identity = await getAuthenticatedIdentity(ctx);
+    const admin = identity?.groups.includes("admins") ?? false;
+    const visibilities: Array<ActivityVisibility | undefined> = admin
+      ? [undefined, "public", "private", "draft"]
+      : identity
+        ? [undefined, "public", "private"]
+        : [undefined, "public"];
+    const activities = (
+      await Promise.all(
+        visibilities.map((visibility) =>
+          ctx.db
+            .query("activities")
+            .withIndex("by_visibility_and_startTime", (q) => q.eq("visibility", visibility))
+            .order("asc")
+            .collect(),
+        ),
+      )
+    )
+      .flat()
+      .sort((left, right) => left.startTime - right.startTime);
     return await Promise.all(
       activities.map(async (a) => {
         return {
@@ -72,7 +107,7 @@ export const getActivities = query({
   },
 });
 
-/** Return a single public activity by its URL slug. */
+/** Return a single activity when it is visible to the current visitor. */
 export const getActivity = query({
   args: { slug: v.string() },
   returns: v.union(activityWithImageValidator, v.null()),
@@ -82,7 +117,7 @@ export const getActivity = query({
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .unique();
     const activity = slugRoute ? await ctx.db.get(slugRoute.activityId) : null;
-    if (!activity) return null;
+    if (!activity || !(await canViewActivity(ctx, activity))) return null;
     return {
       ...activity,
       slug: activity.slug,
@@ -94,6 +129,7 @@ export const getActivity = query({
 });
 
 type ActivityFields = {
+  visibility: ActivityVisibility;
   title: string;
   startTime: number;
   endTime: number;
@@ -212,6 +248,7 @@ function validateAndNormalizeActivity(fields: ActivityFields): ActivityFields {
 /** Create a new activity. Admin only. */
 export const createActivity = mutation({
   args: {
+    visibility: v.union(v.literal("draft"), v.literal("private"), v.literal("public")),
     title: v.string(),
     startTime: v.number(),
     endTime: v.optional(v.number()),
@@ -257,6 +294,7 @@ export const createActivity = mutation({
 export const updateActivity = mutation({
   args: {
     id: v.id("activities"),
+    visibility: v.union(v.literal("draft"), v.literal("private"), v.literal("public")),
     title: v.string(),
     startTime: v.number(),
     endTime: v.number(),

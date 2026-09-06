@@ -4,6 +4,7 @@ import { mutation, type MutationCtx, query } from "./_generated/server";
 import { isAdmin, requireAdmin } from "./auth";
 import { requireCurrentUser } from "./legacy/identity";
 import { isActivityDeregistrationOpen, isActivitySignupOpen } from "../utils/activity-registration";
+import { activityVisibility } from "./activities";
 
 const MAX_COMMENT_LENGTH = 1_000;
 
@@ -62,6 +63,9 @@ export async function createCurrentUserBooking(
   comment: string | undefined,
   signupAllowed: boolean,
 ) {
+  if (activityVisibility(activity) === "draft" && !(await isAdmin(ctx))) {
+    throw new Error("Activity not found");
+  }
   if (!signupAllowed) throw new Error("This activity does not allow sign-ups");
   if (!isActivitySignupOpen(activity)) {
     throw new Error("Registration is closed");
@@ -113,6 +117,9 @@ export async function createCurrentUserBooking(
 
 /** Shared transactional cancellation used by portal and compatibility functions. */
 export async function cancelCurrentUserBooking(ctx: MutationCtx, activity: Doc<"activities">) {
+  if (activityVisibility(activity) === "draft" && !(await isAdmin(ctx))) {
+    throw new Error("Activity not found");
+  }
   if (!isActivityDeregistrationOpen(activity.endTime)) {
     throw new Error("The cancellation period has passed");
   }
@@ -168,6 +175,10 @@ export const getActivityStatus = query({
   }),
   handler: async (ctx, { activityId }) => {
     const user = await requireCurrentUser(ctx);
+    const activity = await ctx.db.get(activityId);
+    if (!activity || (activityVisibility(activity) === "draft" && !(await isAdmin(ctx)))) {
+      throw new Error("Activity not found");
+    }
 
     const [registrations, userRegistration, admin] = await Promise.all([
       ctx.db

@@ -71,6 +71,11 @@ export default defineSchema({
    * Activities (events) organised by SIB Utrecht.
    */
   activities: defineTable({
+    /**
+     * Who may discover and view the activity. Absent on historical records,
+     * which are treated as public for backwards compatibility.
+     */
+    visibility: v.optional(v.union(v.literal("draft"), v.literal("private"), v.literal("public"))),
     /** Activity title. */
     title: v.string(),
     /** Unique URL slug, prefixed with the activity's start year and month. */
@@ -117,6 +122,8 @@ export default defineSchema({
   })
     .index("by_startTime", ["startTime"])
     .index("by_endTime", ["endTime"])
+    .index("by_visibility_and_startTime", ["visibility", "startTime"])
+    .index("by_visibility_and_endTime", ["visibility", "endTime"])
     .index("by_externalId", ["externalId"]),
 
   /**

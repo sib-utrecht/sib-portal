@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, MapPin, Calendar, Users, Pencil, ExternalLink, Share2 } from "lucide-react";
@@ -233,7 +234,12 @@ function ActivityDetailContent({ slug }: { slug: string }) {
       {/* Title & meta */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-2xl font-bold text-white">{activity.title}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-2xl font-bold text-white">{activity.title}</h2>
+            {activity.visibility && activity.visibility !== "public" && (
+              <Badge className="bg-white/95 text-[#21526f] capitalize">{activity.visibility}</Badge>
+            )}
+          </div>
           <Button
             type="button"
             variant="outline"

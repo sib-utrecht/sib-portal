@@ -3,6 +3,7 @@ import type { Doc } from "../_generated/dataModel";
 import { internalQuery, type QueryCtx } from "../_generated/server";
 import { requireAdmin } from "../auth";
 import { findActivity } from "./activityLookup";
+import { activityVisibility, type ActivityVisibility } from "../activities";
 
 const activityValidator = v.object({
   id: v.string(),
@@ -61,20 +62,27 @@ export const listActivities = internalQuery({
   },
   returns: v.array(activityValidator),
   handler: async (ctx, args) => {
-    const query = ctx.db.query("activities").withIndex("by_endTime", (q) => {
-      if (args.after !== undefined && args.before !== undefined) {
-        return q.gte("endTime", args.after).lt("endTime", args.before);
-      }
-      if (args.after !== undefined) return q.gte("endTime", args.after);
-      if (args.before !== undefined) return q.lt("endTime", args.before);
-      return q;
-    });
-    const activities = await query
-      .order(args.descending ? "desc" : "asc")
-      .take(args.offset + args.limit);
-    return await Promise.all(
-      activities.slice(args.offset).map((activity) => asApiActivity(ctx, activity)),
-    );
+    const readPublic = (visibility: ActivityVisibility | undefined) =>
+      ctx.db
+        .query("activities")
+        .withIndex("by_visibility_and_endTime", (q) => {
+          const byVisibility = q.eq("visibility", visibility);
+          if (args.after !== undefined && args.before !== undefined) {
+            return byVisibility.gte("endTime", args.after).lt("endTime", args.before);
+          }
+          if (args.after !== undefined) return byVisibility.gte("endTime", args.after);
+          if (args.before !== undefined) return byVisibility.lt("endTime", args.before);
+          return byVisibility;
+        })
+        .order(args.descending ? "desc" : "asc")
+        .take(args.offset + args.limit);
+    const activities = (await Promise.all([readPublic(undefined), readPublic("public")]))
+      .flat()
+      .sort((left, right) =>
+        args.descending ? right.endTime - left.endTime : left.endTime - right.endTime,
+      )
+      .slice(args.offset, args.offset + args.limit);
+    return await Promise.all(activities.map((activity) => asApiActivity(ctx, activity)));
   },
 });
 
@@ -84,7 +92,9 @@ export const getActivity = internalQuery({
   returns: v.union(activityValidator, v.null()),
   handler: async (ctx, { id }) => {
     const activity = await findActivity(ctx, id);
-    return activity ? await asApiActivity(ctx, activity) : null;
+    return activity && activityVisibility(activity) === "public"
+      ? await asApiActivity(ctx, activity)
+      : null;
   },
 });
 

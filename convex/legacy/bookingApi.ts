@@ -3,6 +3,7 @@ import { internalMutation, internalQuery } from "../_generated/server";
 import { cancelCurrentUserBooking, createCurrentUserBooking } from "../activityBookings";
 import { findActivity } from "./activityLookup";
 import { requireCurrentUser } from "./identity";
+import { activityVisibility } from "../activities";
 
 /** Add a booking through the Flutter compatibility API. */
 export const addBooking = internalMutation({
@@ -10,7 +11,9 @@ export const addBooking = internalMutation({
   returns: v.id("activityRegistrations"),
   handler: async (ctx, { activityIdentifier, comment }) => {
     const activity = await findActivity(ctx, activityIdentifier);
-    if (!activity) throw new Error("Activity not found");
+    if (!activity || activityVisibility(activity) !== "public") {
+      throw new Error("Activity not found");
+    }
     const signupAllowed = activity.allowSignup || activity.legacySignupMethod === "api";
     return await createCurrentUserBooking(ctx, activity, comment, signupAllowed);
   },
@@ -22,7 +25,9 @@ export const removeBooking = internalMutation({
   returns: v.null(),
   handler: async (ctx, { activityIdentifier }) => {
     const activity = await findActivity(ctx, activityIdentifier);
-    if (!activity) throw new Error("Activity not found");
+    if (!activity || activityVisibility(activity) !== "public") {
+      throw new Error("Activity not found");
+    }
     await cancelCurrentUserBooking(ctx, activity);
     return null;
   },
@@ -52,7 +57,7 @@ export const listCurrentUserBookings = internalQuery({
         .filter((registration) => registration.active !== false)
         .map(async (registration) => {
           const activity = await ctx.db.get(registration.activityId);
-          return activity
+          return activity && activityVisibility(activity) === "public"
             ? {
                 eventId: activity.externalId ?? activity._id,
                 comment: registration.comment,
