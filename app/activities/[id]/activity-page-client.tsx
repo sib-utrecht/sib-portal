@@ -138,6 +138,10 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     api.activityBookings.getParticipants,
     status?.isAdmin && activityId ? { activityId } : "skip",
   );
+  const cancelledParticipants = useQuery(
+    api.activityBookings.getCancelledParticipants,
+    status?.isAdmin && activityId ? { activityId } : "skip",
+  );
 
   const register = useMutation(api.activityBookings.registerForActivity);
   const unregister = useMutation(api.activityBookings.unregisterFromActivity);
@@ -266,7 +270,9 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   const canHaveManagedSignups = activity.allowSignup || activity.legacySignupMethod === "api";
   const showAdminSignupList =
     status?.isAdmin &&
-    ((participants !== undefined && participants.length > 0) || canHaveManagedSignups);
+    ((participants !== undefined && participants.length > 0) ||
+      (cancelledParticipants !== undefined && cancelledParticipants.length > 0) ||
+      canHaveManagedSignups);
 
   return (
     <div className="w-full space-y-8">
@@ -558,6 +564,51 @@ function ActivityDetailContent({ slug }: { slug: string }) {
                 </div>
               ))}
             </div>
+          )}
+
+          {cancelledParticipants !== undefined && cancelledParticipants.length > 0 && (
+            <details className="group rounded-2xl border border-dashed border-gray-300 bg-gray-50/80">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-100 [&::-webkit-details-marker]:hidden">
+                <span>Cancelled sign-ups ({cancelledParticipants.length})</span>
+                <span className="text-xs font-normal text-gray-500 group-open:hidden">
+                  Show history
+                </span>
+                <span className="hidden text-xs font-normal text-gray-500 group-open:inline">
+                  Hide history
+                </span>
+              </summary>
+              <div className="space-y-2 border-t border-gray-200 px-4 py-4">
+                <p className="text-xs text-gray-500">
+                  Former registrations, ordered by the most recent cancellation.
+                </p>
+                {cancelledParticipants.map((participant) => (
+                  <div
+                    key={participant._id}
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-600"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                      <div>
+                        <p className="font-medium text-gray-800">
+                          {participant.user?.name ?? "(unknown user)"}
+                        </p>
+                        <p className="text-sm">{participant.user?.email || "No email address"}</p>
+                      </div>
+                      <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                        Cancelled
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500">
+                      {participant.cancelledAt
+                        ? `Cancelled ${formatBookingDate(participant.cancelledAt)}`
+                        : "Cancellation time unavailable"}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-400">
+                      Signed up {formatBookingDate(participant.registeredAt)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </details>
           )}
         </Card>
       )}

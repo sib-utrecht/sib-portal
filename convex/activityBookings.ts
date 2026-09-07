@@ -25,6 +25,10 @@ const participantValidator = v.object({
   ),
 });
 
+const cancelledParticipantValidator = participantValidator.extend({
+  cancelledAt: v.optional(v.number()),
+});
+
 /** Return all active registrations for an activity. Admin only. */
 export const getParticipants = query({
   args: { activityId: v.id("activities") },
@@ -45,6 +49,38 @@ export const getParticipants = query({
           return {
             _id: registration._id,
             registeredAt: registration.registeredAt,
+            source: registration.source,
+            legacyStatus: registration.legacyStatus,
+            spaces: registration.spaces,
+            comment: registration.comment,
+            user: user ? { _id: user._id, name: user.name, email: user.email } : null,
+          };
+        }),
+    );
+  },
+});
+
+/** Return cancelled registrations for an activity, newest cancellation first. Admin only. */
+export const getCancelledParticipants = query({
+  args: { activityId: v.id("activities") },
+  returns: v.array(cancelledParticipantValidator),
+  handler: async (ctx, { activityId }) => {
+    await requireAdmin(ctx);
+    const registrations = await ctx.db
+      .query("activityRegistrations")
+      .withIndex("by_activity", (q) => q.eq("activityId", activityId))
+      .take(1_000);
+
+    return await Promise.all(
+      registrations
+        .filter((registration) => registration.active === false)
+        .sort((left, right) => (right.cancelledAt ?? 0) - (left.cancelledAt ?? 0))
+        .map(async (registration) => {
+          const user = await ctx.db.get(registration.userId);
+          return {
+            _id: registration._id,
+            registeredAt: registration.registeredAt,
+            cancelledAt: registration.cancelledAt,
             source: registration.source,
             legacyStatus: registration.legacyStatus,
             spaces: registration.spaces,
@@ -103,6 +139,7 @@ export async function createCurrentUserBooking(
     spaces: 1,
     comment: comment?.trim() || undefined,
     active: true,
+    cancelledAt: undefined,
   };
   if (existing) {
     await ctx.db.patch(existing._id, fields);
@@ -137,6 +174,7 @@ export async function cancelCurrentUserBooking(ctx: MutationCtx, activity: Doc<"
     source: "portal",
     legacyStatus: "cancelled",
     active: false,
+    cancelledAt: Date.now(),
   });
 }
 

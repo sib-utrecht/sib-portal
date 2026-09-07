@@ -195,6 +195,8 @@ export default defineSchema({
     comment: v.optional(v.string()),
     /** Whether the booking currently counts as an active registration. */
     active: v.optional(v.boolean()),
+    /** Unix timestamp (ms) when the member cancelled through the portal. */
+    cancelledAt: v.optional(v.number()),
   })
     .index("by_activity", ["activityId"])
     .index("by_user", ["userId"])
