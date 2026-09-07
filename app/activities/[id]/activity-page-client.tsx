@@ -263,6 +263,10 @@ function ActivityDetailContent({ slug }: { slug: string }) {
     showStartTime &&
     showEndTime &&
     isSameActivityDay(activity.startTime, activity.endTime);
+  const canHaveManagedSignups = activity.allowSignup || activity.legacySignupMethod === "api";
+  const showAdminSignupList =
+    status?.isAdmin &&
+    ((participants !== undefined && participants.length > 0) || canHaveManagedSignups);
 
   return (
     <div className="w-full space-y-8">
@@ -476,8 +480,8 @@ function ActivityDetailContent({ slug }: { slug: string }) {
         </SignupErrorBoundary>
       )}
 
-      {/* Sign-up list (admin only, including externally managed activities) */}
-      {status?.isAdmin && (
+      {/* Sign-up list for admins when registrations exist or are managed by a synced source. */}
+      {showAdminSignupList && (
         <Card className="p-6 rounded-2xl shadow-sm space-y-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-700">
