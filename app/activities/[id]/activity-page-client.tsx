@@ -13,7 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Component, useLayoutEffect, useState, type ErrorInfo, type ReactNode } from "react";
+import {
+  Component,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  type ErrorInfo,
+  type ReactNode,
+} from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle,
@@ -179,12 +186,22 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   const [signupComment, setSignupComment] = useState("");
   const [sharing, setSharing] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
-  const [participantView, setParticipantView] = useState<"list" | "grid">("list");
+  const [participantView, setParticipantView] = useState<"list" | "grid">("grid");
+  const [participantSort, setParticipantSort] = useState<"newest" | "alphabetical">("newest");
   const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
 
   const selectedParticipant = participants?.find(
     (participant) => participant._id === selectedParticipantId,
   );
+  const displayedParticipants = useMemo(() => {
+    if (participantSort === "newest") return participants;
+
+    return [...participants].sort((left, right) =>
+      (left.user?.shortName ?? "Unknown").localeCompare(right.user?.shortName ?? "Unknown", "en", {
+        sensitivity: "base",
+      }),
+    );
+  }, [participants, participantSort]);
 
   async function handleWhatsAppShare() {
     if (!activity) return;
@@ -534,39 +551,72 @@ function ActivityDetailContent({ slug }: { slug: string }) {
                 </p>
               )}
             </div>
-            <div
-              className="flex rounded-full border border-gray-200 bg-gray-50 p-1"
-              role="group"
-              aria-label="Sign-up view"
-            >
-              <button
-                type="button"
-                onClick={() => setParticipantView("list")}
-                aria-label="Show detailed list"
-                aria-pressed={participantView === "list"}
-                className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
-                  participantView === "list"
-                    ? "bg-white text-[#21526f] shadow-sm"
-                    : "text-gray-500 hover:text-gray-800"
-                }`}
+            <div className="flex flex-wrap justify-end gap-2">
+              <div
+                className="flex rounded-full border border-gray-200 bg-gray-50 p-1"
+                role="group"
+                aria-label="Sign-up order"
               >
-                <List className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">List</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setParticipantView("grid")}
-                aria-label="Show compact grid"
-                aria-pressed={participantView === "grid"}
-                className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
-                  participantView === "grid"
-                    ? "bg-white text-[#21526f] shadow-sm"
-                    : "text-gray-500 hover:text-gray-800"
-                }`}
+                <button
+                  type="button"
+                  onClick={() => setParticipantSort("newest")}
+                  aria-pressed={participantSort === "newest"}
+                  className={`flex h-8 items-center rounded-full px-3 text-sm font-medium transition-colors ${
+                    participantSort === "newest"
+                      ? "bg-white text-[#21526f] shadow-sm"
+                      : "text-gray-500 hover:text-gray-800"
+                  }`}
+                >
+                  Newest
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setParticipantSort("alphabetical")}
+                  aria-label="Sort alphabetically"
+                  aria-pressed={participantSort === "alphabetical"}
+                  className={`flex h-8 items-center rounded-full px-3 text-sm font-medium transition-colors ${
+                    participantSort === "alphabetical"
+                      ? "bg-white text-[#21526f] shadow-sm"
+                      : "text-gray-500 hover:text-gray-800"
+                  }`}
+                >
+                  A–Z
+                </button>
+              </div>
+              <div
+                className="flex rounded-full border border-gray-200 bg-gray-50 p-1"
+                role="group"
+                aria-label="Sign-up view"
               >
-                <Grid3X3 className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Grid</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setParticipantView("list")}
+                  aria-label="Show detailed list"
+                  aria-pressed={participantView === "list"}
+                  className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+                    participantView === "list"
+                      ? "bg-white text-[#21526f] shadow-sm"
+                      : "text-gray-500 hover:text-gray-800"
+                  }`}
+                >
+                  <List className="h-4 w-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">List</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setParticipantView("grid")}
+                  aria-label="Show compact grid"
+                  aria-pressed={participantView === "grid"}
+                  className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+                    participantView === "grid"
+                      ? "bg-white text-[#21526f] shadow-sm"
+                      : "text-gray-500 hover:text-gray-800"
+                  }`}
+                >
+                  <Grid3X3 className="h-4 w-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">Grid</span>
+                </button>
+              </div>
             </div>
           </div>
           <dl className="grid gap-3 rounded-2xl bg-[#f4f8fa] p-4 text-sm sm:grid-cols-2">
@@ -595,7 +645,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
             <p className="text-gray-500 text-sm">No sign-ups yet.</p>
           ) : participantView === "list" ? (
             <div className="space-y-2">
-              {participants.map((p) => (
+              {displayedParticipants.map((p) => (
                 <div
                   key={p._id}
                   className="px-4 py-3 bg-[#eaf3f7] border border-[#6fa8c4]/40 rounded-2xl space-y-2"
@@ -635,8 +685,8 @@ function ActivityDetailContent({ slug }: { slug: string }) {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5">
-              {participants.map((participant) => {
+            <div className="grid grid-cols-4 gap-x-1 gap-y-3 sm:grid-cols-5 md:grid-cols-6">
+              {displayedParticipants.map((participant) => {
                 const shortName = participant.user?.shortName ?? "Unknown";
                 const hasComment = Boolean(participant.comment?.trim());
 
@@ -645,7 +695,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
                     key={participant._id}
                     type="button"
                     onClick={() => setSelectedParticipantId(participant._id)}
-                    className="group flex min-w-0 flex-col items-center rounded-2xl px-2 py-3 text-center transition-colors hover:bg-[#f4f8fa] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#21526f] focus-visible:ring-offset-2"
+                    className="group flex min-w-0 flex-col items-center rounded-2xl px-0 py-2 text-center transition-colors hover:bg-[#f4f8fa] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#21526f] focus-visible:ring-offset-2"
                     aria-label={`View details for ${shortName}${hasComment ? ", has a comment" : ""}`}
                   >
                     <span className="relative">
