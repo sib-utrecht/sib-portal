@@ -1,6 +1,7 @@
 import { Navigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { RequireAuth } from "@/components/require-auth";
 import { RequireAdmin } from "@/components/require-admin";
 import { ActivityForm } from "@/components/activity-form";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { Trash2 } from "lucide-react";
+import { History, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { HeaderAuthControls } from "@/components/header-auth-controls";
 
@@ -19,6 +20,113 @@ type FormStatus = {
   saving: boolean;
   imageUploading: boolean;
 };
+
+const fieldLabels: Record<string, string> = {
+  visibility: "Visibility",
+  title: "Title",
+  slug: "URL slug",
+  startTime: "Start",
+  endTime: "End",
+  description: "Description",
+  promotionalImageStorageId: "Promotional image",
+  location: "Location",
+  allowSignup: "Portal sign-ups",
+  externalSignupUrl: "External sign-up URL",
+  registrationDeadline: "Registration deadline",
+  maxParticipants: "Maximum participants",
+};
+
+function displayChangeValue(field: string, value: string | number | boolean | null) {
+  if (value === null) return "Not set";
+  if (field === "startTime" || field === "endTime" || field === "registrationDeadline") {
+    return new Intl.DateTimeFormat("en-GB", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Europe/Amsterdam",
+    }).format(value as number);
+  }
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (field === "promotionalImageStorageId") return value ? "Image set" : "Not set";
+  const text = String(value)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > 180 ? `${text.slice(0, 177)}…` : text || "Empty";
+}
+
+function ActivityHistory({ activityId }: { activityId: Id<"activities"> }) {
+  const changes = useQuery(api.activities.getActivityChanges, { activityId });
+  const events = changes?.reduce<
+    Array<{
+      changeId: string;
+      changedAt: number;
+      changedByEmail: string;
+      changes: Doc<"activityChanges">[];
+    }>
+  >((groups, change) => {
+    const current = groups.at(-1);
+    if (current?.changeId === change.changeId) current.changes.push(change);
+    else
+      groups.push({
+        changeId: change.changeId,
+        changedAt: change.changedAt,
+        changedByEmail: change.changedByEmail,
+        changes: [change],
+      });
+    return groups;
+  }, []);
+
+  return (
+    <section className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+      <div className="flex items-center gap-2">
+        <History className="h-5 w-5 text-[#21526f]" />
+        <h2 className="font-semibold text-gray-900">Change history</h2>
+      </div>
+      <p className="mt-1 text-sm text-gray-600">
+        Field changes recorded whenever this activity is saved.
+      </p>
+
+      {changes === undefined ? (
+        <Skeleton className="mt-4 h-20 rounded-md" />
+      ) : events?.length ? (
+        <ol className="mt-5 space-y-5">
+          {events.map((event) => (
+            <li key={event.changeId} className="border-l-2 border-[#21526f]/20 pl-4">
+              <p className="text-sm font-medium text-gray-900">
+                {new Intl.DateTimeFormat("en-GB", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                  timeZone: "Europe/Amsterdam",
+                }).format(event.changedAt)}
+              </p>
+              <p className="text-xs text-gray-500">by {event.changedByEmail}</p>
+              <div className="mt-3 space-y-3">
+                {event.changes.map((change) => (
+                  <div key={change._id} className="text-sm">
+                    <p className="font-medium text-gray-700">
+                      {fieldLabels[change.field] ?? change.field}
+                    </p>
+                    <div className="mt-1 grid gap-1 text-gray-600 sm:grid-cols-[1fr_auto_1fr] sm:items-start">
+                      <span className="break-words rounded bg-red-50 px-2 py-1 line-through decoration-red-300">
+                        {displayChangeValue(change.field, change.oldValue)}
+                      </span>
+                      <span className="hidden pt-1 text-gray-400 sm:block">→</span>
+                      <span className="break-words rounded bg-green-50 px-2 py-1">
+                        {displayChangeValue(change.field, change.newValue)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="mt-4 text-sm text-gray-500">No changes have been recorded yet.</p>
+      )}
+    </section>
+  );
+}
 
 function EditActivityContent({
   slug,
@@ -74,6 +182,8 @@ function EditActivityContent({
         formId={activityFormId}
         onStatusChange={onFormStatusChange}
       />
+
+      <ActivityHistory activityId={activity._id} />
 
       <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm sm:p-8">
         <h2 className="font-semibold text-gray-900">Delete activity</h2>

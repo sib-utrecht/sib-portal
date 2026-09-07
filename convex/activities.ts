@@ -13,6 +13,8 @@ const activityListItemValidator = activityWithImageValidator.extend({
   isSignedUp: v.boolean(),
 });
 
+const activityChangeValidator = schema.doc("activityChanges");
+
 export type ActivityVisibility = "draft" | "private" | "public";
 
 /** Historical activities predate visibility and are public by default. */
@@ -145,6 +147,20 @@ export const getActivity = query({
         ? ((await ctx.storage.getUrl(activity.promotionalImageStorageId)) ?? undefined)
         : activity.promotionalImageUrl,
     };
+  },
+});
+
+/** Return the most recent field-level edits for an activity. Admin only. */
+export const getActivityChanges = query({
+  args: { activityId: v.id("activities") },
+  returns: v.array(activityChangeValidator),
+  handler: async (ctx, { activityId }) => {
+    await requireAdmin(ctx);
+    return await ctx.db
+      .query("activityChanges")
+      .withIndex("by_activity_and_changedAt", (q) => q.eq("activityId", activityId))
+      .order("desc")
+      .take(200);
   },
 });
 
@@ -329,6 +345,7 @@ export const updateActivity = mutation({
   returns: v.object({ slug: v.string() }),
   handler: async (ctx, { id, ...fields }) => {
     await requireAdmin(ctx);
+    const identity = await requireLogin(ctx);
     const activity = await ctx.db.get(id);
     if (!activity) throw new Error("Activity not found");
     // If a new image was set, link its tracking record — the old one is kept in storage
@@ -358,7 +375,40 @@ export const updateActivity = mutation({
     });
     const slug = await uniqueActivitySlug(ctx, normalized.title, normalized.startTime, id);
     await ensureActivitySlugRoute(ctx, id, slug);
-    await ctx.db.patch(id, { ...normalized, slug });
+    const updated = { ...normalized, slug };
+    await ctx.db.patch(id, updated);
+
+    const auditableFields = [
+      "visibility",
+      "title",
+      "slug",
+      "startTime",
+      "endTime",
+      "description",
+      "promotionalImageStorageId",
+      "location",
+      "allowSignup",
+      "externalSignupUrl",
+      "registrationDeadline",
+      "maxParticipants",
+    ] as const;
+    const changedAt = Date.now();
+    const changeId = `${id}:${changedAt}:${crypto.randomUUID()}`;
+    for (const field of auditableFields) {
+      const oldValue = activity[field] ?? null;
+      const newValue = updated[field] ?? null;
+      if (oldValue === newValue) continue;
+      await ctx.db.insert("activityChanges", {
+        activityId: id,
+        changeId,
+        field,
+        oldValue,
+        newValue,
+        changedAt,
+        changedByTokenIdentifier: identity.tokenIdentifier,
+        changedByEmail: identity.email,
+      });
+    }
     return { slug };
   },
 });

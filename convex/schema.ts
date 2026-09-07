@@ -127,6 +127,23 @@ export default defineSchema({
     .index("by_externalId", ["externalId"]),
 
   /**
+   * Field-level audit trail for activity edits. Rows sharing a changeId were
+   * written by the same save operation.
+   */
+  activityChanges: defineTable({
+    activityId: v.id("activities"),
+    changeId: v.string(),
+    field: v.string(),
+    oldValue: v.union(v.string(), v.number(), v.boolean(), v.null()),
+    newValue: v.union(v.string(), v.number(), v.boolean(), v.null()),
+    changedAt: v.number(),
+    changedByTokenIdentifier: v.string(),
+    changedByEmail: v.string(),
+  })
+    .index("by_activity_and_changedAt", ["activityId", "changedAt"])
+    .index("by_changeId", ["changeId"]),
+
+  /**
    * Routes canonical and historical URL slugs to activities. Keeping one row
    * per slug makes alias lookup indexable and prevents old links from breaking.
    */
