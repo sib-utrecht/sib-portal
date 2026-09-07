@@ -6,6 +6,13 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Component, useLayoutEffect, useState, type ErrorInfo, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -16,6 +23,9 @@ import {
   Users,
   Pencil,
   ExternalLink,
+  Grid3X3,
+  List,
+  MessageCircle,
   Share2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
@@ -78,6 +88,24 @@ function formatBookingDate(ts: number) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+const participantAvatarColors = [
+  "bg-[#21526f]",
+  "bg-[#397b84]",
+  "bg-[#7a5c8f]",
+  "bg-[#a45c61]",
+  "bg-[#5f7654]",
+  "bg-[#9a6b38]",
+] as const;
+
+function participantAvatarColor(name: string) {
+  const hash = Array.from(name).reduce((total, character) => total + character.codePointAt(0)!, 0);
+  return participantAvatarColors[hash % participantAvatarColors.length];
+}
+
+function participantInitial(name: string) {
+  return Array.from(name.trim())[0]?.toLocaleUpperCase("en-GB") ?? "?";
 }
 
 function sharedImageFilename(title: string, mimeType: string): string {
@@ -151,6 +179,12 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   const [signupComment, setSignupComment] = useState("");
   const [sharing, setSharing] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
+  const [participantView, setParticipantView] = useState<"list" | "grid">("list");
+  const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
+
+  const selectedParticipant = participants?.find(
+    (participant) => participant._id === selectedParticipantId,
+  );
 
   async function handleWhatsAppShare() {
     if (!activity) return;
@@ -489,15 +523,51 @@ function ActivityDetailContent({ slug }: { slug: string }) {
       {/* Sign-up list for admins when registrations exist or are managed by a synced source. */}
       {showAdminSignupList && (
         <Card className="p-6 rounded-2xl shadow-sm space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-700">
-              Sign-ups{participants ? ` (${participants.length})` : ""}
-            </h3>
-            {activity.externalSignupUrl && (
-              <p className="text-sm text-gray-500">
-                Imported from the externally managed sign-up system.
-              </p>
-            )}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700">
+                Sign-ups{participants ? ` (${participants.length})` : ""}
+              </h3>
+              {activity.externalSignupUrl && (
+                <p className="text-sm text-gray-500">
+                  Imported from the externally managed sign-up system.
+                </p>
+              )}
+            </div>
+            <div
+              className="flex rounded-full border border-gray-200 bg-gray-50 p-1"
+              role="group"
+              aria-label="Sign-up view"
+            >
+              <button
+                type="button"
+                onClick={() => setParticipantView("list")}
+                aria-label="Show detailed list"
+                aria-pressed={participantView === "list"}
+                className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+                  participantView === "list"
+                    ? "bg-white text-[#21526f] shadow-sm"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                <List className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">List</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setParticipantView("grid")}
+                aria-label="Show compact grid"
+                aria-pressed={participantView === "grid"}
+                className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
+                  participantView === "grid"
+                    ? "bg-white text-[#21526f] shadow-sm"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                <Grid3X3 className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+            </div>
           </div>
           <dl className="grid gap-3 rounded-2xl bg-[#f4f8fa] p-4 text-sm sm:grid-cols-2">
             <div>
@@ -523,7 +593,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
             </div>
           ) : participants.length === 0 ? (
             <p className="text-gray-500 text-sm">No sign-ups yet.</p>
-          ) : (
+          ) : participantView === "list" ? (
             <div className="space-y-2">
               {participants.map((p) => (
                 <div
@@ -564,7 +634,111 @@ function ActivityDetailContent({ slug }: { slug: string }) {
                 </div>
               ))}
             </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5">
+              {participants.map((participant) => {
+                const shortName = participant.user?.shortName ?? "Unknown";
+                const hasComment = Boolean(participant.comment?.trim());
+
+                return (
+                  <button
+                    key={participant._id}
+                    type="button"
+                    onClick={() => setSelectedParticipantId(participant._id)}
+                    className="group flex min-w-0 flex-col items-center rounded-2xl px-2 py-3 text-center transition-colors hover:bg-[#f4f8fa] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#21526f] focus-visible:ring-offset-2"
+                    aria-label={`View details for ${shortName}${hasComment ? ", has a comment" : ""}`}
+                  >
+                    <span className="relative">
+                      <span
+                        className={`flex h-14 w-14 items-center justify-center rounded-full text-xl font-semibold text-white shadow-sm ${participantAvatarColor(shortName)}`}
+                        aria-hidden="true"
+                      >
+                        {participantInitial(shortName)}
+                      </span>
+                      {hasComment && (
+                        <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-[#e79b37] text-white shadow-sm">
+                          <MessageCircle className="h-3 w-3 fill-current" aria-hidden="true" />
+                        </span>
+                      )}
+                    </span>
+                    <span className="mt-2 w-full truncate text-sm font-medium text-gray-800 group-hover:text-[#21526f]">
+                      {shortName}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           )}
+
+          <Dialog
+            open={Boolean(selectedParticipant)}
+            onOpenChange={(open) => {
+              if (!open) setSelectedParticipantId(null);
+            }}
+          >
+            {selectedParticipant && (
+              <DialogContent className="max-w-md rounded-2xl border-0 bg-white">
+                <DialogHeader className="pr-8 text-left">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-semibold text-white ${participantAvatarColor(selectedParticipant.user?.shortName ?? "Unknown")}`}
+                      aria-hidden="true"
+                    >
+                      {participantInitial(selectedParticipant.user?.shortName ?? "Unknown")}
+                    </span>
+                    <div className="min-w-0">
+                      <DialogTitle>
+                        {selectedParticipant.user?.shortName ?? "Unknown participant"}
+                      </DialogTitle>
+                      <DialogDescription className="mt-1">
+                        {selectedParticipant.user?.name ?? "User details unavailable"}
+                      </DialogDescription>
+                    </div>
+                  </div>
+                </DialogHeader>
+                <div className="space-y-4 text-sm">
+                  <dl className="grid gap-3 rounded-xl bg-[#f4f8fa] p-4">
+                    <div>
+                      <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        Email
+                      </dt>
+                      <dd className="mt-1 break-words text-gray-900">
+                        {selectedParticipant.user?.email || "No email address"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        Signed up
+                      </dt>
+                      <dd className="mt-1 text-gray-900">
+                        {formatBookingDate(selectedParticipant.registeredAt)}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedParticipant.source === "legacy" && <Badge>Imported</Badge>}
+                    {selectedParticipant.legacyStatus !== undefined &&
+                      selectedParticipant.legacyStatus !== "approved" && (
+                        <Badge variant="outline">{selectedParticipant.legacyStatus}</Badge>
+                      )}
+                    {(selectedParticipant.spaces ?? 1) > 1 && (
+                      <Badge variant="outline">{selectedParticipant.spaces} spots</Badge>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Comment</h4>
+                    {selectedParticipant.comment?.trim() ? (
+                      <p className="mt-2 whitespace-pre-wrap break-words rounded-xl border border-[#6fa8c4]/30 bg-[#eaf3f7] p-3 text-gray-700">
+                        {selectedParticipant.comment}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-gray-500">No comment left.</p>
+                    )}
+                  </div>
+                </div>
+              </DialogContent>
+            )}
+          </Dialog>
 
           {cancelledParticipants !== undefined && cancelledParticipants.length > 0 && (
             <details className="group rounded-2xl border border-dashed border-gray-300 bg-gray-50/80">

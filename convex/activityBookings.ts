@@ -19,6 +19,7 @@ const participantValidator = v.object({
     v.object({
       _id: v.id("users"),
       name: v.string(),
+      shortName: v.string(),
       email: v.string(),
     }),
     v.null(),
@@ -53,7 +54,14 @@ export const getParticipants = query({
             legacyStatus: registration.legacyStatus,
             spaces: registration.spaces,
             comment: registration.comment,
-            user: user ? { _id: user._id, name: user.name, email: user.email } : null,
+            user: user
+              ? {
+                  _id: user._id,
+                  name: user.name,
+                  shortName: user.shortName ?? user.firstName ?? user.name,
+                  email: user.email,
+                }
+              : null,
           };
         }),
     );
@@ -85,7 +93,14 @@ export const getCancelledParticipants = query({
             legacyStatus: registration.legacyStatus,
             spaces: registration.spaces,
             comment: registration.comment,
-            user: user ? { _id: user._id, name: user.name, email: user.email } : null,
+            user: user
+              ? {
+                  _id: user._id,
+                  name: user.name,
+                  shortName: user.shortName ?? user.firstName ?? user.name,
+                  email: user.email,
+                }
+              : null,
           };
         }),
     );
