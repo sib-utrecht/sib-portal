@@ -543,7 +543,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
                           Imported
                         </span>
                       )}
-                      {p.legacyStatus && (
+                      {p.legacyStatus !== undefined && p.legacyStatus !== "approved" && (
                         <span className="rounded-full bg-white px-2 py-1 text-gray-700 ring-1 ring-gray-300">
                           {p.legacyStatus}
                         </span>
@@ -593,9 +593,12 @@ function ActivityDetailContent({ slug }: { slug: string }) {
                         </p>
                         <p className="text-sm">{participant.user?.email || "No email address"}</p>
                       </div>
-                      <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-                        Cancelled
-                      </span>
+                      {participant.legacyStatus !== undefined &&
+                        participant.legacyStatus !== "cancelled" && (
+                          <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                            {participant.legacyStatus}
+                          </span>
+                        )}
                     </div>
                     <p className="mt-2 text-xs text-gray-500">
                       {participant.cancelledAt
