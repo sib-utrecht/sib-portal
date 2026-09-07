@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import {
   useMemo,
   useState,
   type ErrorInfo,
+  type FormEvent,
   type ReactNode,
 } from "react";
 import { Link } from "react-router-dom";
@@ -180,6 +182,7 @@ function ActivityDetailContent({ slug }: { slug: string }) {
 
   const register = useMutation(api.activityBookings.registerForActivity);
   const unregister = useMutation(api.activityBookings.unregisterFromActivity);
+  const updateUserShortName = useMutation(api.users.updateUserShortName);
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -189,11 +192,16 @@ function ActivityDetailContent({ slug }: { slug: string }) {
   const [participantView, setParticipantView] = useState<"list" | "grid">("grid");
   const [participantSort, setParticipantSort] = useState<"newest" | "alphabetical">("newest");
   const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
+  const [editingShortName, setEditingShortName] = useState(false);
+  const [shortNameDraft, setShortNameDraft] = useState("");
+  const [shortNameBusy, setShortNameBusy] = useState(false);
+  const [shortNameError, setShortNameError] = useState<string | null>(null);
 
   const selectedParticipant = participants?.find(
     (participant) => participant._id === selectedParticipantId,
   );
   const displayedParticipants = useMemo(() => {
+    if (!participants) return [];
     if (participantSort === "newest") return participants;
 
     return [...participants].sort((left, right) =>
@@ -202,6 +210,28 @@ function ActivityDetailContent({ slug }: { slug: string }) {
       }),
     );
   }, [participants, participantSort]);
+
+  async function handleShortNameSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedParticipant?.user) return;
+
+    const shortName = shortNameDraft.trim();
+    if (!shortName) {
+      setShortNameError("Short name cannot be empty.");
+      return;
+    }
+
+    setShortNameBusy(true);
+    setShortNameError(null);
+    try {
+      await updateUserShortName({ id: selectedParticipant.user._id, shortName });
+      setEditingShortName(false);
+    } catch (error) {
+      setShortNameError(error instanceof Error ? error.message : "Could not update short name.");
+    } finally {
+      setShortNameBusy(false);
+    }
+  }
 
   async function handleWhatsAppShare() {
     if (!activity) return;
@@ -723,7 +753,11 @@ function ActivityDetailContent({ slug }: { slug: string }) {
           <Dialog
             open={Boolean(selectedParticipant)}
             onOpenChange={(open) => {
-              if (!open) setSelectedParticipantId(null);
+              if (!open) {
+                setSelectedParticipantId(null);
+                setEditingShortName(false);
+                setShortNameError(null);
+              }
             }}
           >
             {selectedParticipant && (
@@ -737,9 +771,25 @@ function ActivityDetailContent({ slug }: { slug: string }) {
                       {participantInitial(selectedParticipant.user?.shortName ?? "Unknown")}
                     </span>
                     <div className="min-w-0">
-                      <DialogTitle>
-                        {selectedParticipant.user?.shortName ?? "Unknown participant"}
-                      </DialogTitle>
+                      <div className="flex items-center gap-1">
+                        <DialogTitle>
+                          {selectedParticipant.user?.shortName ?? "Unknown participant"}
+                        </DialogTitle>
+                        {selectedParticipant.user && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShortNameDraft(selectedParticipant.user!.shortName);
+                              setShortNameError(null);
+                              setEditingShortName(true);
+                            }}
+                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-[#eaf3f7] hover:text-[#21526f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#21526f]"
+                            aria-label={`Edit short name for ${selectedParticipant.user.shortName}`}
+                          >
+                            <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                          </button>
+                        )}
+                      </div>
                       <DialogDescription className="mt-1">
                         {selectedParticipant.user?.name ?? "User details unavailable"}
                       </DialogDescription>
@@ -747,6 +797,55 @@ function ActivityDetailContent({ slug }: { slug: string }) {
                   </div>
                 </DialogHeader>
                 <div className="space-y-4 text-sm">
+                  {editingShortName && selectedParticipant.user && (
+                    <form
+                      onSubmit={handleShortNameSubmit}
+                      className="rounded-xl border border-[#6fa8c4]/30 bg-[#f4f8fa] p-3"
+                    >
+                      <label
+                        htmlFor="participant-short-name"
+                        className="text-xs font-medium uppercase tracking-wide text-gray-500"
+                      >
+                        Short name
+                      </label>
+                      <div className="mt-2 flex gap-2">
+                        <Input
+                          id="participant-short-name"
+                          value={shortNameDraft}
+                          onChange={(event) => setShortNameDraft(event.target.value)}
+                          maxLength={100}
+                          autoFocus
+                          disabled={shortNameBusy}
+                          aria-invalid={Boolean(shortNameError)}
+                        />
+                        <Button
+                          type="submit"
+                          size="sm"
+                          disabled={shortNameBusy || shortNameDraft.trim().length === 0}
+                          className="bg-[#21526f] text-white hover:bg-[#1a3f55]"
+                        >
+                          {shortNameBusy ? "Saving…" : "Save"}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={shortNameBusy}
+                          onClick={() => {
+                            setEditingShortName(false);
+                            setShortNameError(null);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                      {shortNameError && (
+                        <p className="mt-2 text-sm text-red-700" role="alert">
+                          {shortNameError}
+                        </p>
+                      )}
+                    </form>
+                  )}
                   <dl className="grid gap-3 rounded-xl bg-[#f4f8fa] p-4">
                     <div>
                       <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">

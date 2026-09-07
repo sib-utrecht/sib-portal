@@ -99,3 +99,31 @@ export const updateUserPhotoPermission = mutation({
     await ctx.db.patch(id, { photoPermission });
   },
 });
+
+/** Update a member's short name. Admin only. */
+export const updateUserShortName = mutation({
+  args: {
+    id: v.id("users"),
+    shortName: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, { id, shortName }) => {
+    await requireAdmin(ctx);
+
+    const user = await ctx.db.get(id);
+    if (!user) throw new Error("User not found");
+
+    const normalizedShortName = shortName.trim();
+    if (normalizedShortName.length === 0) {
+      throw new Error("Short name cannot be empty");
+    }
+    if (normalizedShortName.length > 100) {
+      throw new Error("Short name cannot exceed 100 characters");
+    }
+
+    await ctx.db.patch(id, {
+      shortName: normalizedShortName === user.firstName?.trim() ? null : normalizedShortName,
+    });
+    return null;
+  },
+});
