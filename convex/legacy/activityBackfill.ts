@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import { internal } from "../_generated/api";
 import { internalAction, internalMutation } from "../_generated/server";
 import { ensureActivitySlugRoute, uniqueActivitySlug } from "../activities";
@@ -59,6 +60,7 @@ export const upsertActivity = internalMutation({
       .withIndex("by_externalId", (q) => q.eq("externalId", args.externalId))
       .first();
     if (existing) {
+      await ensureActivitySlugRoute(ctx, existing._id, args.externalId);
       await ctx.db.patch(existing._id, {
         location: existing.location ?? args.location,
         registrationDeadline: existing.registrationDeadline ?? args.registrationDeadline,
@@ -87,7 +89,57 @@ export const upsertActivity = internalMutation({
       legacySignupMethod: args.legacySignupMethod,
     });
     await ensureActivitySlugRoute(ctx, id, slug);
+    await ensureActivitySlugRoute(ctx, id, args.externalId);
     return { id, inserted: true };
+  },
+});
+
+/** Start adding external IDs as aliases for all previously imported activities. */
+export const backfillExternalIdSlugRoutes = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    await ctx.scheduler.runAfter(
+      0,
+      internal.legacy.activityBackfill.backfillExternalIdSlugRoutesPage,
+      {
+        paginationOpts: { numItems: 100, cursor: null },
+      },
+    );
+    return null;
+  },
+});
+
+/** Add external-ID aliases for one bounded page, then schedule the next page. */
+export const backfillExternalIdSlugRoutesPage = internalMutation({
+  args: { paginationOpts: paginationOptsValidator },
+  returns: v.object({
+    scanned: v.number(),
+    routed: v.number(),
+    complete: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const page = await ctx.db.query("activities").paginate(args.paginationOpts);
+    let routed = 0;
+
+    for (const activity of page.page) {
+      const externalId = activity.externalId;
+      if (!externalId) continue;
+      await ensureActivitySlugRoute(ctx, activity._id, externalId);
+      routed++;
+    }
+
+    if (!page.isDone) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.legacy.activityBackfill.backfillExternalIdSlugRoutesPage,
+        {
+          paginationOpts: { ...args.paginationOpts, cursor: page.continueCursor },
+        },
+      );
+    }
+
+    return { scanned: page.page.length, routed, complete: page.isDone };
   },
 });
 

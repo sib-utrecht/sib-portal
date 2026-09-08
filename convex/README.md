@@ -112,3 +112,11 @@ after deploying the optional schema fields, run:
 ```sh
 npx convex run legacy/userBackfill:backfillUsersAndBookings '{"limit":20}'
 ```
+
+Legacy activity imports also reserve each external activity ID as a historical
+URL slug. After deploying that behavior, add these aliases for activities that
+were imported previously with:
+
+```sh
+npx convex run legacy/activityBackfill:backfillExternalIdSlugRoutes '{}'
+```
