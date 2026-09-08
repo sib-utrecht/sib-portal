@@ -256,7 +256,7 @@ const proxyLegacyV2 = httpAction(async (_ctx, request) => {
       method: request.method,
       headers,
       body:
-        request.method === "GET" || request.method === "HEAD" ? undefined : await request.bytes(),
+        request.method === "GET" || request.method === "HEAD" ? undefined : await request.text(),
     });
     const responseHeaders = new Headers(jsonHeaders);
     responseHeaders.set(
@@ -265,7 +265,7 @@ const proxyLegacyV2 = httpAction(async (_ctx, request) => {
     );
     const appVersion = response.headers.get("X-App-Version");
     if (appVersion) responseHeaders.set("X-App-Version", appVersion);
-    return new Response(await response.bytes(), {
+    return new Response(await response.text(), {
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
