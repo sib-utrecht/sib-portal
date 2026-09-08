@@ -230,53 +230,6 @@ const corsPreflight = httpAction(
   async () => new Response(null, { status: 204, headers: jsonHeaders }),
 );
 
-/**
- * Keep the Flutter app's non-migrated v2 features working behind the portal
- * hostname. Activities and bookings are handled above; remaining routes are
- * forwarded to the legacy API until their data moves to Convex as well.
- */
-const proxyLegacyV2 = httpAction(async (_ctx, request) => {
-  const incomingUrl = new URL(request.url);
-  const legacyPath = incomingUrl.pathname.replace(/^\/api/, "");
-  if (!legacyPath.startsWith("/v2/")) return json({ error: "Not found" }, 404);
-
-  const legacyUrl = new URL(`https://api2.sib-utrecht.nl${legacyPath}`);
-  legacyUrl.search = incomingUrl.search;
-  const headers = new Headers();
-  if (request.headers.has("Authorization")) {
-    headers.set("Authorization", request.headers.get("Authorization")!);
-  }
-  for (const headerName of ["Content-Type", "X-Id-Token", "X-App-Version"]) {
-    const value = request.headers.get(headerName);
-    if (value) headers.set(headerName, value);
-  }
-
-  try {
-    const response = await fetch(legacyUrl, {
-      method: request.method,
-      headers,
-      body:
-        request.method === "GET" || request.method === "HEAD" ? undefined : await request.text(),
-    });
-    const responseHeaders = new Headers(jsonHeaders);
-    responseHeaders.set(
-      "Content-Type",
-      response.headers.get("Content-Type") ?? "application/json; charset=utf-8",
-    );
-    const appVersion = response.headers.get("X-App-Version");
-    if (appVersion) responseHeaders.set("X-App-Version", appVersion);
-    return new Response(await response.text(), {
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-    });
-  } catch (error) {
-    return json(
-      { error: error instanceof Error ? error.message : "Legacy API proxy request failed" },
-      502,
-    );
-  }
-});
 
 export function registerLegacyRoutes(http: ReturnType<typeof httpRouter>) {
   http.route({ path: "/v2/events", method: "GET", handler: listActivities });
@@ -292,8 +245,4 @@ export function registerLegacyRoutes(http: ReturnType<typeof httpRouter>) {
     handler: removeMyBooking,
   });
   http.route({ pathPrefix: "/v2/", method: "OPTIONS", handler: corsPreflight });
-  http.route({ pathPrefix: "/v2/", method: "GET", handler: proxyLegacyV2 });
-  http.route({ pathPrefix: "/v2/", method: "POST", handler: proxyLegacyV2 });
-  http.route({ pathPrefix: "/v2/", method: "PUT", handler: proxyLegacyV2 });
-  http.route({ pathPrefix: "/v2/", method: "DELETE", handler: proxyLegacyV2 });
 }
